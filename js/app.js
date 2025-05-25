@@ -524,7 +524,7 @@ async function performSearch(query, selectedAPIs) {
             const customIndex = parseInt(apiId.replace('custom_', ''));
             const customApi = APISourceManager.getCustomApiInfo(customIndex);
             if (customApi) {
-                return fetch(`/api/search?wd=${encodeURIComponent(query)}&source=custom&customApi=${encodeURIComponent(customApi.url)}`)
+                    return fetch(`/api/search?wd=${encodeURIComponent(query)}&source=${apiId}&customApi=${encodeURIComponent(customApi.url)}`)
                     .then(response => response.json())
                     .then(data => ({
                         ...data,

@@ -1,4 +1,4 @@
-import { sha256 } from './sha256.js';
+import { sha256 } from './js/sha256.js';
 
 export async function onRequest(context) {
   const { request, env, next } = context;

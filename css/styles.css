@@ -1,0 +1,787 @@
+/* -------- 1. 全局 CSS 变量（保留） -------- */
+:root {
+  --primary-color: #00ccff;
+  --primary-light: #33d6ff;
+  --secondary-color: #0f1622;
+  --accent-color: #ff3c78;
+  --text-color: #e6f2ff;
+  --text-muted: #8599b2;
+  --border-color: rgba(0, 204, 255, 0.15);
+  --page-gradient-start: #0f1622;
+  --page-gradient-end: #192231;
+  --card-gradient-start: #121b29;
+  --card-gradient-end: #1c2939;
+  --card-accent: rgba(0, 204, 255, 0.12);
+  --card-hover-border: rgba(0, 204, 255, 0.5);
+}
+
+/* -------- 2. 统一滚动条样式（全局应用） -------- */
+html,
+body,
+.history-panel,
+.episode-grid,
+.custom-title-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #444 #222;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.history-panel::-webkit-scrollbar,
+.episode-grid::-webkit-scrollbar,
+.custom-title-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track,
+.history-panel::-webkit-scrollbar-track,
+.episode-grid::-webkit-scrollbar-track,
+.custom-title-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb,
+.history-panel::-webkit-scrollbar-thumb,
+.episode-grid::-webkit-scrollbar-thumb,
+.custom-title-scroll::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover,
+.history-panel::-webkit-scrollbar-thumb:hover,
+.episode-grid::-webkit-scrollbar-thumb:hover,
+.custom-title-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+/* -------- 3. 页面背景（保留多层点状背景） -------- */
+.page-bg {
+  background:
+    linear-gradient(180deg, var(--page-gradient-start), var(--page-gradient-end)),
+    radial-gradient(circle at 25px 25px, rgba(0, 204, 255, 0.04) 2px, transparent 3px),
+    radial-gradient(circle at 75px 75px, rgba(255, 60, 120, 0.02) 1px, transparent 2px),
+    radial-gradient(circle at 50px 50px, rgba(150, 255, 250, 0.015) 1px, transparent 2px);
+  background-blend-mode: normal;
+  background-size: cover, 100px 100px, 50px 50px, 75px 75px;
+  min-height: 100vh;
+}
+
+/* -------- 4. 按钮 & 卡片过渡（优化） -------- */
+button,
+.card-hover {
+  /* 替换 transition: all 为具体属性 */
+  transition:
+    transform 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.card-hover {
+  will-change: transform, border-color, box-shadow;
+}
+
+/* -------- 5. 卡片基本样式 -------- */
+.card-hover {
+  border: 1px solid var(--border-color);
+  background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end));
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* 卡片内容布局优化 */
+.card-hover .flex-grow {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 卡片标题文本溢出处理 */
+.card-hover h3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  line-height: 1.2rem;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+/* 卡片悬停效果（保留，难以用Tailwind实现） */
+.card-hover::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, var(--card-accent), transparent);
+  transition: left 0.6s ease;
+}
+
+.card-hover:hover {
+  border-color: var(--card-hover-border);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
+}
+
+.card-hover:hover::before {
+  left: 100%;
+}
+
+/* -------- 6. 渐变文字 & 搜索按钮 -------- */
+.gradient-text {
+  background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 搜索按钮可以用Tailwind类替代，但保留变量一致性 */
+.search-button {
+  background: var(--primary-color);
+  color: var(--text-color);
+}
+
+.search-button:hover {
+  background: var(--primary-light);
+}
+
+/* -------- 7. 设置面板（优化过渡效果） -------- */
+.settings-panel {
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  background: linear-gradient(135deg, var(--page-gradient-end), var(--page-gradient-start));
+  border-left: 1px solid var(--primary-color);
+}
+
+.settings-panel.show {
+  transform: translateX(0);
+}
+
+/* -------- 8. 开关样式（合并重复规则） -------- */
+/* 合并开关背景样式 */
+#yellowFilterToggle:checked+.toggle-bg,
+#adFilterToggle:checked+.toggle-bg {
+  background-color: var(--primary-color);
+}
+
+/* 合并开关点样式 */
+#yellowFilterToggle:checked~.toggle-dot,
+#adFilterToggle:checked~.toggle-dot {
+  transform: translateX(1.5rem);
+  box-shadow: 0 2px 4px rgba(0, 204, 255, 0.3);
+}
+
+/* 合并焦点与悬停样式 */
+#yellowFilterToggle:focus+.toggle-bg,
+#yellowFilterToggle:hover+.toggle-bg,
+#adFilterToggle:focus+.toggle-bg,
+#adFilterToggle:hover+.toggle-bg {
+  box-shadow: 0 0 0 2px rgba(0, 204, 255, 0.3);
+}
+
+/* 分离过渡效果 */
+.toggle-dot {
+  transition: transform 0.3s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-bg {
+  transition: background-color 0.3s ease-in-out;
+}
+
+/* -------- 9. 表单复选框（保留自定义样式） -------- */
+.form-checkbox {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  height: 14px;
+  width: 14px;
+  background-color: #222;
+  border: 1px solid #333;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+}
+
+.form-checkbox:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.form-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* 删除重复的滚动区样式，使用html中的全局样式 */
+
+/* -------- 10. 过滤器禁用样式 -------- */
+.filter-disabled {
+  position: relative;
+  opacity: 1;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.filter-disabled::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 0.5rem;
+  z-index: 5;
+}
+
+.filter-disabled>* {
+  opacity: 1;
+  z-index: 6;
+  position: relative;
+}
+
+.filter-disabled .toggle-bg {
+  background-color: #444 !important;
+  opacity: 0.8;
+}
+
+.filter-disabled .toggle-dot {
+  transform: translateX(0) !important;
+  background-color: #777 !important;
+  opacity: 0.9;
+}
+
+.filter-disabled .filter-description {
+  color: #ff7b9d !important;
+  font-style: italic;
+  font-weight: 500;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+}
+
+.filter-tooltip {
+  background-color: rgba(255, 61, 87, 0.1);
+  border: 1px solid rgba(255, 61, 87, 0.2);
+  border-radius: 0.25rem;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  line-height: 1.25;
+  position: relative;
+  z-index: 10;
+}
+
+.filter-tooltip svg {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  margin-right: 0.35rem;
+}
+
+/* -------- 11. 页脚样式 -------- */
+.footer {
+  width: 100%;
+  margin-top: auto;
+  background: linear-gradient(to bottom, transparent, var(--page-gradient-start));
+  border-top: 1px solid var(--border-color);
+  transition: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* 基本布局可以用Tailwind替代 */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  flex: 1;
+}
+
+/* -------- 12. 响应式样式 -------- */
+@media screen and (max-width: 640px) {
+  .footer {
+    padding-bottom: 2rem;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .card-hover h3 {
+    min-height: 2.5rem;
+  }
+
+  .card-hover .flex-grow {
+    min-height: 80px;
+  }
+}
+
+/* -------- 13. 模态框动画（保留） -------- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+#modal.show {
+  animation: fadeIn 0.3s forwards;
+}
+
+#modal.hide {
+  animation: fadeOut 0.3s forwards;
+}
+
+#modal>div {
+  background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end));
+  border: 1px solid var(--primary-color);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 204, 255, 0.1);
+  border-radius: 8px;
+}
+
+#episodesGrid button {
+  background: rgba(0, 204, 255, 0.08);
+  border: 1px solid rgba(0, 204, 255, 0.2);
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#episodesGrid button:hover {
+  background: rgba(0, 204, 255, 0.15);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 8px rgba(0, 204, 255, 0.3);
+}
+
+/* -------- 14. 历史记录面板（优化过渡效果） -------- */
+.history-panel {
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease-in-out;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  width: 320px;
+  box-sizing: border-box;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #333 #111;
+}
+
+/* 为历史面板定制滚动条样式 */
+.history-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-panel::-webkit-scrollbar-track {
+  background: #111;
+  border-radius: 4px;
+}
+
+.history-panel::-webkit-scrollbar-thumb {
+  background-color: #333;
+  border-radius: 4px;
+}
+
+.history-panel::-webkit-scrollbar-thumb:hover {
+  background-color: #444;
+  /* old4 的滑块悬停颜色 (new4 全局是 #555) */
+}
+
+.history-panel.show {
+  transform: translateX(0);
+}
+
+#historyList {
+  padding-right: 6px;
+}
+
+.history-item {
+  background: #1a1a1a;
+  border-radius: 6px;
+  border: 1px solid #333;
+  overflow: hidden;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  padding: 10px 14px;
+  position: relative;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+.history-item:hover {
+  transform: translateY(-2px);
+  border-color: #444;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.history-item .delete-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.history-item:hover .delete-btn {
+  opacity: 1;
+}
+
+.history-info {
+  padding: 10px;
+  min-height: 70px;
+}
+
+.history-title {
+  font-weight: 500;
+  font-size: 0.95rem;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-meta {
+  color: #bbb;
+  font-size: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 1px;
+}
+
+.history-episode {
+  color: #3b82f6;
+}
+
+.history-source {
+  color: #10b981;
+}
+
+.history-time {
+  color: #888;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+/* 历史分隔符样式 */
+.history-separator {
+  color: #666;
+  margin-left: 0.25rem;
+  /* Equivalent to mx-1 */
+  margin-right: 0.25rem;
+  /* Equivalent to mx-1 */
+}
+
+.history-thumbnail {
+  width: 100%;
+  height: 90px;
+  background-color: #222;
+  overflow: hidden;
+}
+
+.history-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 播放进度条 */
+.history-progress {
+  margin: 5px 0;
+}
+
+.progress-bar {
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 2px;
+}
+
+.progress-filled {
+  height: 100%;
+  background: linear-gradient(to right, #00ccff, #3b82f6);
+  border-radius: 2px;
+}
+
+.progress-text {
+  font-size: 10px;
+  color: #888;
+  text-align: right;
+}
+
+/* 恢复播放提示 */
+.position-restore-hint {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  z-index: 100;
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.position-restore-hint.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 锁定控制时屏蔽交互（未变动） */
+.player-container.controls-locked .dplayer-controller,
+.player-container.controls-locked .dplayer-mask,
+.player-container.controls-locked .dplayer-bar-wrap,
+.player-container.controls-locked .dplayer-statusbar,
+.player-container.controls-locked .shortcut-hint {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.player-container.controls-locked #lockToggle {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* API组标题样式 */
+.api-group-title {
+  grid-column: span 2;
+  padding: 0.25rem 0;
+  margin-top: 0.5rem;
+  border-top: 1px solid #333;
+  color: #8599b2;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* 搜索记录标签样式 (从旧代码恢复) */
+.search-tag {
+  background-color: var(--secondary-color);
+  color: var(--text-muted);
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.75rem;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+  /* 添加 color 过渡 */
+  cursor: pointer;
+  /* 鼠标悬停变手，否则default */
+  display: inline-block;
+}
+
+.search-tag:hover {
+  background-color: var(--card-gradient-start);
+  border-color: var(--primary-color);
+  color: var(--primary-light);
+}
+
+/* 搜索卡片结果居中*/
+#results {
+  justify-content: center;
+}
+
+/* 播放器顶部header移动端优化 */
+.player-header {
+  gap: 0.5rem;
+}
+
+.custom-title-scroll {
+  overflow-x: auto;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.custom-title-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.logo-text {
+  display: inline;
+}
+
+.home-btn-text {
+  display: inline;
+}
+
+@media (max-width: 640px) {
+  .logo-text {
+    display: none;
+  }
+
+  .home-btn-text {
+    display: none;
+  }
+
+  .logo-icon {
+    margin-right: 0;
+  }
+
+  .home-btn svg {
+    margin-right: 0;
+  }
+
+  .player-header {
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+
+  .custom-title-scroll {
+    font-size: 1rem;
+  }
+}
+
+/* 搜索结果卡片优化：横向布局 */
+.search-card-img-container {
+  width: 100px;
+  height: 150px;
+  overflow: hidden;
+  background-color: #191919;
+}
+
+/* 确保图片不会被拉伸，并且能够正确显示 */
+.search-card-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 针对搜索结果卡片修改网格布局以适应横向卡片 */
+@media (max-width: 640px) {
+  #results {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+}
+
+/* 响应式调整：在小屏幕上依然保持较好的视觉效果 */
+@media (min-width: 641px) and (max-width: 768px) {
+  #results {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* 调整网格布局，减少每行卡片数量以适应更大尺寸的卡片 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  #results {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  #results {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+/* 增加卡片内字体大小 */
+.card-hover h3 {
+  font-size: 0.95rem;
+  line-height: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-hover p {
+  font-size: 0.8rem;
+}
+
+/* 优化卡片内元素间距 */
+.card-hover .p-2 {
+  padding: 0.5rem;
+}
+
+.logo-text {
+  display: inline;
+}
+
+.home-btn-text {
+  display: inline;
+}
+
+/* -------- 卡片内集数/备注样式 (图14) -------- */
+.result-remarks {
+  font-weight: normal;
+}
+
+/* 确保卡片标题和元信息有足够空间 */
+.card-hover h3.result-title {
+  min-height: 2.4em;
+  margin-bottom: 0.375rem;
+}
+
+.card-hover .result-meta {
+  min-height: 1.5em;
+  margin-bottom: 0.375rem;
+}
+
+/* -------- 模态框内按钮样式 (图12) -------- */
+.modal-icon-button {
+  padding: 0.5rem;
+  background-color: #374151;
+  color: white;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-icon-button:hover {
+  background-color: #4B5563;
+}
+
+.modal-icon-button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* 让删除按钮不额外撑高内容 */
+.search-tag+span[role=button] {
+  margin-left: 0.45em;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* 鼠标悬停在x变手势 */
+.search-tag+span[role=button] {
+  cursor: pointer;
+}

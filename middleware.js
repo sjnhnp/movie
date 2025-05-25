@@ -1,4 +1,4 @@
-import { sha256 } from './functions/sha256.js'; // 需新建或引入SHA-256实现
+import { sha256 } from './js/sha256.js'; // 需新建或引入SHA-256实现
 
 // Vercel Middleware to inject environment variables
 export default async function middleware(request) {

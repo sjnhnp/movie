@@ -1,5 +1,7 @@
 - 上游：[Libretv](https://github.com/LibreSpark/LibreTV)
-- cf绑定kv spacename：LIBRETV_PROXY_KV
+- cf绑定
+  - kv spacename：LIBRETV_PROXY_KV
+  - 密码：PASSWORD
 - cloudflare pages / vercel 部署方法见[上游](https://github.com/LibreSpark/LibreTV)
   
 与[上游](https://github.com/LibreSpark/LibreTV)主要差异

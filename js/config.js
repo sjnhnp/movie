@@ -5,16 +5,16 @@ const MAX_HISTORY_ITEMS = 5;
 
 // 密码保护配置
 window.PASSWORD_CONFIG = window.PASSWORD_CONFIG || {  
-    localStorageKey: 'passwordVerified', // 
+    localStorageKey: 'passwordVerified', 
     verificationTTL: 90 * 24 * 60 * 60 * 1000, // 90天验证有效期 
 };
 // 网站信息配置
-const SITE_CONFIG = { // 
-    name: 'x', // 
-    url: '', // 
-    description: '', // 
+const SITE_CONFIG = { 
+    name: 'x', 
+    url: '', 
+    description: '', 
     logo: 'https://images.icon-icons.com/38/PNG/512/retrotv_5520.png',  
-    version: '1.0.3' // 
+    version: '1.0.3' 
 };
 
 // API站点配置（已更新 api 字段以包含完整路径）

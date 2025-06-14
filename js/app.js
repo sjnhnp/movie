@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function initializeAppState() {
     // 使用AppState.initialize方法初始化状态
     AppState.initialize({
-        'selectedAPIs': JSON.parse(localStorage.getItem('selectedAPIs') || '["dyttzy", "heimuer", "tyyszy", "dbzy"]'),
+        'selectedAPIs': JSON.parse(localStorage.getItem('selectedAPIs') || '["jmzy", "bfzy", "dyttzy", "heimuer", "tyyszy"]'),
         'customAPIs': JSON.parse(localStorage.getItem('customAPIs') || '[]'),
         'currentEpisodeIndex': 0,
         'currentEpisodes': [],

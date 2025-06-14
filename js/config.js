@@ -19,6 +19,8 @@ const SITE_CONFIG = {
 
 // API站点配置（已更新 api 字段以包含完整路径）
 const API_SITES = { 
+    jmzy: { api: 'https://api.jmzy.com/api.php/provide/vod', name: '金马资源' },
+    bfzy: { api: 'https://bfzyapi.com/api.php/provide/vod', name: '暴风资源' },
     dyttzy: { api: 'http://caiji.dyttzyapi.com/api.php/provide/vod', name: '电影天堂', detail: 'http://caiji.dyttzyapi.com' },
     heimuer: { api: 'https://json.heimuer.xyz/api.php/provide/vod', name: '黑木耳', detail: 'https://heimuer.tv' },  
     tyyszy: { api: 'https://tyyszy.com/api.php/provide/vod', name: '天涯资源' },  
@@ -27,7 +29,6 @@ const API_SITES = {
     ruyi: { api: 'https://cj.rycjapi.com/api.php/provide/vod', name: '如意资源' }, 
     maotai: { api: 'https://caiji.maotaizy.cc/api.php/provide/vod', name: '茅台资源' },  
     wolong: { api: 'https://wolongzyw.com/api.php/provide/vod', name: '卧龙资源' }, 
-    bfzy: { api: 'https://bfzyapi.com/api.php/provide/vod', name: '暴风资源' },
     zy360: { api: 'https://360zy.com/api.php/provide/vod', name: '360资源' }, 
     jisu: { api: 'https://jszyapi.com/api.php/provide/vod', name: '极速资源', detail: 'https://jszyapi.com' }, 
     huya: { api: 'https://www.huyaapi.com/api.php/provide/vod', name: '虎牙资源', detail: 'https://www.huyaapi.com', },  

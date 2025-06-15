@@ -30,6 +30,7 @@
     <!-- 应用脚本 -->
     <script src="js/config.js" defer></script>
     <script src="js/password.js" defer></script>
+    <script src="js/api.js" defer></script>
     <script src="js/player_app.js" defer></script>
     <script src="js/player_preload.js" defer></script>
     <script src="js/ui.js" defer></script>
@@ -121,6 +122,7 @@
 
         <div class="p-4 bg-gray-900 rounded-lg mx-4 mb-4">
             <div class="player-control-bar">
+
                 <div class="flex items-center gap-2">
                     <span id="autoplay-label" class="control-label">自动播放</span>
                     <label class="switch">
@@ -134,6 +136,20 @@
                         <input type="checkbox" id="remember-episode-progress-toggle" checked
                             aria-labelledby="remember-episode-progress-label"> <span class="slider"></span>
                     </label>
+                </div>
+
+                <div class="relative line-switch-container">
+                    <button id="line-switch-button"
+                        class="icon-btn bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors flex items-center gap-1 px-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                        </svg>
+                        <span class="text-sm">线路</span>
+                    </button>
+                    <div id="line-switch-dropdown" class="hidden">
+                    </div>
                 </div>
 
                 <!-- Skip Intro/Outro Control -->

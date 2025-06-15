@@ -644,6 +644,7 @@ function initializePageContent() {
     });
     updateButtonStates();
     updateOrderButton();
+    setupLineSwitching();
 
     setTimeout(() => {
         setupProgressBarPreciseClicks();
@@ -1826,3 +1827,219 @@ function doEpisodeSwitch(index, url) {
 }
 
 window.playEpisode = playEpisode;
+
+/**
+ * 设置线路切换功能 (优化版)
+ * - 增加了 touchend 事件处理，以兼容移动端设备。
+ * - 动态判断菜单弹出方向（向上或向下）。
+ * - 使用 guard flag 确保事件监听器只绑定一次。
+ */
+function setupLineSwitching() {
+    const button = document.getElementById('line-switch-button');
+    const dropdown = document.getElementById('line-switch-dropdown');
+    if (!button || !dropdown) return;
+
+    // 1. 使用 guard flag 防止重复绑定事件监听器
+    if (button._lineSwitchListenerAttached) {
+        return;
+    }
+
+    // 2. 封装核心的菜单更新和显示/隐藏逻辑
+    const updateAndToggleMenu = (event) => {
+        event.stopPropagation();
+
+        // 动态生成菜单内容
+        const currentSourceCode = new URLSearchParams(window.location.search).get('source_code');
+        const selectedAPIs = JSON.parse(localStorage.getItem('selectedAPIs') || '[]');
+        const customAPIs = JSON.parse(localStorage.getItem('customAPIs') || '[]');
+        dropdown.innerHTML = '';
+
+        const availableSources = [];
+        if (selectedAPIs.length > 0) {
+            selectedAPIs.forEach(sourceCode => {
+                let apiInfo = {};
+                if (sourceCode.startsWith('custom_')) {
+                    const index = parseInt(sourceCode.replace('custom_', ''));
+                    const customApi = customAPIs[index];
+                    if (customApi) apiInfo = { name: customApi.name };
+                } else if (window.API_SITES && window.API_SITES[sourceCode]) {
+                    apiInfo = { name: window.API_SITES[sourceCode].name };
+                }
+                if (apiInfo.name) {
+                    availableSources.push({ name: apiInfo.name, code: sourceCode });
+                }
+            });
+        }
+
+        if (availableSources.length > 0) {
+            availableSources.forEach(source => {
+                const item = document.createElement('button');
+                item.textContent = source.name;
+                item.dataset.sourceCode = source.code;
+                item.className = 'w-full text-left px-3 py-2 rounded text-sm transition-colors';
+                if (source.code === currentSourceCode) {
+                    item.classList.add('line-active');
+                    item.disabled = true;
+                }
+                dropdown.appendChild(item);
+            });
+        } else {
+            dropdown.innerHTML = `<div class="text-center text-sm text-gray-500 py-2">无可用线路</div>`;
+        }
+
+        // --- 新增：动态定位逻辑 ---
+        // 仅在准备显示菜单时计算位置
+        if (dropdown.classList.contains('hidden')) {
+            const buttonRect = button.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - buttonRect.bottom;
+
+            // 使用辅助类来测量高度，避免闪烁
+            dropdown.classList.add('measure-height');
+            const dropdownHeight = dropdown.offsetHeight;
+            dropdown.classList.remove('measure-height');
+
+            // 如果下方空间不足，且上方空间足够，则向上弹出
+            if (spaceBelow < (dropdownHeight + 10) && buttonRect.top > dropdownHeight) {
+                dropdown.classList.add('dropdown-top');
+            } else {
+                dropdown.classList.remove('dropdown-top');
+            }
+        }
+        // --- 动态定位逻辑结束 ---
+
+        // 切换菜单的可见性
+        dropdown.classList.toggle('hidden');
+    };
+
+    // 3. 为桌面端和移动端绑定事件
+    button.addEventListener('click', updateAndToggleMenu);
+    button.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        updateAndToggleMenu(e);
+    });
+
+    // 4. 设置 flag，表示监听器已附加
+    button._lineSwitchListenerAttached = true;
+
+    // 5. 为下拉菜单和文档本身绑定一次性事件
+    if (!dropdown._actionListener) {
+        dropdown.addEventListener('click', (e) => {
+            const target = e.target.closest('button[data-source-code]');
+            if (target && !target.disabled) {
+                dropdown.classList.add('hidden');
+                switchLine(target.dataset.sourceCode);
+            }
+        });
+        dropdown._actionListener = true;
+    }
+    if (!document._docClickListenerForLineSwitch) {
+        document.addEventListener('click', (e) => {
+            if (!dropdown.classList.contains('hidden') && !button.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+        document._docClickListenerForLineSwitch = true;
+    }
+}
+
+/**
+ * 切换线路的核心逻辑
+ * @param {string} newSourceCode - 新的数据源标识
+ */
+async function switchLine(newSourceCode) {
+    if (!dp || !currentVideoTitle) {
+        showError("无法切换线路：播放器或视频信息丢失");
+        return;
+    }
+
+    const timeToSeek = dp.video.currentTime;
+    const loadingEl = document.getElementById('loading');
+    const errorEl = document.getElementById('error');
+
+    if (loadingEl) {
+        const loadingTextEl = loadingEl.querySelector('div:last-child');
+        if (loadingTextEl) loadingTextEl.textContent = '正在切换线路...';
+        loadingEl.style.display = 'flex';
+    }
+    if (errorEl) errorEl.style.display = 'none';
+
+    try {
+        // 1. 获取新线路的API信息
+        const customAPIs = JSON.parse(localStorage.getItem('customAPIs') || '[]');
+        let apiInfo = {};
+        let isCustom = newSourceCode.startsWith('custom_');
+        if (isCustom) {
+            const index = parseInt(newSourceCode.replace('custom_', ''));
+            apiInfo = customAPIs[index];
+        } else {
+            apiInfo = window.API_SITES[newSourceCode];
+        }
+
+        if (!apiInfo) throw new Error(`未找到线路 ${newSourceCode} 的信息`);
+
+        // 2. 在新线路上搜索视频以获取新的 vod_id
+        let searchUrl = `/api/search?wd=${encodeURIComponent(currentVideoTitle)}&source=${newSourceCode}`;
+        if (isCustom) {
+            searchUrl += `&customApi=${encodeURIComponent(apiInfo.url)}`;
+        }
+
+        const searchRes = await fetch(searchUrl);
+        const searchData = await searchRes.json();
+
+        if (searchData.code !== 200 || !searchData.list || searchData.list.length === 0) {
+            throw new Error(`在线路“${apiInfo.name}”上未找到《${currentVideoTitle}》`);
+        }
+
+        // 简单匹配第一个结果，可以优化为更精确的匹配
+        const newVodId = searchData.list[0].vod_id;
+        if (!newVodId) throw new Error("新线路返回的数据中缺少视频ID");
+
+        // 3. 使用新的 vod_id 获取视频详情
+        let detailUrl = `/api/detail?id=${newVodId}&source=${newSourceCode}`;
+        if (isCustom) {
+            detailUrl += `&customApi=${encodeURIComponent(apiInfo.url)}`;
+        }
+
+        const detailRes = await fetch(detailUrl);
+        const detailData = await detailRes.json();
+
+        if (detailData.code !== 200 || !detailData.episodes || detailData.episodes.length === 0) {
+            throw new Error(`在线路“${apiInfo.name}”上获取剧集列表失败`);
+        }
+
+        // 4. 切换播放
+        const newEpisodes = detailData.episodes;
+        if (currentEpisodeIndex >= newEpisodes.length) {
+            throw new Error(`新线路的剧集数(${newEpisodes.length})少于当前集数(${currentEpisodeIndex + 1})`);
+        }
+        const newEpisodeUrl = newEpisodes[currentEpisodeIndex];
+
+        // 更新全局剧集列表
+        currentEpisodes = newEpisodes;
+        window.currentEpisodes = newEpisodes;
+        localStorage.setItem('currentEpisodes', JSON.stringify(newEpisodes));
+
+        // 更新浏览器URL
+        const newUrlForBrowser = new URL(window.location.href);
+        newUrlForBrowser.searchParams.set('source_code', newSourceCode);
+        newUrlForBrowser.searchParams.set('source', apiInfo.name);
+        newUrlForBrowser.searchParams.set('id', newVodId);
+        newUrlForBrowser.searchParams.set('url', newEpisodeUrl);
+        window.history.replaceState({}, '', newUrlForBrowser.toString());
+
+        // 设置跳转时间并切换视频
+        nextSeekPosition = timeToSeek;
+        _tempUrlForCustomHls = newEpisodeUrl;
+        dp.switchVideo({ url: newEpisodeUrl, type: 'hls' });
+
+        // 更新UI
+        renderEpisodes();
+        // setupLineSwitching(); // 重新渲染线路列表以更新active状态
+        showMessage(`已切换到线路: ${apiInfo.name}`, 'success');
+
+    } catch (err) {
+        console.error("切换线路失败:", err);
+        showError(err.message || "切换线路失败，请重试");
+        if (loadingEl) loadingEl.style.display = 'none';
+    }
+}

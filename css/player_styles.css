@@ -649,3 +649,54 @@ input:checked+.slider:before {
   transform-origin: bottom center; /* 动画基点改为底部中心 */
 }
 /* END: 线路切换菜单样式 */
+
+
+/* 顶部导航栏 */
+header {
+  display: flex;
+  align-items: center;
+  padding: 14px 12px;
+  height: 56px; /* 减少高度以匹配移动端标准 */
+}
+
+/* 返回按钮保持标准字体大小 */
+#back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem; /* 标准字体大小 */
+  line-height: 1.5;
+  min-width: 72px;
+  padding: 6px 0; /* 增加垂直内边距 */
+}
+
+/* 全屏按钮样式调整 */
+#fullscreen-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(30, 30, 30, 0.7);
+}
+
+/* 统一按钮内文本垂直对齐 */
+#back-button svg,
+#fullscreen-button svg {
+  vertical-align: middle;
+}
+
+/* 响应式微调 */
+@media (max-width: 640px) {
+  header {
+    padding: 12px 8px;
+    height: 52px;
+  }
+  
+  #back-button {
+    gap: 6px;
+    font-size: 0.95rem; /* 小屏幕轻微调整 */
+  }
+}

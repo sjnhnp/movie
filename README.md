@@ -36,17 +36,21 @@
 
 本项目可一键部署于 Cloudflare Pages 或 Vercel。基础部署流程请参考 [**上游项目文档**](https://github.com/LibreSpark/LibreTV)。
 
-### Cloudflare Worker 代理配置
+### cloudflare pages / vercel 环境变量
 
 如果您为此项目配置了代理 Worker，您需要在 Cloudflare Pages 项目的 `设置` -> `函数` -> `绑定` 中添加以下绑定：
 
 #### 1. KV Namespace Binding
 - **变量名称 (Variable name):** `LIBRETV_PROXY_KV`
-- **KV 命名空间 (KV namespace):** (选择您为代理创建的KV)
+- **KV 命名空间 (KV namespace):** 选择您创建的KV
 
-#### 2. Secrets Binding
+#### 2. Variables and Secrets
 - **变量名称 (Variable name):** `PASSWORD`
-- **密钥值 (Secret text):** (输入您为代理设定的密码)
+- **密钥值 (text):** 网站密码保护
+
+#### 3. Variables and Secrets
+- **变量名称 (Variable name):** `SETTINGS_PASSWORD`
+- **密钥值 (text):** 首页设置按钮密码保护
 
 ## 许可证 (License)
 

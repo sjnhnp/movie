@@ -1,14 +1,12 @@
 // 密码保护功能
 
-// ========== 配置项校验 ==========
+// 在文件顶部添加一个全局变量来跟踪验证目的
+window.verifyingPurpose = 'main'; // 'main' 或 'settings'
 
 // 只从全局读取，不再声明const，避免重复
 const PASSWORD_CONFIG = window.PASSWORD_CONFIG;
 if (!PASSWORD_CONFIG) {
     console.warn('PASSWORD_CONFIG 未定义，密码功能默认关闭');
-    // 可选兜底（如果你担心某些页面不引入config.js）
-    // window.PASSWORD_CONFIG = { localStorageKey: 'passwordVerified', verificationTTL: 12*60*60*1000 };
-    // 或强制return，停止执行
 }
 /**
  * 检查是否设置了密码保护（依赖 window.__ENV__ 挂载的 PASSWORD SHA256 哈希）
@@ -41,24 +39,35 @@ window.isPasswordProtected = isPasswordProtected;
 window.isPasswordVerified = isPasswordVerified;
 
 /**
- * 校验输入密码是否正确（异步SHA-256）
+ * 检查用户是否已通过“设置”的密码验证
  */
-async function verifyPassword(password) {
-    const correctHash = window.__ENV__?.PASSWORD;
+function isSettingsPasswordVerified() {
+    try {
+        const settingsHash = window.__ENV__?.SETTINGS_PASSWORD;
+        if (!settingsHash || /^0+$/.test(settingsHash)) return true; // 如果未设置密码，则视为通过
+
+        const raw = localStorage.getItem(PASSWORD_CONFIG.settingsLocalStorageKey) || '{}';
+        const { verified, timestamp, passwordHash } = JSON.parse(raw);
+
+        // 检查通过、未过期、且为当前设置密码的哈希
+        return !!(verified && timestamp && passwordHash === settingsHash && Date.now() < timestamp + PASSWORD_CONFIG.verificationTTL);
+    } catch (e) {
+        console.error('设置密码验证状态判断异常:', e);
+        return false;
+    }
+}
+
+/**
+ * 校验输入密码是否正确（异步SHA-256）
+ * @param {string} password - 用户输入的密码
+ * @param {string} correctHash - 正确的密码哈希
+ */
+async function verifyPassword(password, correctHash) {
     if (!correctHash) return false;
 
     try {
-        // 直接调用本地 sha256 函数
         const inputHash = await sha256(password);
-        const isValid = inputHash === correctHash;
-        if (isValid) {
-            localStorage.setItem(PASSWORD_CONFIG.localStorageKey, JSON.stringify({
-                verified: true,
-                timestamp: Date.now(),
-                passwordHash: correctHash
-            }));
-        }
-        return isValid;
+        return inputHash === correctHash;
     } catch (error) {
         console.error('SHA-256 计算失败:', error);
         return false;
@@ -87,9 +96,16 @@ async function sha256(message) {
 }
 
 // ========== 密码弹窗及错误提示 ==========
+
 function showPasswordModal() {
     const modal = document.getElementById('passwordModal');
     if (modal) {
+        const input = document.getElementById('passwordInput');
+        if (input) {
+            input.value = ''; // 清空输入框
+        }
+        hidePasswordError(); // 确保错误提示是隐藏的
+        
         modal.style.display = 'flex';
         setTimeout(() => document.getElementById('passwordInput')?.focus(), 80);
     }
@@ -114,10 +130,30 @@ function hidePasswordError() {
 async function handlePasswordSubmit() {
     const input = document.getElementById('passwordInput');
     const pwd = input ? input.value.trim() : '';
-    if (await verifyPassword(pwd)) {
+    const purpose = window.verifyingPurpose || 'main';
+
+    const targetHash = purpose === 'settings'
+        ? window.__ENV__?.SETTINGS_PASSWORD
+        : window.__ENV__?.PASSWORD;
+
+    if (await verifyPassword(pwd, targetHash)) {
         hidePasswordError();
         hidePasswordModal();
-        document.dispatchEvent(new CustomEvent('passwordVerified'));
+        if (purpose === 'main') {
+            localStorage.setItem(PASSWORD_CONFIG.localStorageKey, JSON.stringify({
+                verified: true,
+                timestamp: Date.now(),
+                passwordHash: targetHash
+            }));
+            document.dispatchEvent(new CustomEvent('passwordVerified'));
+        } else if (purpose === 'settings') {
+            localStorage.setItem(PASSWORD_CONFIG.settingsLocalStorageKey, JSON.stringify({
+                verified: true,
+                timestamp: Date.now(),
+                passwordHash: targetHash
+            }));
+            document.dispatchEvent(new CustomEvent('settingsPasswordVerified'));
+        }
     } else {
         showPasswordError();
         if (input) {

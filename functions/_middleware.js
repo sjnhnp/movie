@@ -4,25 +4,41 @@ export async function onRequest(context) {
   const { request, env, next } = context;
   const response = await next();
   const contentType = response.headers.get("content-type") || "";
+
   if (contentType.includes("text/html")) {
     let html = await response.text();
+
     const password = env.PASSWORD || "";
+    const settingsPassword = env.SETTINGS_PASSWORD || ""; // 新增：读取设置密码
+
     let passwordHash = "";
+    let settingsPasswordHash = ""; // 新增：设置密码的哈希
+
     if (password) {
       passwordHash = await sha256(password);
     }
-    // 最佳实践：用正则宽松匹配替换
+    if (settingsPassword) { // 新增
+      settingsPasswordHash = await sha256(settingsPassword); // 新增
+    }
+
+    // 注入主密码哈希
     html = html.replace(
       /window\.__ENV__\.PASSWORD\s*=\s*["']\{\{PASSWORD\}\}["'];?/,
-      `window.__ENV__.PASSWORD = "${passwordHash}"; // SHA-256 hash`
+      `window.__ENV__.PASSWORD = "${passwordHash}";`
     );
-    // 可选调试输出: 将 hash 或密码是否注入打印到页面底部
-    // html += `<div style="display:none">DEBUG-PASSWORD-HASH: ${passwordHash}</div>`;
+
+    // 新增：注入设置密码哈希
+    html = html.replace(
+      /window\.__ENV__\.SETTINGS_PASSWORD\s*=\s*["']\{\{SETTINGS_PASSWORD\}\}["'];?/,
+      `window.__ENV__.SETTINGS_PASSWORD = "${settingsPasswordHash}";`
+    );
+
     return new Response(html, {
       headers: response.headers,
       status: response.status,
       statusText: response.statusText,
     });
   }
+
   return response;
 }

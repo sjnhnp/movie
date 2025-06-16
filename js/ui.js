@@ -13,6 +13,42 @@ const TOAST_BG_COLORS = {
 };
 const HISTORY_MAX_ITEMS = 50;           // 观看历史最大数量
 
+/**
+ * 实际切换设置面板的函数
+ */
+function actuallyToggleSettingsPanel() {
+    togglePanel('settingsPanel', 'historyPanel');
+}
+
+/**
+ * 设置面板开关 - 增加了密码验证逻辑
+ * @param {Event} e 事件对象
+ */
+// js/ui.js
+
+function toggleSettings(e) {
+    e?.stopPropagation();
+
+    const settingsPasswordHash = window.__ENV__?.SETTINGS_PASSWORD;
+    const isProtected = settingsPasswordHash && settingsPasswordHash.length === 64 && !/^0+$/.test(settingsPasswordHash);
+
+    if (isProtected && typeof isSettingsPasswordVerified === 'function' && !isSettingsPasswordVerified()) {
+        window.verifyingPurpose = 'settings';
+        const modal = getElement('passwordModal');
+        const title = getElement('passwordModalTitle');
+        const p = modal?.querySelector('p');
+
+        if (title) title.textContent = "设置项验证";
+        if (p) p.textContent = "请输入密码以访问设置";
+
+        if (typeof showPasswordModal === 'function') {
+            showPasswordModal();
+        }
+    } else {
+        // 如果没有设置密码，或者已经验证通过，直接打开
+        actuallyToggleSettingsPanel();
+    }
+}
 
 /**
  * 生成「剧 + 集」唯一标识  
@@ -100,15 +136,6 @@ function togglePanel(panelIdToShow, panelIdToHide, onShowCallback) {
 }
 
 // =============== UI相关函数 =============================
-
-/**
- * 设置面板开关
- * @param {Event} e 事件对象
- */
-function toggleSettings(e) {
-    e?.stopPropagation();
-    togglePanel('settingsPanel', 'historyPanel');
-}
 
 /**
  * 历史面板开关
@@ -711,6 +738,9 @@ function attachEventListeners() {
     if (settingsButton) {
         settingsButton.addEventListener('click', toggleSettings);
     }
+
+    // 新增：监听设置密码验证成功的事件
+    document.addEventListener('settingsPasswordVerified', actuallyToggleSettingsPanel);
 
     // 观看历史按钮
     const historyButton = getElement('historyButton');

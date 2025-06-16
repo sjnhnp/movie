@@ -6,6 +6,7 @@ const MAX_HISTORY_ITEMS = 5;
 // 密码保护配置
 window.PASSWORD_CONFIG = window.PASSWORD_CONFIG || {  
     localStorageKey: 'passwordVerified', 
+    settingsLocalStorageKey: 'settingsPasswordVerified', // 设置按钮密码
     verificationTTL: 90 * 24 * 60 * 60 * 1000, // 90天验证有效期 
 };
 // 网站信息配置
@@ -17,7 +18,7 @@ const SITE_CONFIG = {
     version: '1.0.3' 
 };
 
-window.SITE_CONFIG = SITE_CONFIG; // <-- 新增此行，使其全局可用
+window.SITE_CONFIG = SITE_CONFIG;
 
 // API站点配置（已更新 api 字段以包含完整路径）
 const API_SITES = { 
@@ -44,7 +45,7 @@ const API_SITES = {
     ikun: { api: 'https://ikunzyapi.com/api.php/provide/vod', name: 'iKun资源' } 
 };
 
-window.API_SITES = API_SITES; // <-- 新增此行，使其全局可用
+window.API_SITES = API_SITES;
 const DEFAULT_SELECTED_APIS = ["heimuer", "tyyszy", "jmzy", "bfzy", "dyttzy"];
 window.DEFAULT_SELECTED_APIS = DEFAULT_SELECTED_APIS; // 将其设为全局变量
 

@@ -38,6 +38,7 @@
 
 <body class="bg-black text-white font-sans min-h-screen">
     <div class="player-container relative">
+
         <!-- 顶部导航栏 - Position 1: Video Title -->
         <header class="flex items-center justify-between p-4">
             <button id="back-button" class="flex items-center gap-2 text-white hover:text-blue-400 transition-colors"
@@ -48,13 +49,10 @@
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
-                <span>返回</span>
+                <span class="font-semibold">返回</span>
             </button>
 
-            <!-- Position 1: Video Title -->
-            <h1 id="video-title" class="text-xl font-bold text-center flex-1 mx-4 truncate">加载中...</h1>
-
-            <div class="flex items-center gap-4">
+            <div class="flex items-center ml-auto">
                 <button id="fullscreen-button"
                     class="text-white hover:text-blue-400 allow-when-locked transition-colors" aria-label="全屏">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -71,7 +69,6 @@
         <!-- 播放器区域 -->
         <div id="player" class="relative" role="region" aria-label="视频播放区域">
             <div id="dplayer" class="w-full h-full"></div>
-
             <!-- 加载中提示 -->
             <div id="loading" class="loading-container" aria-live="polite">
                 <div class="loading-spinner" aria-hidden="true"></div>

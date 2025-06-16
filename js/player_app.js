@@ -2029,31 +2029,6 @@ async function switchLine(newSourceCode) {
 }
 
 /**
- * 设置控制条自动隐藏（包括中央播放按钮）- 已修复版本
- * @param {Object} dpInstance - DPlayer 实例
- */
-// js/player_app.js
-
-/**
- * 设置控制条自动隐藏（包括中央播放按钮）- 最终修复版
- * @param {Object} dpInstance - DPlayer 实例
- */
-您好，非常感谢您提供如此精确的反馈！您指出的双击暂停和播放行为不一致的问题确实存在，这是之前修改中未能覆盖到的一个细节。
-
-问题根源分析
-
-问题出在 js / player_app.js 文件的 resetHideTimer 函数内部的自动隐藏逻辑上。它包含一个条件 if (dpInstance.video && !dpInstance.video.paused)，这导致了只有在视频 正在播放 时，计时器到期后才会隐藏控制条。当您双击暂停时，视频状态变为“已暂停”，这个条件不满足，导致自动隐藏失效，从而引发了您观察到的不一致行为。
-
-解决方案
-
-解决方案是移除这个!dpInstance.video.paused 的判断条件，让计时器无论在播放还是暂停状态下都能正常触发隐藏操作。而当用户通过点击DPlayer自带的暂停按钮来暂停时，控制条依然会保持可见，因为 DPlayer 的 pause 事件有专门的处理器会取消这个计时器。
-
-请打开 js / player_app.js 文件，找到 setupControlsAutoHide 函数，并将其 整个函数 替换为以下最终修复版本。
-JavaScript
-
-// js/player_app.js
-
-/**
  * 设置控制条自动隐藏（包括中央播放按钮）- 最终修复版
  * @param {Object} dpInstance - DPlayer 实例
  */
@@ -2089,7 +2064,7 @@ function setupControlsAutoHide(dpInstance) {
         document.addEventListener('touchend', endDrag);
         document.addEventListener('touchcancel', endDrag);
     }
-
+    
     // --- 重置隐藏计时器 ---
     function resetHideTimer() {
         if (isScreenLocked || isDraggingProgressBar) return;

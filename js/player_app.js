@@ -1013,10 +1013,6 @@ function addDPlayerEventListeners() {
     });
 
     setupLongPressSpeedControl();
-    // 新增：调用双击处理函数
-    if (playerVideoWrap) {
-        setupDoubleClickToPlayPause(dp, playerVideoWrap);
-    }
 
     dp.on('seeking', function () { if (debugMode) console.log("[PlayerApp] DPlayer event: seeking"); isUserSeeking = true; videoHasEnded = false; });
     dp.on('seeked', function () {
@@ -1302,68 +1298,6 @@ function showShortcutHint(text, direction) {
     }
     hintElement.classList.add('show');
     shortcutHintTimeout = setTimeout(() => hintElement.classList.remove('show'), 1500);
-}
-
-// 在 js/player_app.js 文件中，可以放在 setupLongPressSpeedControl 函数的上方或下方
-
-/**
- * 设置双击播放/暂停功能
- * @param {object} dpInstance DPlayer 实例
- * @param {HTMLElement} videoWrapElement 视频的包装元素 (通常是 .dplayer-video-wrap)
- */
-function setupDoubleClickToPlayPause(dpInstance, videoWrapElement) {
-    if (!dpInstance || !videoWrapElement) {
-        console.warn('[DoubleClick] DPlayer instance or video wrap element not provided.');
-        return;
-    }
-
-    if (videoWrapElement._doubleTapListenerAttached) {
-        return; // 防止重复绑定监听器
-    }
-
-    videoWrapElement.addEventListener('touchend', function (e) {
-        if (isScreenLocked) { // isScreenLocked 是您代码中已有的全局变量
-            return; // 屏幕锁定时，不响应双击
-        }
-
-        // 选择器数组，用于判断触摸是否发生在DPlayer的控件上
-        const controlSelectors = [
-            '.dplayer-controller', // DPlayer 主控制条区域
-            '.dplayer-setting',    // 设置菜单
-            '.dplayer-comment',    // 弹幕相关（如果启用并可交互）
-            '.dplayer-notice',     // 播放器通知
-            '#episode-grid button',// 外部的选集按钮
-            // 可以根据需要添加其他自定义的、位于 videoWrapElement 内的交互控件选择器
-        ];
-
-        let tappedOnControl = false;
-        for (const selector of controlSelectors) {
-            if (e.target.closest(selector)) {
-                tappedOnControl = true;
-                break;
-            }
-        }
-
-        if (tappedOnControl) {
-            // 如果点击发生在控件上，则重置lastTapTimeForDoubleTap，避免影响下一次真正的视频区域点击
-            lastTapTimeForDoubleTap = 0;
-            return; // 不执行双击播放/暂停逻辑
-        }
-
-        const currentTime = new Date().getTime();
-        if ((currentTime - lastTapTimeForDoubleTap) < DOUBLE_TAP_INTERVAL) {
-            // 检测到双击
-            if (dpInstance && typeof dpInstance.toggle === 'function') {
-                dpInstance.toggle(); // 切换播放/暂停状态
-            }
-            lastTapTimeForDoubleTap = 0; // 重置时间戳，防止连续三次点击被误判
-        } else {
-            // 单击 (或者是双击的第一次点击)
-            lastTapTimeForDoubleTap = currentTime;
-        }
-    }, { passive: true }); // 使用 passive: true 明确表示我们不阻止默认的单击行为
-
-    videoWrapElement._doubleTapListenerAttached = true; // 添加标记，表示已绑定
 }
 
 function setupLongPressSpeedControl() {
@@ -2098,53 +2032,52 @@ async function switchLine(newSourceCode) {
  * 设置控制条自动隐藏（包括中央播放按钮）- 已修复版本
  * @param {Object} dpInstance - DPlayer 实例
  */
+// js/player_app.js
+
+/**
+ * 设置控制条自动隐藏（包括中央播放按钮）- 最终修复版
+ * @param {Object} dpInstance - DPlayer 实例
+ */
 function setupControlsAutoHide(dpInstance) {
     if (!dpInstance) return;
 
-    const CONTROLS_HIDE_DELAY = 3000; // 3秒后隐藏控制条
+    const CONTROLS_HIDE_DELAY = 3000;
     let hideControlsTimeout;
     const playerContainer = dpInstance.container;
+    const videoWrapElement = playerContainer.querySelector('.dplayer-video-wrap'); // 获取视频包装元素
 
-    if (!playerContainer) return;
+    if (!playerContainer || !videoWrapElement) return;
 
-    // --- 新增代码块: 用于跟踪进度条拖动状态 ---
+    // --- 跟踪进度条拖动状态 ---
     let isDraggingProgressBar = false;
     const progressBar = playerContainer.querySelector('.dplayer-bar-wrap');
 
     if (progressBar) {
         const startDrag = () => {
             isDraggingProgressBar = true;
-            clearTimeout(hideControlsTimeout); // 开始拖动时，立即清除隐藏计时器
+            clearTimeout(hideControlsTimeout);
         };
         const endDrag = () => {
             if (isDraggingProgressBar) {
                 isDraggingProgressBar = false;
-                resetHideTimer(); // 拖动结束后，重新开始计时
+                resetHideTimer();
             }
         };
 
-        // 监听鼠标和触摸事件
         progressBar.addEventListener('mousedown', startDrag);
-        document.addEventListener('mouseup', endDrag); // 在整个文档上监听松开事件
-
+        document.addEventListener('mouseup', endDrag);
         progressBar.addEventListener('touchstart', startDrag, { passive: true });
         document.addEventListener('touchend', endDrag);
-        document.addEventListener('touchcancel', endDrag); // 触摸取消时也应结束拖动
+        document.addEventListener('touchcancel', endDrag);
     }
-    // --- 新增代码块结束 ---
 
-
-    // 重置隐藏计时器
+    // --- 重置隐藏计时器 ---
     function resetHideTimer() {
-        // --- 修改点: 正在拖动或屏幕锁定时，不执行任何操作 ---
         if (isScreenLocked || isDraggingProgressBar) return;
 
         clearTimeout(hideControlsTimeout);
-
-        // 显示控制条
         playerContainer.classList.remove('dplayer-hide-controller');
 
-        // 设置新的隐藏计时器
         hideControlsTimeout = setTimeout(() => {
             if (dpInstance.video && !dpInstance.video.paused) {
                 playerContainer.classList.add('dplayer-hide-controller');
@@ -2152,33 +2085,39 @@ function setupControlsAutoHide(dpInstance) {
         }, CONTROLS_HIDE_DELAY);
     }
 
-    // (此部分大部分保留，但移除了原有的 video_click 处理，以避免冲突)
-    function handlePlayerInteraction(e) {
-        if (e.target.closest('.dplayer-controller, .dplayer-play-icon')) {
-            return;
-        }
+    // --- 双击播放/暂停逻辑 ---
+    if (!videoWrapElement._doubleTapListenerAttached) {
+        let lastTapTimeForDoubleTap = 0;
+        videoWrapElement.addEventListener('touchend', function (e) {
+            if (isScreenLocked) return;
+            const controlSelectors = ['.dplayer-controller', '.dplayer-setting', '.dplayer-notice', '#episode-grid button'];
+            if (controlSelectors.some(selector => e.target.closest(selector))) {
+                lastTapTimeForDoubleTap = 0;
+                return;
+            }
 
-        if (!playerContainer.classList.contains('dplayer-hide-controller')) {
-            clearTimeout(hideControlsTimeout);
-            playerContainer.classList.add('dplayer-hide-controller');
-        } else {
-            resetHideTimer();
-        }
+            const currentTime = new Date().getTime();
+            if ((currentTime - lastTapTimeForDoubleTap) < 300) { // DOUBLE_TAP_INTERVAL
+                if (dpInstance && typeof dpInstance.toggle === 'function') {
+                    dpInstance.toggle();
+                    resetHideTimer(); // <-- 核心修改：双击后立即显示UI并重置计时器
+                }
+                lastTapTimeForDoubleTap = 0;
+            } else {
+                lastTapTimeForDoubleTap = currentTime;
+            }
+        }, { passive: true });
+        videoWrapElement._doubleTapListenerAttached = true;
     }
 
-    // 鼠标移动显示控制条
+    // --- 其他事件监听 ---
     playerContainer.addEventListener('mousemove', resetHideTimer);
-
-    // 播放器事件处理
     dpInstance.on('play', resetHideTimer);
-
     dpInstance.on('pause', () => {
         clearTimeout(hideControlsTimeout);
         playerContainer.classList.remove('dplayer-hide-controller');
     });
-
     dpInstance.on('seeked', resetHideTimer);
-
     dpInstance.on('fullscreen', resetHideTimer);
     dpInstance.on('fullscreen_cancel', resetHideTimer);
 

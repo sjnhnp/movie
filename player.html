@@ -164,9 +164,7 @@
                         </svg>
                     </button>
 
-                    <div id="skip-control-dropdown"
-                        class="hidden absolute top-10 right-0 bg-gray-900 rounded shadow-lg p-3 w-56">
-                        <!-- 1+2：跳片头(秒) + 输入框 同行 -->
+                    <div id="skip-control-dropdown" class="absolute top-10 right-0 bg-gray-900 rounded shadow-lg p-3">
                         <div class="flex items-center mb-2">
                             <label for="skip-intro-input" class="text-gray-300 text-sm mr-2">
                                 跳片头(秒)
@@ -175,7 +173,6 @@
                                 class="flex-1 bg-gray-800 text-gray-300 rounded p-2 text-sm">
                         </div>
 
-                        <!-- 3+4：跳片尾(秒) + 输入框 同行 -->
                         <div class="flex items-center mb-4">
                             <label for="skip-outro-input" class="text-gray-300 text-sm mr-2">
                                 跳片尾(秒)
@@ -184,7 +181,6 @@
                                 class="flex-1 bg-gray-800 text-gray-300 rounded p-2 text-sm">
                         </div>
 
-                        <!-- 操作按钮 -->
                         <button id="apply-skip-settings"
                             class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded p-2 mb-2">
                             应用
@@ -195,8 +191,6 @@
                         </button>
                     </div>
                 </div>
-
-
 
                 <button onclick="copyLinks()" title="复制当前视频链接"
                     class="icon-btn bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"

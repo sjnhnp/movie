@@ -278,18 +278,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
 /**
  * 初始化应用状态
- * 从localStorage加载初始状态并设置到AppState
+ * 从localStorage加载初始状态并设置到AppState，如果localStorage为空则写入默认值
  */
 function initializeAppState() {
-    // 使用AppState.initialize方法初始化状态
+    // 移除硬编码的默认列表
+    const selectedAPIsRaw = localStorage.getItem('selectedAPIs');
+
+    // 初始化 AppState，如果localStorage为空，则使用从config.js读取的全局默认值
     AppState.initialize({
-        'selectedAPIs': JSON.parse(localStorage.getItem('selectedAPIs') || '["heimuer", "tyyszy", "jmzy", "bfzy", "dyttzy"]'),
+        'selectedAPIs': JSON.parse(selectedAPIsRaw || JSON.stringify(window.DEFAULT_SELECTED_APIS)),
         'customAPIs': JSON.parse(localStorage.getItem('customAPIs') || '[]'),
         'currentEpisodeIndex': 0,
         'currentEpisodes': [],
         'currentVideoTitle': '',
         'episodesReversed': false
     });
+
+    // 如果localStorage中没有selectedAPIs，则将默认值写入
+    if (selectedAPIsRaw === null) {
+        // 使用从config.js读取的全局默认值
+        localStorage.setItem('selectedAPIs', JSON.stringify(window.DEFAULT_SELECTED_APIS));
+    }
 }
 
 /**
@@ -524,8 +533,8 @@ async function performSearch(query, selectedAPIs) {
             const customIndex = parseInt(apiId.replace('custom_', ''));
             const customApi = APISourceManager.getCustomApiInfo(customIndex);
             if (customApi) {
-                    return fetch(`/api/search?wd=${encodeURIComponent(query)}&source=${apiId}&customApi=${encodeURIComponent(customApi.url)}`)
-                    .then(response => response.json())
+                return fetch(`/api/search?wd=${encodeURIComponent(query)}&source=${apiId}&customApi=${encodeURIComponent(customApi.url)}`)
+                .then(response => response.json())
                     .then(data => ({
                         ...data,
                         apiId: apiId,

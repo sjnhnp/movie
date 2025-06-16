@@ -83,17 +83,51 @@ function setupSkipControls() {
         return;
     }
 
-    // 显示 / 隐藏菜单
-    skipButton.addEventListener('click', () => {
-        if (dropdown.classList.contains('hidden')) {
-            dropdown.classList.remove('hidden');
-            dropdown.classList.add('block');
-        } else {
-            dropdown.classList.add('hidden');
+    // 显示 / 隐藏菜单 (替换原有逻辑)
+    skipButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // 阻止事件冒泡，防止被 document 的点击事件立即关闭
+
+        // 在打开跳过菜单前，先关闭线路菜单
+        const lineDropdown = document.getElementById('line-switch-dropdown');
+        if (lineDropdown) {
+            lineDropdown.classList.add('hidden'); // 线路菜单使用 .hidden 类来隐藏
+        }
+
+        const isCurrentlyVisible = dropdown.classList.contains('block');
+
+        if (isCurrentlyVisible) {
             dropdown.classList.remove('block');
+        } else {
+            // --- 核心：定位逻辑 ---
+            const buttonRect = skipButton.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - buttonRect.bottom;
+
+            // 为了在不引起页面闪烁的情况下测量高度，
+            // 我们临时让菜单在布局中可见但视觉上隐藏。
+            // 'hidden' class 会导致 display:none，使 offsetHeight 为 0，所以我们先移除它。
+            dropdown.classList.remove('hidden');
+            dropdown.style.visibility = 'hidden'; // 使用 visibility 替代 display
+            dropdown.classList.add('block'); // 添加 'block' 以应用其尺寸相关的样式
+
+            const dropdownHeight = dropdown.offsetHeight;
+
+            // 测量完毕，恢复初始状态
+            dropdown.classList.remove('block');
+            dropdown.style.visibility = '';
+
+            // 判断方向
+            if ((spaceBelow < (dropdownHeight + 10)) && (buttonRect.top > dropdownHeight)) {
+                // 如果下方空间不足，且上方空间足够，则向上弹出
+                dropdown.classList.add('dropdown-top');
+            } else {
+                // 否则，使用默认的向下弹出
+                dropdown.classList.remove('dropdown-top');
+            }
+
+            // 最终显示菜单
+            dropdown.classList.add('block');
         }
     });
-
 
     // 应用设置按钮
     applyBtn.addEventListener('click', () => {
@@ -130,19 +164,21 @@ function setupSkipControls() {
 }
 
 function setupSkipDropdownEvents() {
+    // 替换原有逻辑
     document.addEventListener('click', (event) => {
         const dropdown = document.getElementById('skip-control-dropdown');
         const skipButton = document.getElementById('skip-control-button');
-        if (!skipButton || !dropdown) return;
 
-        if (skipButton.contains(event.target)) {
-            // 已由 setupSkipControls 单独处理
-        } else if (!dropdown.contains(event.target)) {
-            dropdown.classList.add('hidden');
+        // 如果下拉菜单不存在或本就是隐藏的，则无需处理
+        if (!dropdown || !dropdown.classList.contains('block')) {
+            return;
+        }
+
+        // 如果点击发生在按钮或下拉菜单自身之外的区域，则隐藏下拉菜单
+        if (!skipButton.contains(event.target) && !dropdown.contains(event.target)) {
             dropdown.classList.remove('block');
         }
     });
-
 }
 
 // 自动跳过片头和片尾
@@ -1848,9 +1884,23 @@ function setupLineSwitching() {
     const updateAndToggleMenu = (event) => {
         event.stopPropagation();
 
+        // 在打开线路菜单前，先关闭跳过菜单
+        const skipDropdown = document.getElementById('skip-control-dropdown');
+        if (skipDropdown) {
+            skipDropdown.classList.remove('block'); // 跳过菜单使用 .block 类来显示
+        }
         // 动态生成菜单内容
         const currentSourceCode = new URLSearchParams(window.location.search).get('source_code');
-        const selectedAPIs = JSON.parse(localStorage.getItem('selectedAPIs') || '[]');
+
+        let selectedAPIsRaw = localStorage.getItem('selectedAPIs');
+        // 如果 localStorage 中没有数据，则使用全局配置创建并存入
+        if (selectedAPIsRaw === null && window.DEFAULT_SELECTED_APIS) {
+            selectedAPIsRaw = JSON.stringify(window.DEFAULT_SELECTED_APIS);
+            localStorage.setItem('selectedAPIs', selectedAPIsRaw);
+        }
+        // 如果依然为空（例如config.js加载失败），则使用空数组以防报错
+        const selectedAPIs = JSON.parse(selectedAPIsRaw || '[]');
+
         const customAPIs = JSON.parse(localStorage.getItem('customAPIs') || '[]');
         dropdown.innerHTML = '';
 
@@ -2053,17 +2103,43 @@ function setupControlsAutoHide(dpInstance) {
 
     const CONTROLS_HIDE_DELAY = 3000; // 3秒后隐藏控制条
     let hideControlsTimeout;
-    let isHidingIntentionally = false; // 标记用户是否主动点击隐藏
     const playerContainer = dpInstance.container;
 
     if (!playerContainer) return;
 
+    // --- 新增代码块: 用于跟踪进度条拖动状态 ---
+    let isDraggingProgressBar = false;
+    const progressBar = playerContainer.querySelector('.dplayer-bar-wrap');
+
+    if (progressBar) {
+        const startDrag = () => {
+            isDraggingProgressBar = true;
+            clearTimeout(hideControlsTimeout); // 开始拖动时，立即清除隐藏计时器
+        };
+        const endDrag = () => {
+            if (isDraggingProgressBar) {
+                isDraggingProgressBar = false;
+                resetHideTimer(); // 拖动结束后，重新开始计时
+            }
+        };
+
+        // 监听鼠标和触摸事件
+        progressBar.addEventListener('mousedown', startDrag);
+        document.addEventListener('mouseup', endDrag); // 在整个文档上监听松开事件
+
+        progressBar.addEventListener('touchstart', startDrag, { passive: true });
+        document.addEventListener('touchend', endDrag);
+        document.addEventListener('touchcancel', endDrag); // 触摸取消时也应结束拖动
+    }
+    // --- 新增代码块结束 ---
+
+
     // 重置隐藏计时器
     function resetHideTimer() {
-        if (isScreenLocked) return;
+        // --- 修改点: 正在拖动或屏幕锁定时，不执行任何操作 ---
+        if (isScreenLocked || isDraggingProgressBar) return;
 
         clearTimeout(hideControlsTimeout);
-        isHidingIntentionally = false;
 
         // 显示控制条
         playerContainer.classList.remove('dplayer-hide-controller');
@@ -2076,33 +2152,19 @@ function setupControlsAutoHide(dpInstance) {
         }, CONTROLS_HIDE_DELAY);
     }
 
-    // 立即隐藏控制条（用户主动点击隐藏）
-    function hideControlsImmediately() {
-        clearTimeout(hideControlsTimeout);
-        playerContainer.classList.add('dplayer-hide-controller');
-        isHidingIntentionally = true;
-    }
-
-    // ===== 核心点击处理逻辑 =====
+    // (此部分大部分保留，但移除了原有的 video_click 处理，以避免冲突)
     function handlePlayerInteraction(e) {
-        // 如果是控制条上的操作，不处理（避免点击按钮时隐藏控制条）
         if (e.target.closest('.dplayer-controller, .dplayer-play-icon')) {
             return;
         }
 
-        // 如果控制条当前是可见的
         if (!playerContainer.classList.contains('dplayer-hide-controller')) {
-            // 用户主动点击隐藏
-            hideControlsImmediately();
+            clearTimeout(hideControlsTimeout);
+            playerContainer.classList.add('dplayer-hide-controller');
         } else {
-            // 控制条是隐藏的，显示并开始倒计时
             resetHideTimer();
         }
     }
-
-    // ===== 事件监听 =====
-    // 视频区域点击（使用DPlayer原生事件）
-    dpInstance.on('video_click', handlePlayerInteraction);
 
     // 鼠标移动显示控制条
     playerContainer.addEventListener('mousemove', resetHideTimer);
@@ -2122,5 +2184,4 @@ function setupControlsAutoHide(dpInstance) {
 
     // 初始状态
     resetHideTimer();
-
 }

@@ -384,7 +384,7 @@ input:checked+.slider:before {
   right: 0;
   /* 贴合父容器右侧 */
   left: auto;
-  width: clamp(200px, 60vw, 280px);
+  width: clamp(150px, 50vw, 190px);
   /* 响应式宽度 */
   max-width: calc(100vw - 16px);
   /* 视口宽度减去两侧各8px的安全边距 */
@@ -406,6 +406,20 @@ input:checked+.slider:before {
   transition:
     opacity 0.18s cubic-bezier(0.25, 0.8, 0.25, 1),
     transform 0.22s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* 新增：当菜单需要向上弹出时的样式 */
+#skip-control-dropdown.dropdown-top {
+  top: auto;
+  bottom: calc(100% + 8px); /* 距离按钮顶部 8px */
+  transform-origin: bottom right; /* 动画基点改为右下角 */
+  /* 动画起始位置在按钮上方，准备向上移动到最终位置 */
+  transform: translateY(8px) scale(0.97);
+}
+
+/* 确保显示时 transform 恢复正常（此规则可能已存在，可合并） */
+#skip-control-dropdown.block.dropdown-top {
+  transform: translateY(0) scale(1);
 }
 
 /* 显示状态 */
@@ -489,7 +503,7 @@ input:checked+.slider:before {
 /* 移动端调整 */
 @media (max-width: 480px) {
   #skip-control-dropdown {
-    width: clamp(180px, 75vw, 260px);
+    width: clamp(130px, 50vw, 180px);
     max-width: calc(100vw - 16px);
     padding: 10px 12px;
     right: 8px;

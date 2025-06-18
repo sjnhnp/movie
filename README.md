@@ -38,8 +38,6 @@
 
 ### cloudflare pages / vercel 环境变量
 
-如果您为此项目配置了代理 Worker，您需要在 Cloudflare Pages 项目的 `设置` -> `函数` -> `绑定` 中添加以下绑定：
-
 #### 1. KV Namespace Binding
 - **变量名称 (Variable name):** `LIBRETV_PROXY_KV`
 - **KV 命名空间 (KV namespace):** 选择您创建的KV

@@ -1,7 +1,7 @@
 /* -------- 1. 全局 CSS 变量（保留） -------- */
 :root {
-  --primary-color: #00ccff;
-  --primary-light: #33d6ff;
+  --primary-color: #d4af37;  /* 改为金色 */
+  --primary-light: #f4e4bc;  /* 改为浅金色 */
   --secondary-color: #0f1622;
   --accent-color: #ff3c78;
   --text-color: #e6f2ff;
@@ -16,14 +16,6 @@
 }
 
 /* -------- 2. 统一滚动条样式（全局应用） -------- */
-html,
-body,
-.history-panel,
-.episode-grid,
-.custom-title-scroll {
-  scrollbar-width: thin;
-  scrollbar-color: #444 #222;
-}
 
 html::-webkit-scrollbar,
 body::-webkit-scrollbar,
@@ -784,4 +776,56 @@ body {
 /* 鼠标悬停在x变手势 */
 .search-tag+span[role=button] {
   cursor: pointer;
+}
+
+/* -------- 历史面板优化 -------- */
+.history-panel {
+  background: linear-gradient(145deg, rgba(15, 22, 34, 0.98), rgba(25, 34, 49, 0.98)) !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* Webkit 滚动条样式 */
+.history-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.history-panel::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.history-panel::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* 清空历史按钮 - 修复黑色背景问题 */
+.history-panel .mt-4.text-center.sticky.bottom-0 {
+  background: transparent !important; /* 移除背景色 */
+  padding: 0.75rem 1rem;
+  margin: 0;
+}
+
+.history-panel .clear-history-btn {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.08)) !important;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 12px;
+  margin: 0;
+  padding: 0.75rem 1.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  color: #d4af37; /* 添加文字颜色 */
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+.history-panel .clear-history-btn:hover {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.15)) !important;
+  border-color: rgba(212, 175, 55, 0.4);
+  color: #f4e4bc;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
 }

@@ -105,6 +105,7 @@ button,
   overflow: hidden;
   text-overflow: ellipsis;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   line-height: 1.2rem;
   word-break: break-word;
   hyphens: auto;
@@ -136,6 +137,7 @@ button,
 .gradient-text {
   background: linear-gradient(to right, var(--primary-color), var(--accent-color));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

@@ -2,6 +2,8 @@
 
 这是一个基于 [**LibreSpark/LibreTV**](https://github.com/LibreSpark/LibreTV) 的深度优化分支。本项目在保留上游核心功能的基础上，进行了大量代码重构，采用 [**Vidstack Player**](https://github.com/vidstack/player) 作为新的播放器，并增加了多项提升用户体验的实用功能。
 
+> 采用dplayer版本请移步到分支[for-dplayer](https://github.com/sjnhnp/movie/tree/for-dplayer)
+
 ## 🚀 主要特性
 
 ### 首页 (Homepage)

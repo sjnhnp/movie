@@ -118,9 +118,10 @@ media-player {
   left: 0;
   right: 0;
   bottom: 0;
-  background: #333;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 24px;
-  transition: .4s;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .slider:before {
@@ -129,18 +130,40 @@ media-player {
   height: 18px;
   width: 18px;
   left: 3px;
-  bottom: 3px;
+  bottom: 2px;
   background: #fff;
   border-radius: 50%;
-  transition: .4s;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* 未选中状态的悬停效果 */
+.slider:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* 选中状态 */
 input:checked+.slider {
-  background: #00ccff;
+  background: #404040;
+  border-color: transparent;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
+/* 选中状态的滑块位置 */
 input:checked+.slider:before {
   transform: translateX(22px);
+  background: #ffffff;
+}
+
+/* 选中状态的悬停效果 */
+input:checked+.slider:hover {
+  background: #505050;
+}
+
+/* 禁用状态 */
+input:disabled+.slider {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* 键盘快捷键提示 */
@@ -203,7 +226,6 @@ input:checked+.slider:before {
   /* 最彻底的解决方案 */
 }
 
-
 /* end 锁屏样式 */
 
 /* 选集按钮样式（未选中） */
@@ -226,12 +248,150 @@ input:checked+.slider:before {
   justify-content: center;
 }
 
+/* 统一播放控制按钮样式 */
+#prev-episode,
+#next-episode {
+  /* 减小按钮尺寸，与控制栏按钮保持一致 */
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-/* 控件标签 */
+#prev-episode:hover:not(:disabled),
+#next-episode:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+#prev-episode:active:not(:disabled),
+#next-episode:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+#prev-episode:disabled,
+#next-episode:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+#prev-episode svg,
+#next-episode svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* 确保集数信息也有一致的样式 */
+#episode-info-span {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+}
+
+/* 统一所有控制按钮的间距和排版 */
+.flex.items-center.justify-between.p-4 {
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  #prev-episode,
+  #next-episode {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8125rem;
+  }
+  
+  #prev-episode svg,
+  #next-episode svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  #episode-info-span {
+    font-size: 0.8125rem;
+  }
+}
+
+/* 开关文本标签样式优化 */
 .control-label {
-  font-size: .875rem;
-  color: #9ca3af;
-  margin-right: .25rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.85);
+  margin-right: 0.5rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+/* 选中状态下的文本标签 */
+.switch input:checked~.control-label {
+  color: #ffffff;
+}
+
+/* 容器样式优化 */
+.player-control-bar>div {
+  display: flex;
+  align-items: center;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.player-control-bar>div:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+
+/* 添加焦点状态 */
+.switch input:focus+.slider {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+/* 设置动画效果 */
+@keyframes switchOn {
+  0% {
+    transform: scale(0.95);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.switch input:checked+.slider {
+  animation: switchOn 0.2s ease-out;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .switch {
+    width: 40px;
+    height: 22px;
+  }
+
+  .slider:before {
+    width: 16px;
+    height: 16px;
+  }
+
+  input:checked+.slider:before {
+    transform: translateX(18px);
+  }
+
+  .control-label {
+    font-size: 0.8125rem;
+  }
 }
 
 /* 隐藏 "选集" 二字 */
@@ -307,6 +467,7 @@ input:checked+.slider:before {
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -326,7 +487,7 @@ input:checked+.slider:before {
 .progress-restore-card {
   background: linear-gradient(145deg, rgba(20, 24, 35, 0.95), rgba(30, 35, 50, 0.95));
   border-radius: 20px;
-  box-shadow: 
+  box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.4),
     0 0 0 1px rgba(255, 255, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
@@ -446,21 +607,21 @@ input:checked+.slider:before {
     max-width: 95vw;
     margin: 1rem;
   }
-  
+
   .progress-modal-title {
     font-size: 1.2rem;
   }
-  
+
   .progress-modal-content {
     font-size: 0.9rem;
     margin-bottom: 1.5rem;
   }
-  
+
   .progress-modal-actions {
     flex-direction: column;
     gap: 0.75rem;
   }
-  
+
   .progress-modal-btn {
     width: 100%;
     padding: 0.875rem 1rem;
@@ -478,59 +639,102 @@ input:checked+.slider:before {
   position: absolute;
   bottom: 100%;
   right: 0;
-  width: clamp(150px, 50vw, 190px);
-  background: rgba(25, 28, 38, 0.97);
-  border-radius: 8px;
-  border: 1px solid rgba(50, 50, 60, 0.5);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
-  padding: 12px 14px;
+  width: clamp(180px, 50vw, 220px);
+  background: linear-gradient(145deg, rgba(20, 24, 35, 0.95), rgba(30, 35, 50, 0.95));
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 16px;
   z-index: 2222;
   margin-bottom: 8px;
+  backdrop-filter: blur(20px);
 }
 
 #skip-control-dropdown:not(.hidden) {
   display: block;
+  animation: dropdown-fade-in 0.2s ease-out;
+}
+
+@keyframes dropdown-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+#skip-control-dropdown .flex {
+  margin-bottom: 12px;
+}
+
+#skip-control-dropdown .flex:last-of-type {
+  margin-bottom: 16px;
 }
 
 #skip-control-dropdown label {
   display: block;
-  margin-bottom: 8px;
-  color: #c0c8e0;
-  font-size: 0.9em;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
   font-weight: 500;
+  margin-right: 8px;
+  min-width: 60px;
 }
 
 #skip-control-dropdown input[type="number"] {
   width: 100%;
-  font-size: 0.95em;
-  padding: 8px 10px;
-  border-radius: 5px;
-  border: 1px solid #303442;
-  background: #1f222e;
-  color: #e1e6fa;
-  margin-top: 4px;
+  font-size: 0.875rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
   box-sizing: border-box;
+  transition: all 0.2s ease;
 }
 
 #skip-control-dropdown input[type="number"]:focus {
   outline: none;
-  border-color: #00aeff;
-  background: #2a2d3a;
-  box-shadow: 0 0 0 2px rgba(0, 174, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+}
+
+#skip-control-dropdown input[type="number"]::placeholder {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 #skip-control-dropdown button {
   width: 100%;
-  margin-top: 10px;
-  padding: 9px 12px;
-  font-size: 0.9em;
+  padding: 10px 16px;
+  font-size: 0.875rem;
   font-weight: 600;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease-out,
-    color 0.15s ease-out,
-    transform 0.1s ease-out;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+#skip-control-dropdown button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+#skip-control-dropdown button:hover::before {
+  left: 100%;
 }
 
 #skip-control-dropdown button:active {
@@ -538,15 +742,54 @@ input:checked+.slider:before {
 }
 
 #skip-control-dropdown #apply-skip-settings {
-  background: linear-gradient(135deg, #007bff, #0056b3);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#skip-control-dropdown #apply-skip-settings:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 #skip-control-dropdown #reset-skip-settings {
-  background: #4A5568;
-  color: #e0e0e0;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+#skip-control-dropdown #reset-skip-settings:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  #skip-control-dropdown {
+    width: clamp(160px, 80vw, 200px);
+    padding: 14px;
+  }
+
+  #skip-control-dropdown label {
+    font-size: 0.8125rem;
+    min-width: 55px;
+  }
+
+  #skip-control-dropdown input[type="number"] {
+    padding: 7px 10px;
+    font-size: 0.8125rem;
+  }
+
+  #skip-control-dropdown button {
+    padding: 9px 14px;
+    font-size: 0.8125rem;
+  }
+}
+
+/* 线路切换菜单样式 */
 /* 线路切换菜单样式 */
 .line-switch-container {
   position: relative;
@@ -557,51 +800,127 @@ input:checked+.slider:before {
   display: none;
   position: absolute;
   bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-bottom: 8px;
-  width: 150px;
-  max-height: 200px;
+  right: 0;
+  width: clamp(180px, 50vw, 220px);
+  max-height: 300px;
   overflow-y: auto;
-  background: rgba(25, 28, 38, 0.97);
-  border-radius: 8px;
-  border: 1px solid rgba(50, 50, 60, 0.5);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
-  padding: 8px;
+  background: linear-gradient(145deg, rgba(20, 24, 35, 0.95), rgba(30, 35, 50, 0.95));
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 12px;
   z-index: 2223;
+  margin-bottom: 8px;
+  backdrop-filter: blur(20px);
 }
 
 #line-switch-dropdown:not(.hidden) {
   display: block;
+  animation: dropdown-fade-in 0.2s ease-out;
 }
 
 #line-switch-dropdown button {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 8px 12px;
+  padding: 10px 12px;
   margin-bottom: 4px;
   text-align: left;
-  font-size: 0.9em;
-  color: #c0c8e0;
-  background-color: transparent;
-  border: none;
-  border-radius: 5px;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  font-weight: 500;
 }
 
 #line-switch-dropdown button:last-child {
   margin-bottom: 0;
 }
 
+#line-switch-dropdown button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+#line-switch-dropdown button:hover:not(:disabled)::before {
+  left: 100%;
+}
+
 #line-switch-dropdown button:hover:not(:disabled) {
-  background-color: #303442;
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+  color: #ffffff;
+}
+
+#line-switch-dropdown button:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 #line-switch-dropdown button.line-active {
-  background-color: #007bff;
-  color: #fff;
-  font-weight: bold;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-weight: 600;
+  border-color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+#line-switch-dropdown button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 自定义滚动条 */
+#line-switch-dropdown::-webkit-scrollbar {
+  width: 6px;
+}
+
+#line-switch-dropdown::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+#line-switch-dropdown::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+#line-switch-dropdown::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  #line-switch-dropdown {
+    width: clamp(160px, 80vw, 200px);
+    padding: 10px;
+  }
+  
+  #line-switch-dropdown button {
+    padding: 8px 10px;
+    font-size: 0.8125rem;
+  }
+}
+
+/* 添加空状态样式 */
+#line-switch-dropdown .empty-state {
+  padding: 12px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.875rem;
 }
 
 /* 顶部导航栏 */
@@ -668,7 +987,7 @@ header {
   left: 50%;
   transform: translate(-50%, -50%);
   /* 确保z-index足够高，高于播放器所有UI */
-  z-index: 2147483647; 
+  z-index: 2147483647;
   pointer-events: none;
   background: rgba(0, 0, 0, 0.7);
   border-radius: 8px;

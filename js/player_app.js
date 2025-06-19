@@ -813,7 +813,7 @@ function toggleLockScreen() {
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                 <path d="M7 11V7a5 5 0 0 1 9.9-1"></path>
             `;
-            showMessage('屏幕已锁定，单击解锁按钮可解锁', 'info', 2500);
+            showMessage('屏幕已锁定', 'info', 2500);
         } else {
             lockIcon.innerHTML = `
                 <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>

@@ -518,8 +518,9 @@ function handleHistoryListClick(e) {
     if (deleteButton) {
         e.stopPropagation();
         const historyItem = deleteButton.closest('.history-item');
-        if (historyItem && historyItem.dataset.url) {
-            deleteHistoryItem(encodeURIComponent(historyItem.dataset.url));
+        // Use the correct dataset attribute
+        if (historyItem && historyItem.dataset.internalId) {
+            deleteHistoryItem(historyItem.dataset.internalId); // Use internalId
         }
         return;
     }
@@ -649,6 +650,7 @@ function loadViewingHistory() {
         historyItem.dataset.title = safeTitle;
         historyItem.dataset.episodeIndex = item.episodeIndex || 0;
         historyItem.dataset.playbackPosition = item.playbackPosition || 0;
+        historyItem.dataset.internalId = item.internalShowIdentifier; 
 
         // 构建历史项内容
         const historyInfo = document.createElement('div');
@@ -880,3 +882,26 @@ function setupPanelAutoClose() {
 document.addEventListener('DOMContentLoaded', function () {
     setupPanelAutoClose();
 });
+
+/**
+ * 删除单条观看历史
+ * @param {string} internalId 要删除的记录的 internalShowIdentifier
+ */
+function deleteHistoryItem(internalId) {
+    try {
+        let history = getViewingHistory();
+        // 使用 internalShowIdentifier 来确保删除正确的条目
+        const updatedHistory = history.filter(item => item.internalShowIdentifier !== internalId);
+        
+        if (history.length !== updatedHistory.length) {
+            localStorage.setItem('viewingHistory', JSON.stringify(updatedHistory));
+            loadViewingHistory(); // 重新渲染历史记录列表
+            showToast('已删除该条记录', 'success');
+        } else {
+            showToast('未找到要删除的记录', 'warning');
+        }
+    } catch (e) {
+        console.error('删除观看历史失败:', e);
+        showToast('删除历史记录失败', 'error');
+    }
+}

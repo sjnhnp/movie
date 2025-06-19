@@ -6,9 +6,37 @@
 }
 
 /* 播放器区域 */
-#player {
+#player-region {
   width: 100%;
   height: 60vh;
+  position: relative;
+}
+
+
+/* 确保 Vidstack 播放器和其内部 video 元素正确缩放 */
+#player,
+media-player {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  /* 添加弹性布局 */
+  justify-content: center;
+  /* 水平居中 */
+  align-items: center;
+  /* 垂直居中 */
+  background-color: black;
+  /* 黑边背景 */
+}
+
+#player video {
+  max-width: 100%;
+  /* 保证不溢出容器 */
+  max-height: 100%;
+  /* 保证不溢出容器 */
+  object-fit: contain;
+  /* 使用contain模式确保完整显示 */
+  margin: auto;
+  /* 居中 */
 }
 
 /* 加载和错误覆盖层 */
@@ -55,7 +83,7 @@
   margin-bottom: 10px;
 }
 
-/* 合并重复的选集按钮样式 */
+/* 选集按钮样式 */
 .episode-active {
   background: #3b82f6 !important;
   border-color: #60a5fa !important;
@@ -126,7 +154,7 @@ input:checked+.slider:before {
   padding: 1rem 2rem;
   border-radius: .5rem;
   font-size: 1.5rem;
-  display: flex;
+  display: none;
   align-items: center;
   gap: .5rem;
   z-index: 1000;
@@ -135,41 +163,48 @@ input:checked+.slider:before {
 }
 
 .shortcut-hint.show {
+  display: flex;
   opacity: 1;
 }
 
-/* 全屏适配 */
-.player-container:-webkit-full-screen,
-.player-container:fullscreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 10000;
-  background: #000;
+/* 锁屏样式 - 适配 Vidstack */
+.player-container.player-locked #lock-button {
+  opacity: 1 !important;
+  /* 确保锁屏按钮本身总是可见的 */
+  pointer-events: auto !important;
+  z-index: 51;
+  /* 确保它在最上层，可以被点击 */
 }
 
-.player-container:-webkit-full-screen #player,
-.player-container:fullscreen #player {
-  width: 100%;
-  height: 100%;
-}
-
-/* 锁屏样式 */
-.player-locked .dplayer-controller,
-.player-locked .dplayer-mask,
-.player-locked .dplayer-video-wrap,
-.player-locked .dplayer-bar-wrap,
-.player-locked .dplayer-menu,
-.player-locked .dplayer-bezel {
+/* 锁屏样式 - 适配 Vidstack 的plyr style
+.player-locked .plyr {
   pointer-events: none !important;
 }
 
-.player-locked #lock-button {
-  pointer-events: auto !important;
-  z-index: 51;
+.player-locked .plyr__controls {
+  display: none !important;
 }
+ */
+
+/* Vidstack 的 Default Layout 锁屏样式 */
+/* 确保锁定状态下控制条保持隐藏 */
+.player-locked .vds-controls {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* 允许视频区域的点击事件通过 */
+.player-locked .vds-video-container {
+  pointer-events: auto !important;
+}
+
+.player-locked .vds-gestures {
+  display: none !important;
+  /* 最彻底的解决方案 */
+}
+
+
+/* end 锁屏样式 */
 
 /* 选集按钮样式（未选中） */
 #episode-grid button:not(.episode-active) {
@@ -213,7 +248,6 @@ input:checked+.slider:before {
   align-items: center;
 }
 
-/* 900px and below */
 @media (max-width: 900px) {
   .player-control-bar {
     gap: 0.8rem;
@@ -224,7 +258,6 @@ input:checked+.slider:before {
   }
 }
 
-/* 768px and below */
 @media (max-width: 768px) {
   .player-control-bar {
     gap: 0.6rem;
@@ -235,11 +268,9 @@ input:checked+.slider:before {
   }
 }
 
-/* 600px and below */
 @media (max-width: 600px) {
   .player-control-bar {
     gap: 0.25rem;
-    /* Equivalent to Tailwind's gap-1 */
   }
 
   .icon-btn {
@@ -249,10 +280,8 @@ input:checked+.slider:before {
 
 #episodes-count {
   display: none !important;
-  /* 使用 !important 确保覆盖 Tailwind 的类 */
 }
 
-/* 优雅记住进度弹窗样式 - 放在 player_styles.css 最后 */
 #progress-restore-modal {
   position: fixed;
   z-index: 22002;
@@ -261,18 +290,27 @@ input:checked+.slider:before {
   width: 100vw;
   height: 100vh;
   display: none;
-  /* 默认隐藏 */
   align-items: center;
   justify-content: center;
-  background: rgba(16, 22, 34, 0.45);
-  /* 大屏淡黑蒙层 */
-  backdrop-filter: blur(3.5px);
-  transition: background 0.28s;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
 }
 
 #progress-restore-modal.active {
   display: flex;
-  animation: fadein-modal 0.25s;
+  animation: modal-fade-in 0.3s ease-out;
+}
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes fadein-modal {
@@ -286,150 +324,174 @@ input:checked+.slider:before {
 }
 
 .progress-restore-card {
-  background: rgba(34, 39, 51, 0.78);
-  border-radius: 16px;
-  box-shadow: 0 8px 40px 0 rgba(10, 18, 36, 0.25), 0 1.5px 6px 0 rgba(0, 204, 255, 0.08);
-  padding: 2rem 2.5rem 1.3rem 2.5rem;
-  min-width: 330px;
-  max-width: 92vw;
-  color: var(--text-color, #e6f2ff);
-  font-size: 1.07rem;
+  background: linear-gradient(145deg, rgba(20, 24, 35, 0.95), rgba(30, 35, 50, 0.95));
+  border-radius: 20px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  padding: 2.5rem 2rem 2rem 2rem;
+  min-width: 380px;
+  max-width: 90vw;
+  color: #ffffff;
+  font-size: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  border: 1.5px solid var(--primary-color, #00ccff);
-  /* 轻度毛玻璃 */
-  backdrop-filter: blur(7px) saturate(1.35);
+  text-align: center;
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-restore-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(180, 160, 255, 0.4), transparent);
 }
 
 .progress-modal-title {
-  font-size: 1.17rem;
-  font-weight: 700;
-  color: var(--primary-color, #00ccff);
-  margin-bottom: 0.4rem;
-  letter-spacing: 0.01em;
-  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.progress-modal-title::before {
+  content: '▶';
+  color: #b4a0ff;
+  font-size: 1.2rem;
 }
 
 .progress-modal-content {
-  line-height: 1.8;
-  margin-bottom: 1.10rem;
-  text-shadow: 0 1.5px 12px rgba(0, 204, 255, 0.08);
-  text-align: center;
-  color: var(--text-color, #e6f2ff);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
 }
 
 .progress-modal-actions {
   display: flex;
-  gap: 1.2rem;
+  gap: 1rem;
   justify-content: center;
-  margin-top: 0.2rem;
+  width: 100%;
 }
 
 .progress-modal-btn {
   border: none;
-  font-size: 1.08rem;
-  padding: 0.48em 1.5em;
-  border-radius: 8px;
+  font-size: 0.95rem;
+  padding: 0.75rem 2rem;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 500;
   outline: none;
-  transition: background 0.16s, color 0.13s;
-  box-shadow: 0 2px 7px -1.5px rgba(0, 0, 0, 0.11);
+  transition: all 0.2s ease;
+  min-width: 100px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-modal-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.progress-modal-btn:hover::before {
+  left: 100%;
 }
 
 .progress-modal-btn.confirm {
-  background: linear-gradient(94deg, #00ccff 60%, #33d6ff 100%);
-  color: #fff;
+  background: linear-gradient(135deg, #a596e7, #7a6bb8);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(166, 150, 231, 0.3);
 }
 
 .progress-modal-btn.confirm:hover {
-  background: #05e3e3;
-  color: #303343;
+  background: linear-gradient(135deg, #9485d6, #6f60a7);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(166, 150, 231, 0.4);
 }
 
 .progress-modal-btn.cancel {
-  background: rgba(200, 200, 200, 0.25);
-  color: #a1bada;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .progress-modal-btn.cancel:hover {
-  background: rgba(180, 180, 180, 0.13);
-  color: #73b1cb;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .progress-restore-card {
-    padding: 1.25rem 0.6rem;
+    padding: 2rem 1.5rem;
     min-width: 0;
-    max-width: 98vw;
-    font-size: 0.98rem;
+    max-width: 95vw;
+    margin: 1rem;
+  }
+  
+  .progress-modal-title {
+    font-size: 1.2rem;
+  }
+  
+  .progress-modal-content {
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .progress-modal-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  
+  .progress-modal-btn {
+    width: 100%;
+    padding: 0.875rem 1rem;
   }
 }
 
 /* 跳过片头和片尾下拉菜单样式*/
-
-/* 父容器：用于相对定位 */
 .skip-control-container {
   position: relative;
   display: inline-block;
-  /* 根据需要也可改成 block */
 }
 
-/* 下拉菜单 默认样式（隐藏） */
 #skip-control-dropdown {
+  display: none;
   position: absolute;
-  top: calc(100% + 8px);
-  /* 距离按钮底部 8px */
+  bottom: 100%;
   right: 0;
-  /* 贴合父容器右侧 */
-  left: auto;
   width: clamp(150px, 50vw, 190px);
-  /* 响应式宽度 */
-  max-width: calc(100vw - 16px);
-  /* 视口宽度减去两侧各8px的安全边距 */
-  margin: 0 8px;
-  /* 小屏幕下防止紧贴屏幕边缘 */
-  box-sizing: border-box;
   background: rgba(25, 28, 38, 0.97);
   border-radius: 8px;
   border: 1px solid rgba(50, 50, 60, 0.5);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
   padding: 12px 14px;
   z-index: 2222;
-
-  /* 隐藏与过渡 */
-  opacity: 0;
-  pointer-events: none;
-  transform-origin: top right;
-  transform: translateY(-8px) scale(0.97);
-  transition:
-    opacity 0.18s cubic-bezier(0.25, 0.8, 0.25, 1),
-    transform 0.22s cubic-bezier(0.25, 0.8, 0.25, 1);
+  margin-bottom: 8px;
 }
 
-/* 新增：当菜单需要向上弹出时的样式 */
-#skip-control-dropdown.dropdown-top {
-  top: auto;
-  bottom: calc(100% + 8px); /* 距离按钮顶部 8px */
-  transform-origin: bottom right; /* 动画基点改为右下角 */
-  /* 动画起始位置在按钮上方，准备向上移动到最终位置 */
-  transform: translateY(8px) scale(0.97);
+#skip-control-dropdown:not(.hidden) {
+  display: block;
 }
 
-/* 确保显示时 transform 恢复正常（此规则可能已存在，可合并） */
-#skip-control-dropdown.block.dropdown-top {
-  transform: translateY(0) scale(1);
-}
-
-/* 显示状态 */
-#skip-control-dropdown.block {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateY(0) scale(1);
-}
-
-/* 内容排版 */
 #skip-control-dropdown label {
   display: block;
   margin-bottom: 8px;
@@ -457,11 +519,6 @@ input:checked+.slider:before {
   box-shadow: 0 0 0 2px rgba(0, 174, 255, 0.3);
 }
 
-#skip-control-dropdown input[type="number"]::placeholder {
-  color: #606880;
-  opacity: 1;
-}
-
 #skip-control-dropdown button {
   width: 100%;
   margin-top: 10px;
@@ -480,110 +537,29 @@ input:checked+.slider:before {
   transform: scale(0.98);
 }
 
-/* 应用按钮 */
 #skip-control-dropdown #apply-skip-settings {
   background: linear-gradient(135deg, #007bff, #0056b3);
   color: #fff;
 }
 
-#skip-control-dropdown #apply-skip-settings:hover {
-  background: linear-gradient(135deg, #0069d9, #004085);
-}
-
-/* 重置按钮 */
 #skip-control-dropdown #reset-skip-settings {
   background: #4A5568;
   color: #e0e0e0;
 }
 
-#skip-control-dropdown #reset-skip-settings:hover {
-  background: #3A4354;
-}
-
-/* 移动端调整 */
-@media (max-width: 480px) {
-  #skip-control-dropdown {
-    width: clamp(130px, 50vw, 180px);
-    max-width: calc(100vw - 16px);
-    padding: 10px 12px;
-    right: 8px;
-    /* 贴合视口右侧并留白 */
-    left: auto;
-  }
-
-  #skip-control-dropdown label {
-    font-size: 0.85em;
-  }
-
-  #skip-control-dropdown input[type="number"] {
-    font-size: 0.9em;
-    padding: 7px 9px;
-  }
-
-  #skip-control-dropdown button {
-    font-size: 0.85em;
-    padding: 8px 10px;
-  }
-}
-
-/* 1. 弹性行容器，让子 label 同一行 */
-#skip-control-dropdown .inline-fields {
-  display: flex;
-  gap: 8px;
-  /* 两列间距 */
-  margin-bottom: 8px;
-  /* 与下一行跳片尾的间距 */
-}
-
-/* 2. 让两个 label 平分一行 */
-#skip-control-dropdown .inline-fields label {
-  flex: 1;
-  /* 平分剩余宽度 */
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 0;
-  /* 覆盖全局 label 的下边距 */
-}
-
-/* 3. 复用已有的 input 样式，或按需微调宽度 */
-#skip-control-dropdown .inline-fields input {
-  width: 100%;
-  /* 填满各自的 label 宽度 */
-}
-
-/* 锁屏时也允许全屏按钮交互 */
-.allow-when-locked {
-  z-index: 10003 !important;
-  pointer-events: auto !important;
-  opacity: 1 !important;
-  position: absolute;
-  /* 如需 */
-  top: 10px;
-  right: 20px;
-  /* 取决于页面 */
-}
-
-.player-locked .allow-when-locked {
-  z-index: 10003 !important;
-  pointer-events: auto !important;
-}
-
-/* START: 线路切换菜单样式 (精简定位版) */
+/* 线路切换菜单样式 */
 .line-switch-container {
   position: relative;
   display: inline-block;
 }
 
 #line-switch-dropdown {
-  display: block; 
+  display: none;
   position: absolute;
-  top: 100%;
-  /* <-- 修改这里：从按钮下方弹出 */
+  bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  margin-top: 8px;
-  /* <-- 修改这里：向下留出8px的间距 */
-
+  margin-bottom: 8px;
   width: 150px;
   max-height: 200px;
   overflow-y: auto;
@@ -595,9 +571,8 @@ input:checked+.slider:before {
   z-index: 2223;
 }
 
-/* 默认使用 hidden 类来隐藏 */
-#line-switch-dropdown.hidden {
-  display: none;
+#line-switch-dropdown:not(.hidden) {
+  display: block;
 }
 
 #line-switch-dropdown button {
@@ -619,7 +594,7 @@ input:checked+.slider:before {
   margin-bottom: 0;
 }
 
-#line-switch-dropdown button:hover {
+#line-switch-dropdown button:hover:not(:disabled) {
   background-color: #303442;
 }
 
@@ -629,48 +604,24 @@ input:checked+.slider:before {
   font-weight: bold;
 }
 
-/* 用于 JS 测量高度而不引起闪烁的辅助类 */
-.measure-height {
-  visibility: hidden !important;
-  display: block !important;
-}
-
-/* 原始下拉菜单的动画基点 */
-#line-switch-dropdown {
-  transform-origin: top center;
-}
-
-/* 新增：当菜单需要向上弹出时的样式 */
-#line-switch-dropdown.dropdown-top {
-  top: auto;
-  bottom: 100%;
-  margin-top: 0;
-  margin-bottom: 8px; /* 菜单与按钮的间距 */
-  transform-origin: bottom center; /* 动画基点改为底部中心 */
-}
-/* END: 线路切换菜单样式 */
-
-
 /* 顶部导航栏 */
 header {
   display: flex;
   align-items: center;
   padding: 14px 12px;
-  height: 56px; /* 减少高度以匹配移动端标准 */
+  height: 56px;
 }
 
-/* 返回按钮保持标准字体大小 */
 #back-button {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 1rem; /* 标准字体大小 */
+  font-size: 1rem;
   line-height: 1.5;
   min-width: 72px;
-  padding: 6px 0; /* 增加垂直内边距 */
+  padding: 6px 0;
 }
 
-/* 全屏按钮样式调整 */
 #fullscreen-button {
   display: flex;
   align-items: center;
@@ -682,21 +633,48 @@ header {
   background: rgba(30, 30, 30, 0.7);
 }
 
-/* 统一按钮内文本垂直对齐 */
 #back-button svg,
 #fullscreen-button svg {
   vertical-align: middle;
 }
 
-/* 响应式微调 */
-@media (max-width: 640px) {
-  header {
-    padding: 12px 8px;
-    height: 52px;
+/* ———————————— 仅在移动端 生效 ———————————— */
+@media (max-width: 900px) {
+
+  /* 让容器随宽度按 16:9 比例撑高 */
+  #player-region {
+    width: 100%;
+    height: auto !important;
+    /* 保持 auto */
+    aspect-ratio: 16/9;
+    /* 一开始就按 16:9 算高 */
+    background-color: transparent;
+    /* 去掉黑底 */
   }
-  
-  #back-button {
-    gap: 6px;
-    font-size: 0.95rem; /* 小屏幕轻微调整 */
+
+  /* video 同步自适应 */
+  #player video,
+  media-player video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
   }
+}
+
+/* 全屏播放器操作提示 */
+#toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* 确保z-index足够高，高于播放器所有UI */
+  z-index: 2147483647; 
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 18px;
+  color: white;
+  opacity: 0;
+  transition: opacity .3s ease-in-out;
 }

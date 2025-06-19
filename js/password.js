@@ -105,7 +105,17 @@ function showPasswordModal() {
             input.value = ''; // 清空输入框
         }
         hidePasswordError(); // 确保错误提示是隐藏的
-        
+
+        const closeButton = document.getElementById('closePasswordModalButton');
+        if (closeButton) {
+            // 仅当验证目的是'settings'时才显示关闭按钮
+            if (window.verifyingPurpose === 'settings') {
+                closeButton.classList.remove('hidden');
+            } else {
+                closeButton.classList.add('hidden');
+            }
+        }
+
         modal.style.display = 'flex';
         setTimeout(() => document.getElementById('passwordInput')?.focus(), 80);
     }
@@ -113,8 +123,13 @@ function showPasswordModal() {
 
 function hidePasswordModal() {
     const modal = document.getElementById('passwordModal');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.style.display = 'none';
+        // 确保关闭时，关闭按钮也被隐藏
+        document.getElementById('closePasswordModalButton')?.classList.add('hidden');
+    }
 }
+
 
 function showPasswordError() {
     document.getElementById('passwordError')?.classList.remove('hidden');
@@ -164,30 +179,47 @@ async function handlePasswordSubmit() {
 }
 
 /**
+ * 初始化密码弹窗的事件监听器
+ */
+function initPasswordModalListeners() {
+    const closeButton = document.getElementById('closePasswordModalButton');
+    if (closeButton && !closeButton._listenerAttached) {
+        closeButton.addEventListener('click', hidePasswordModal);
+        closeButton._listenerAttached = true;
+    }
+
+    const submitBtn = document.getElementById('passwordSubmitBtn');
+    if (submitBtn && !submitBtn.onclick) {
+        submitBtn.addEventListener('click', handlePasswordSubmit);
+    }
+
+    const input = document.getElementById('passwordInput');
+    if (input && !input._passwordEvtBinded) {
+        input.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') handlePasswordSubmit();
+        });
+        input._passwordEvtBinded = true;
+    }
+}
+
+/**
  * 初始化密码保护入口
  */
 function initPasswordProtection() {
     if (!isPasswordProtected()) return;
 
-    // 未认证弹出密码框及事件
+    // 未认证弹出密码框
     if (!isPasswordVerified()) {
         showPasswordModal();
-        const submitBtn = document.getElementById('passwordSubmitBtn');
-        if (submitBtn) {
-            // 只绑定一次
-            if (!submitBtn.onclick) submitBtn.addEventListener('click', handlePasswordSubmit);
-        }
-        const input = document.getElementById('passwordInput');
-        if (input) {
-            if (!input._passwordEvtBinded) { // 避免重复绑定
-                input.addEventListener('keypress', function (e) {
-                    if (e.key === 'Enter') handlePasswordSubmit();
-                });
-                input._passwordEvtBinded = true;
-            }
-        }
     }
 }
+
+// DOM加载完成自动初始化
+document.addEventListener('DOMContentLoaded', () => {
+    initPasswordProtection();
+    initPasswordModalListeners(); // 统一初始化所有监听器
+});
+
 
 // DOM加载完成自动初始化
 document.addEventListener('DOMContentLoaded', initPasswordProtection);

@@ -422,9 +422,23 @@ const APISourceManager = {
      * @returns {object|null} - 自定义API信息对象或null
      */
     getCustomApiInfo: function (index) {
-        const customAPIs = AppState.get('customAPIs'); // 从AppState获取自定义API列表
+        // 【修改】让函数在没有 AppState 的环境中也能工作
+        let customAPIs = [];
+        if (typeof AppState !== 'undefined' && AppState.get('customAPIs')) {
+            // 优先从 AppState 获取 (用于 index.html)
+            customAPIs = AppState.get('customAPIs');
+        } else {
+            // 如果 AppState 不存在，则从 localStorage 回退 (用于 player.html)
+            try {
+                customAPIs = JSON.parse(localStorage.getItem('customAPIs') || '[]');
+            } catch (e) {
+                console.error("从 localStorage 解析 customAPIs 失败:", e);
+                customAPIs = [];
+            }
+        }
+
         if (customAPIs && typeof index === 'number' && index >= 0 && index < customAPIs.length) {
-            return customAPIs[index]; // 返回格式应为 { name, url, isAdult }
+            return customAPIs[index];
         }
         console.warn(`getCustomApiInfo: Invalid index ${index} or customAPIs not found.`);
         return null;

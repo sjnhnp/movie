@@ -650,7 +650,7 @@ function loadViewingHistory() {
         historyItem.dataset.title = safeTitle;
         historyItem.dataset.episodeIndex = item.episodeIndex || 0;
         historyItem.dataset.playbackPosition = item.playbackPosition || 0;
-        historyItem.dataset.internalId = item.internalShowIdentifier; 
+        historyItem.dataset.internalId = item.internalShowIdentifier;
 
         // 构建历史项内容
         const historyInfo = document.createElement('div');
@@ -714,7 +714,7 @@ function loadViewingHistory() {
 
         // 删除按钮
         const deleteButton = document.createElement('button');
-        deleteButton.className = 'history-item-delete-btn absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-gray-400 hover:text-red-400 p-1 rounded-full hover:bg-gray-800 z-10';
+        deleteButton.className = 'history-item-delete-btn absolute right-2 top-2 transition-opacity duration-200 text-gray-400 hover:text-red-400 p-1 rounded-full hover:bg-gray-800 z-10';
         deleteButton.title = '删除记录';
         deleteButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -892,7 +892,7 @@ function deleteHistoryItem(internalId) {
         let history = getViewingHistory();
         // 使用 internalShowIdentifier 来确保删除正确的条目
         const updatedHistory = history.filter(item => item.internalShowIdentifier !== internalId);
-        
+
         if (history.length !== updatedHistory.length) {
             localStorage.setItem('viewingHistory', JSON.stringify(updatedHistory));
             loadViewingHistory(); // 重新渲染历史记录列表

@@ -348,13 +348,33 @@ function doEpisodeSwitch(index, url) {
         currentVideoYear = urlParams.get('year') || '';
         currentVideoTypeName = urlParams.get('typeName') || '';
 
-        const videoKey = urlParams.get('videoKey');
-        if (videoKey) {
+        // —— 从 sessionStorage 获取可能的可选线路 —— 
+        const sourceMapJSON = sessionStorage.getItem('videoSourceMap');
+        if (sourceMapJSON) {
             try {
-                const sourceMapJSON = sessionStorage.getItem('videoSourceMap');
-                if (sourceMapJSON) {
-                    const sourceMap = JSON.parse(sourceMapJSON);
-                    availableAlternativeSources = sourceMap[videoKey] || [];
+                const sourceMap = JSON.parse(sourceMapJSON);
+                // 优先使用外部传入的 videoKey
+                const videoKey = urlParams.get('videoKey');
+                if (videoKey && sourceMap[videoKey]) {
+                    availableAlternativeSources = sourceMap[videoKey];
+                } else {
+                    // 回退：用 title|year 去匹配
+                    const titleParam = urlParams.get('title')
+                        ? decodeURIComponent(urlParams.get('title'))
+                        : '';
+                    const yearParam = urlParams.get('year') || '';
+                    const fallbackKey = `${titleParam}|${yearParam}`;
+                    if (sourceMap[fallbackKey]) {
+                        availableAlternativeSources = sourceMap[fallbackKey];
+                    } else {
+                        // 兜底：查找首条以 title 开头的映射
+                        for (const key in sourceMap) {
+                            if (key.startsWith(`${titleParam}|`)) {
+                                availableAlternativeSources = sourceMap[key];
+                                break;
+                            }
+                        }
+                    }
                 }
             } catch (e) {
                 console.error("从 sessionStorage 读取线路失败:", e);

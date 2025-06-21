@@ -179,11 +179,13 @@ async function initPlayer(videoUrl, title) {
             src: { src: videoUrl, type: 'application/x-mpegurl' },
             title: title,
             autoplay: true,
+            preload: 'auto',
             layout: new VidstackPlayerLayout(),
             // layout: new PlyrLayout(),
             // controls: true,
             playsInline: true,
             crossOrigin: true,
+            layout: new VidstackPlayerLayout(),
             keyTarget: 'document',
             keyShortcuts: {
                 togglePaused: 'k Space',
@@ -294,9 +296,9 @@ async function playEpisode(index) {
         if (savedProgress && savedProgress > 5) {
             const wantsToResume = await showProgressRestoreModal({
                 title: "继续播放？",
-                content: `发现《${currentVideoTitle}》第 ${index + 1} 集的播放记录，<br>是否从 <span style="color:#00ccff">${formatPlayerTime(savedProgress)}</span> 继续播放？`,
-                confirmText: "继续播放",
-                cancelText: "从头播放"
+                content: `《${currentVideoTitle}》第 ${index + 1}，<br> <span style="color:#00ccff">${formatPlayerTime(savedProgress)}</span> `,
+                confirmText: "YES",
+                cancelText: "NO"
             });
 
             if (wantsToResume) {
@@ -409,9 +411,9 @@ function doEpisodeSwitch(index, url) {
                 if (savedProgress && savedProgress > 5) {
                     const wantsToResume = await showProgressRestoreModal({
                         title: "继续播放？",
-                        content: `发现《${currentVideoTitle}》第 ${currentEpisodeIndex + 1} 集的播放记录，<br>是否从 <span style="color:#00ccff">${formatPlayerTime(savedProgress)}</span> 继续播放？`,
-                        confirmText: "继续播放",
-                        cancelText: "从头播放"
+                        content: `《${currentVideoTitle}》第 ${currentEpisodeIndex + 1} 集，<br> <span style="color:#00ccff">${formatPlayerTime(savedProgress)}</span> `,
+                        confirmText: "YES",
+                        cancelText: "NO"
                     });
 
                     if (wantsToResume) {

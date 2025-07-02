@@ -837,7 +837,7 @@ function toggleLockScreen() {
     player.keyDisabled = isScreenLocked;
     const playerContainer = document.querySelector('.player-container');
     const lockIcon = document.getElementById('lock-icon');
-    const elementsToToggle = document.querySelectorAll('.plyr, .plyr__controls, .vds-controls, .vds-gestures, header, .player-control-bar, #episodes-container, #prev-episode, #next-episode');
+    const elementsToToggle = document.querySelectorAll('.plyr, .plyr__controls, .vds-controls, .vds-gestures, #episodes-container, #prev-episode, #next-episode, .player-control-bar > *:not(#lock-button)');
 
     if (playerContainer) {
         playerContainer.classList.toggle('player-locked', isScreenLocked);

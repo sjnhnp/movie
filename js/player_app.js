@@ -161,67 +161,57 @@ function showProgressRestoreModal(opts) {
  * @returns {Promise<string>} 处理后的视频URL (可能是原始URL或Blob URL)
  */
 async function processVideoUrl(url) {
-    // 如果未启用广告过滤，直接返回原始URL
+    // 如果未启用广告过滤，直接返回原始 URL
     if (!adFilteringEnabled) {
-        return url;
+      return url;
     }
-
+  
     try {
-        // 步骤 1: 手动获取M3U8文件
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`无法获取M3U8文件，状态码: ${response.status}`);
+      // 1. 拉取 m3u8 文本
+      const resp = await fetch(url, { mode: 'cors' });
+      if (!resp.ok) throw new Error(`无法获取 m3u8，状态 ${resp.status}`);
+      const m3u8Text = await resp.text();
+  
+      // 2. 广告过滤 & URL 补全
+      const adPatterns = [
+        /#EXT-X-DISCONTINUITY/i,
+        /MOMENT-START/i,
+        /\/\/.*\.(ts|jpg|png)\?ad=/i
+      ];
+      const lines = m3u8Text.split('\n');
+      const baseUrl = url;           // 原始 m3u8 地址
+      const cleanLines = [];
+  
+      for (let line of lines) {
+        // 跳过广告相关标签或片段
+        if (adPatterns.some(p => p.test(line))) {
+          // 如果是标签直接丢弃
+          continue;
         }
-        let m3u8Text = await response.text();
-
-        // 步骤 2: 过滤M3U8内容
-        // 这是一个通用的过滤规则，主要移除广告插入点。
-        // 您可能需要根据视频源的广告特征进行调整。
-        const adPatterns = [
-            /#EXT-X-DISCONTINUITY/gi,       // 常见广告插入标记
-            /MOMENT-START/gi,               // 某些源的广告标记
-            /https?:\/\/.*\.(ts|jpg|gif|png)\?ad=/gi // 过滤带ad参数的链接
-        ];
-
-        let lines = m3u8Text.split('\n');
-        let cleanLines = [];
-        let isAdSegment = false;
-
-        for (const line of lines) {
-            // 检查当前行是否是广告标记
-            if (adPatterns.some(pattern => pattern.test(line))) {
-                isAdSegment = true;
-                continue; // 跳过广告标记行
-            }
-
-            // 如果是广告片段，则跳过
-            if (isAdSegment && (line.trim().endsWith('.ts') || line.trim().endsWith('.jpg'))) {
-                // 在下一个非广告片段开始时重置
-                if (!adPatterns.some(pattern => pattern.test(line))) {
-                    isAdSegment = false;
-                }
-                continue;
-            }
-
-            cleanLines.push(line);
+        // 如果当前行是片段 URI（简单按 .ts/.m3u8 判断）
+        if (line && !line.startsWith('#') && /\.(ts|m3u8)(\?|$)/i.test(line.trim())) {
+          try {
+            // new URL 可以自动把相对路径、// 开头、绝对路径等都补全成完整 URL
+            line = new URL(line.trim(), baseUrl).href;
+          } catch (e) {
+            console.warn('URL 补全失败，保留原行:', line, e);
+          }
         }
-
-        const cleanM3u8Text = cleanLines.join('\n');
-
-        // 步骤 3 & 4: 创建Blob和Blob URL
-        const blob = new Blob([cleanM3u8Text], { type: 'application/vnd.apple.mpegurl' });
-        const blobUrl = URL.createObjectURL(blob);
-
-        console.log("广告过滤已应用，使用新的Blob URL进行播放。");
-        return blobUrl;
-
-    } catch (error) {
-        console.error("广告过滤失败:", error);
-        showToast("广告过滤失败，将播放原始视频", "warning");
-        return url; // 过滤失败时，返回原始URL
+        cleanLines.push(line);
+      }
+  
+      const filteredM3u8 = cleanLines.join('\n');
+  
+      // 3. 生成 Blob URL
+      const blob = new Blob([filteredM3u8], { type: 'application/vnd.apple.mpegurl' });
+      return URL.createObjectURL(blob);
+  
+    } catch (err) {
+      console.error('广告过滤或 URL 补全失败：', err);
+      showToast('广告过滤失败，播放原始地址', 'warning');
+      return url;
     }
-}
-
+  }  
 
 // --- 播放器核心逻辑 ---
 

@@ -120,7 +120,7 @@ function playVideo(url, title, episodeIndex, sourceName = '', sourceCode = '', v
         playerUrl.searchParams.set('videoKey', videoKey);
     }
     // ← 在这一行后面，插入广告过滤开关参数
-    const adOn = getBoolConfig(PLAYER_CONFIG.adFilteringStorage, false);
+    const adOn = getBoolConfig(PLAYER_CONFIG.adFilteringStorage, PLAYER_CONFIG.adFilteringEnabled);
     playerUrl.searchParams.set('af', adOn ? '1' : '0');
 
     window.location.href = playerUrl.toString();
@@ -231,7 +231,7 @@ function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
 
     // 添加广告过滤参数 (PLAYER_CONFIG 和 getBoolConfig 应在 app.js 或其引用的 config.js 中可用)
     const adOn = typeof getBoolConfig !== 'undefined' && typeof PLAYER_CONFIG !== 'undefined' ?
-        getBoolConfig(PLAYER_CONFIG.adFilteringStorage, false) : false;
+        getBoolConfig(PLAYER_CONFIG.adFilteringStorage, PLAYER_CONFIG.adFilteringEnabled) : PLAYER_CONFIG?.adFilteringEnabled ?? false;
     playerUrl.searchParams.set('af', adOn ? '1' : '0');
 
     console.log(`[App - playFromHistory] Navigating to player: ${playerUrl.toString()}`);
@@ -360,7 +360,7 @@ function initializeEventListeners() {
         });
 
         // 初始化开关状态 - 使用getBoolConfig
-        adFilteringToggle.checked = getBoolConfig(PLAYER_CONFIG.adFilteringStorage, false);
+        adFilteringToggle.checked = getBoolConfig(PLAYER_CONFIG.adFilteringStorage, PLAYER_CONFIG.adFilteringEnabled);
     }
 
     // 黄色内容过滤开关事件

@@ -46,7 +46,7 @@ const API_SITES = {
 };
 
 window.API_SITES = API_SITES; 
-const DEFAULT_SELECTED_APIS = ["heimuer", "tyyszy", "jmzy", "bfzy", "dyttzy"];
+const DEFAULT_SELECTED_APIS = ["heimuer", "bfzy", "tyyszy", "dyttzy", "jmzy"];
 window.DEFAULT_SELECTED_APIS = DEFAULT_SELECTED_APIS; // 将其设为全局变量
 
 // 聚合搜索配置 (与 renew.txt 原有保持一致)
@@ -98,9 +98,8 @@ const PLAYER_CONFIG = {
     width: '100%', 
     height: '600', 
     timeout: 15000, // 播放器加载超时时间 
-    filterAds: false, // 是否启用广告过滤 
     autoPlayNext: true, // 默认启用自动连播功能 
-    adFilteringEnabled: getBoolConfig('adFilteringEnabled', false), // 默认关闭分片广告过滤（如果localStorage无记录），开启会导致某些资源卡住 
+    adFilteringEnabled: getBoolConfig('adFilteringEnabled', true), // 默认关闭分片广告过滤（如果localStorage无记录），开启会导致某些资源卡住 
     adFilteringStorage: 'adFilteringEnabled', // 存储广告过滤设置的键名 
     enablePreloading: getBoolConfig('enablePreloading', DEFAULTS.enablePreloading),
     preloadCount: getIntConfig('preloadCount', DEFAULTS.preloadCount, 1, 10), 

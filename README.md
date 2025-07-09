@@ -122,10 +122,8 @@ docker run -d \
   或者 docker-compose.yml
 
 ```
-  version: '3.8'
-
 services:
-  movie-app:
+  movie:
     build: .
     image: ghcr.io/sjnhnp/sjnhnp/movie:latest
     ports:

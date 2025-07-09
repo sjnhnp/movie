@@ -28,6 +28,15 @@ let lastFailedAction = null;
 let availableAlternativeSources = [];
 // 新增：用于存储广告过滤状态的全局变量
 let adFilteringEnabled = false;
+let universalId = '';
+
+// 生成视频统一标识符，用于跨线路共享播放进度
+function generateUniversalId(title, year, episodeIndex) {
+        // 移除标题中的特殊字符和空格，转换为小写 
+        const normalizedTitle = title.toLowerCase().replace(/[^\w\u4e00-\u9fa5]/g, '').replace(/\s+/g, '');  
+        const normalizedYear = year ? year : 'unknown'; 
+        return `${normalizedTitle}_${normalizedYear}_${episodeIndex}`; 
+    }
 
 // 实用工具函数
 function showToast(message, type = 'info', duration = 3000) {
@@ -161,55 +170,55 @@ function showProgressRestoreModal(opts) {
 async function processVideoUrl(url) {
     // 如果未启用广告过滤，直接返回原始 URL
     if (!adFilteringEnabled) {
-      return url;
+        return url;
     }
-  
+
     try {
-      // 1. 拉取 m3u8 文本
-      const resp = await fetch(url, { mode: 'cors' });
-      if (!resp.ok) throw new Error(`无法获取 m3u8，状态 ${resp.status}`);
-      const m3u8Text = await resp.text();
-  
-      // 2. 广告过滤 & URL 补全
-      const adPatterns = [
-        /#EXT-X-DISCONTINUITY/i,
-        /MOMENT-START/i,
-        /\/\/.*\.(ts|jpg|png)\?ad=/i
-      ];
-      const lines = m3u8Text.split('\n');
-      const baseUrl = url;           // 原始 m3u8 地址
-      const cleanLines = [];
-  
-      for (let line of lines) {
-        // 跳过广告相关标签或片段
-        if (adPatterns.some(p => p.test(line))) {
-          // 如果是标签直接丢弃
-          continue;
+        // 1. 拉取 m3u8 文本
+        const resp = await fetch(url, { mode: 'cors' });
+        if (!resp.ok) throw new Error(`无法获取 m3u8，状态 ${resp.status}`);
+        const m3u8Text = await resp.text();
+
+        // 2. 广告过滤 & URL 补全
+        const adPatterns = [
+            /#EXT-X-DISCONTINUITY/i,
+            /MOMENT-START/i,
+            /\/\/.*\.(ts|jpg|png)\?ad=/i
+        ];
+        const lines = m3u8Text.split('\n');
+        const baseUrl = url;           // 原始 m3u8 地址
+        const cleanLines = [];
+
+        for (let line of lines) {
+            // 跳过广告相关标签或片段
+            if (adPatterns.some(p => p.test(line))) {
+                // 如果是标签直接丢弃
+                continue;
+            }
+            // 如果当前行是片段 URI（简单按 .ts/.m3u8 判断）
+            if (line && !line.startsWith('#') && /\.(ts|m3u8)(\?|$)/i.test(line.trim())) {
+                try {
+                    // new URL 可以自动把相对路径、// 开头、绝对路径等都补全成完整 URL
+                    line = new URL(line.trim(), baseUrl).href;
+                } catch (e) {
+                    console.warn('URL 补全失败，保留原行:', line, e);
+                }
+            }
+            cleanLines.push(line);
         }
-        // 如果当前行是片段 URI（简单按 .ts/.m3u8 判断）
-        if (line && !line.startsWith('#') && /\.(ts|m3u8)(\?|$)/i.test(line.trim())) {
-          try {
-            // new URL 可以自动把相对路径、// 开头、绝对路径等都补全成完整 URL
-            line = new URL(line.trim(), baseUrl).href;
-          } catch (e) {
-            console.warn('URL 补全失败，保留原行:', line, e);
-          }
-        }
-        cleanLines.push(line);
-      }
-  
-      const filteredM3u8 = cleanLines.join('\n');
-  
-      // 3. 生成 Blob URL
-      const blob = new Blob([filteredM3u8], { type: 'application/vnd.apple.mpegurl' });
-      return URL.createObjectURL(blob);
-  
+
+        const filteredM3u8 = cleanLines.join('\n');
+
+        // 3. 生成 Blob URL
+        const blob = new Blob([filteredM3u8], { type: 'application/vnd.apple.mpegurl' });
+        return URL.createObjectURL(blob);
+
     } catch (err) {
-      console.error('广告过滤或 URL 补全失败：', err);
-      showToast('广告过滤失败，播放原始地址', 'warning');
-      return url;
+        console.error('广告过滤或 URL 补全失败：', err);
+        showToast('广告过滤失败，播放原始地址', 'warning');
+        return url;
     }
-  }  
+}
 
 // --- 播放器核心逻辑 ---
 
@@ -341,9 +350,9 @@ async function playEpisode(index) {
 
     const rememberOn = localStorage.getItem(REMEMBER_EPISODE_PROGRESS_ENABLED_KEY) !== 'false';
     if (rememberOn) {
-        const showId = getShowIdentifier(false);
+        const currentUniversalId = generateUniversalId(currentVideoTitle, currentVideoYear, index);
         const allProgress = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
-        const savedProgress = allProgress[showId]?.[index];
+        const savedProgress = allProgress[currentUniversalId];
 
         if (savedProgress && savedProgress > 5) {
             const wantsToResume = await showProgressRestoreModal({
@@ -356,7 +365,7 @@ async function playEpisode(index) {
             if (wantsToResume) {
                 nextSeekPosition = savedProgress;
             } else {
-                clearVideoProgressForEpisode(index);
+                clearVideoProgressForEpisode(currentUniversalId);
                 nextSeekPosition = 0;
             }
         } else {
@@ -391,6 +400,8 @@ async function doEpisodeSwitch(index, url) {
 
         // 【修改】读取 af 参数
         adFilteringEnabled = urlParams.get('af') === '1';
+
+        universalId = urlParams.get('universalId') || '';
 
         let episodeUrlForPlayer = urlParams.get('url');
 
@@ -455,9 +466,8 @@ async function doEpisodeSwitch(index, url) {
         } else {
             const rememberOn = localStorage.getItem(REMEMBER_EPISODE_PROGRESS_ENABLED_KEY) !== 'false';
             if (rememberOn) {
-                const showId = getShowIdentifier(false);
                 const allProgress = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
-                const savedProgress = allProgress[showId]?.[currentEpisodeIndex];
+                const savedProgress = universalId ? allProgress[universalId] : undefined;
 
                 if (savedProgress && savedProgress > 5) {
                     const wantsToResume = await showProgressRestoreModal({
@@ -666,18 +676,16 @@ function saveVideoSpecificProgress() {
     if (isNavigatingToEpisode) return;
     const toggle = document.getElementById('remember-episode-progress-toggle');
     if (!toggle || !toggle.checked || !player) return;
+        const currentUniversalId = generateUniversalId(currentVideoTitle, currentVideoYear, currentEpisodeIndex);
 
     const currentTime = Math.floor(player.currentTime);
     const duration = Math.floor(player.duration);
-    const showId = getShowIdentifier(false);
 
     if (currentTime > 5 && duration > 0 && currentTime < duration * 0.95) {
         try {
-            let allShowsProgresses = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
-            if (!allShowsProgresses[showId]) allShowsProgresses[showId] = {};
-            allShowsProgresses[showId][currentEpisodeIndex.toString()] = currentTime;
-            allShowsProgresses[showId].lastPlayedEpisodeIndex = currentEpisodeIndex;
-            localStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allShowsProgresses));
+            let allProgresses = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
+            allProgresses[currentUniversalId] = currentTime;
+            localStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgresses));
         } catch (e) {
             console.error('保存特定视频集数进度失败:', e);
         }
@@ -692,21 +700,15 @@ function startProgressSaveInterval() {
     }, 8000);
 }
 
-function clearVideoProgressForEpisode(episodeIndex) {
+function clearVideoProgressForEpisode(universalId) {
     try {
-        const showId = getShowIdentifier(false);
-        let allProgress = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
-
-        if (allProgress[showId] && allProgress[showId][episodeIndex] !== undefined) {
-            delete allProgress[showId][episodeIndex];
-            const keys = Object.keys(allProgress[showId]);
-            if (keys.length === 0 || (keys.length === 1 && keys[0] === 'lastPlayedEpisodeIndex')) {
-                delete allProgress[showId];
-            }
-            localStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgress));
+        let allProgresses = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
+               if (allProgresses[universalId]) {
+                        delete allProgresses[universalId];
+            localStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgresses));
         }
     } catch (e) {
-        console.error(`清除第 ${episodeIndex + 1} 集的进度失败:`, e);
+        console.error(`清除进度失败:`, e);
     }
 }
 
@@ -1043,6 +1045,9 @@ async function switchLine(newSourceCode, newVodId) {
         newUrlForBrowser.searchParams.set('source', apiInfo.name);
         newUrlForBrowser.searchParams.set('id', newVodId);
         newUrlForBrowser.searchParams.set('url', newEpisodeUrl);
+        if (universalId) {
+            newUrlForBrowser.searchParams.set('universalId', universalId);
+        }
         window.history.replaceState({}, '', newUrlForBrowser.toString());
         nextSeekPosition = timeToSeek;
         const processedUrl = await processVideoUrl(newEpisodeUrl); // 切换时也处理

@@ -119,6 +119,10 @@ function playVideo(url, title, episodeIndex, sourceName = '', sourceCode = '', v
     if (videoKey) {
         playerUrl.searchParams.set('videoKey', videoKey);
     }
+
+    const universalId = generateUniversalId(title, year, episodeIndex);
+    playerUrl.searchParams.set('universalId', universalId);
+
     // ← 在这一行后面，插入广告过滤开关参数
     const adOn = getBoolConfig(PLAYER_CONFIG.adFilteringStorage, PLAYER_CONFIG.adFilteringEnabled);
     playerUrl.searchParams.set('af', adOn ? '1' : '0');
@@ -126,6 +130,19 @@ function playVideo(url, title, episodeIndex, sourceName = '', sourceCode = '', v
     window.location.href = playerUrl.toString();
 }
 
+/**
+ * 生成视频统一标识符，用于跨线路共享播放进度
+ * @param {string} title 视频标题
+ * @param {string} year 年份
+ * @param {number} episodeIndex 集数索引
+ * @returns {string} 统一标识符
+ */
+function generateUniversalId(title, year, episodeIndex) {
+    // 移除标题中的特殊字符和空格，转换为小写   
+    const normalizedTitle = title.toLowerCase().replace(/[^\w\u4e00-\u9fa5]/g, '').replace(/\s+/g, '');
+    const normalizedYear = year ? year : 'unknown';
+    return `${normalizedTitle}_${normalizedYear}_${episodeIndex}`;
+}
 
 /**
  * 播放上一集

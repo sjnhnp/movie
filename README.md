@@ -109,6 +109,7 @@
 
 ### docker安装方式，密码可以根据自己的需要是否保留
 
+#### Docker
 ```
 docker run -d \
   -p 8080:8080 \
@@ -119,8 +120,8 @@ docker run -d \
   ghcr.io/sjnhnp/sjnhnp/movie:latest
 ```
 
-  或者 docker-compose.yml
-
+#### Docker Compose
+`docker-compose.yml` 文件：
 ```
 services:
   movie:

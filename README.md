@@ -117,7 +117,7 @@ docker run -d \
   -e SETTINGS_PASSWORD="your-settings-password" \
   --restart unless-stopped \
   --name movie \
-  ghcr.io/sjnhnp/sjnhnp/movie:latest
+  ghcr.io/sjnhnp/movie:latest
 ```
 
 #### Docker Compose
@@ -126,7 +126,7 @@ docker run -d \
 services:
   movie:
     build: .
-    image: ghcr.io/sjnhnp/sjnhnp/movie:latest
+    image: ghcr.io/sjnhnp/movie:latest
     ports:
       - "8080:8080"
     environment:

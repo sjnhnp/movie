@@ -1,0 +1,29 @@
+# Git
+.git
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Node.js
+node_modules
+npm-debug.log
+
+# IDE and OS specific
+.idea
+.vscode
+*.suo
+*.user
+*.userosscache
+*.sln
+*.swp
+Thumbs.db
+.DS_Store
+
+# Vercel and Cloudflare specific files (not needed in Docker)
+vercel.json
+middleware.js
+functions/
+api/

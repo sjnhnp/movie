@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  movie-app:
+    # 从当前目录的 Dockerfile 构建镜像
+    build: .
+    # 为构建的镜像命名
+    image: dockeridgood/movie:latest
+    # 将主机的 8080 端口映射到容器的 8080 端口
+    ports:
+      - "8080:8080"
+    # 通过 environment 字段设置环境变量
+    environment:
+      - PORT=8080
+      # 在这里设置您的网站访问密码和设置密码
+      - PASSWORD=your-secret-password
+      - SETTINGS_PASSWORD=your-settings-password
+    # 如果您希望在文件更改时自动重启服务（需要 nodemon 等工具），
+    # 可以挂载卷。对于生产构建，通常不这样做。
+    # volumes:
+    #   - .:/app
+    #   - /app/node_modules
+    restart: unless-stopped

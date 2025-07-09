@@ -1,4 +1,3 @@
-// 动态导入 VidstackPlayer
 // import { PlyrLayout, VidstackPlayer } from 'https://cdn.vidstack.io/player'; //plyr layout
 import { VidstackPlayer, VidstackPlayerLayout } from 'https://cdn.vidstack.io/player';
 
@@ -32,11 +31,12 @@ let universalId = '';
 
 // 生成视频统一标识符，用于跨线路共享播放进度
 function generateUniversalId(title, year, episodeIndex) {
-        // 移除标题中的特殊字符和空格，转换为小写 
-        const normalizedTitle = title.toLowerCase().replace(/[^\w\u4e00-\u9fa5]/g, '').replace(/\s+/g, '');  
-        const normalizedYear = year ? year : 'unknown'; 
-        return `${normalizedTitle}_${normalizedYear}_${episodeIndex}`; 
-    }
+    // 移除标题中的特殊字符和空格，转换为小写 
+    const normalizedTitle = title.toLowerCase().replace(/[^\w\u4e00-\u9fa5]/g, '').replace(/\s+/g, '');
+    const normalizedYear = year ? year : 'unknown';
+    return `${normalizedTitle}_${normalizedYear}_${episodeIndex}`;
+}
+
 
 // 实用工具函数
 function showToast(message, type = 'info', duration = 3000) {
@@ -195,8 +195,23 @@ async function processVideoUrl(url) {
                 // 如果是标签直接丢弃
                 continue;
             }
+
+            // 处理加密密钥(key)的相对路径，将其转换为绝对路径
+            if (line.startsWith('#EXT-X-KEY')) {
+                const uriMatch = line.match(/URI="([^"]+)"/);
+                if (uriMatch && uriMatch[1]) {
+                    const relativeUri = uriMatch[1];
+                    try {
+                        const absoluteUri = new URL(relativeUri, baseUrl).href;
+                        line = line.replace(relativeUri, absoluteUri);
+                    } catch (e) {
+                        console.warn('加密密钥 URL 补全失败，保留原行:', line, e);
+                    }
+                }
+            }
+
             // 如果当前行是片段 URI（简单按 .ts/.m3u8 判断）
-            if (line && !line.startsWith('#') && /\.(ts|m3u8)(\?|$)/i.test(line.trim())) {
+            else if (line && !line.startsWith('#') && /\.(ts|m3u8)(\?|$)/i.test(line.trim())) {
                 try {
                     // new URL 可以自动把相对路径、// 开头、绝对路径等都补全成完整 URL
                     line = new URL(line.trim(), baseUrl).href;
@@ -495,8 +510,6 @@ async function doEpisodeSwitch(index, url) {
     });
 })();
 
-// ... 此处省略其他所有未改变的函数，如 setupAllUI, updateUIForNewEpisode, updateBrowserHistory, etc. ...
-// 请将您文件中从 setupAllUI 开始到文件末尾的所有函数粘贴到这里
 function setupAllUI() {
     updateEpisodeInfo();
     renderEpisodes();
@@ -676,7 +689,8 @@ function saveVideoSpecificProgress() {
     if (isNavigatingToEpisode) return;
     const toggle = document.getElementById('remember-episode-progress-toggle');
     if (!toggle || !toggle.checked || !player) return;
-        const currentUniversalId = generateUniversalId(currentVideoTitle, currentVideoYear, currentEpisodeIndex);
+
+    const currentUniversalId = generateUniversalId(currentVideoTitle, currentVideoYear, currentEpisodeIndex);
 
     const currentTime = Math.floor(player.currentTime);
     const duration = Math.floor(player.duration);
@@ -703,8 +717,8 @@ function startProgressSaveInterval() {
 function clearVideoProgressForEpisode(universalId) {
     try {
         let allProgresses = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
-               if (allProgresses[universalId]) {
-                        delete allProgresses[universalId];
+        if (allProgresses[universalId]) {
+            delete allProgresses[universalId];
             localStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgresses));
         }
     } catch (e) {

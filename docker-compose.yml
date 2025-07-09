@@ -1,0 +1,11 @@
+services:
+  movie:
+    build: .
+    image: ghcr.io/sjnhnp/movie:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - PASSWORD=your-secret-password
+      - SETTINGS_PASSWORD=your-settings-password
+    restart: unless-stopped

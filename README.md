@@ -107,6 +107,35 @@
     * **变量名称 (Variable name):** `SETTINGS_PASSWORD`
         * **值 (Value):** 用于为首页的“设置”按钮单独设置密码。
 
+### docker安装方式，密码可以根据自己的需要是否保留
+
+#### Docker
+```
+docker run -d \
+  -p 8080:8080 \
+  -e PASSWORD="your-secret-password" \
+  -e SETTINGS_PASSWORD="your-settings-password" \
+  --restart unless-stopped \
+  --name movie \
+  ghcr.io/sjnhnp/movie:latest
+```
+
+#### Docker Compose
+`docker-compose.yml` 文件：
+```
+services:
+  movie:
+    build: .
+    image: ghcr.io/sjnhnp/movie:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - PASSWORD=your-secret-password
+      - SETTINGS_PASSWORD=your-settings-password
+    restart: unless-stopped
+```
+
 ## 配置修改
 
 您可以通过修改以下JS文件来进行个性化配置：

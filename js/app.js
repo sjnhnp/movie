@@ -178,7 +178,8 @@ function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
 
         if (historyItem) {
             console.log("[App - playFromHistory] Found historyItem:", historyItem);
-            if (historyItem.episodes && Array.isArray(historyItem.episodes)) {
+            // Only use the episode list from history if it's a valid, non-empty array.
+            if (historyItem.episodes && Array.isArray(historyItem.episodes) && historyItem.episodes.length > 0) {
                 episodesList = historyItem.episodes;
             }
         } else {
@@ -193,6 +194,7 @@ function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
     // 更新 AppState 和 localStorage 以反映即将播放的剧集信息
     AppState.set('currentEpisodeIndex', episodeIndex);
     AppState.set('currentVideoTitle', title);
+    // Only update localStorage if we have a valid list. This prevents overwriting with an empty array.
     if (episodesList.length > 0) {
         AppState.set('currentEpisodes', episodesList);
         localStorage.setItem('currentEpisodes', JSON.stringify(episodesList));
@@ -576,7 +578,7 @@ function renderSearchResults(results, doubanSearchedTitle = null) {
     if (!searchResultsContainer || !resultsArea || !searchResultsCountElement) return;
 
     let allResults = [];
-    // 不再关心错误的具体信息，只收集成功的结果
+    // 我们不再关心错误的具体信息，只收集成功的结果
     results.forEach(result => {
         if (result.code === 200 && Array.isArray(result.list) && result.list.length > 0) {
             const resultsWithSource = result.list.map(item => ({

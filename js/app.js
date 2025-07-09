@@ -361,6 +361,7 @@ function initializeEventListeners() {
 
         // 初始化开关状态 - 使用getBoolConfig
         adFilteringToggle.checked = getBoolConfig(PLAYER_CONFIG.adFilteringStorage, PLAYER_CONFIG.adFilteringEnabled);
+
     }
 
     // 黄色内容过滤开关事件
@@ -453,6 +454,18 @@ function initializeUIComponents() {
  */
 
 function search(options = {}) {
+    // --- 新增：在每次新搜索开始时，强制清除所有旧的搜索结果缓存 ---
+    try {
+        sessionStorage.removeItem('searchQuery');
+        sessionStorage.removeItem('searchResults');
+        sessionStorage.removeItem('searchSelectedAPIs');
+        sessionStorage.removeItem('videoSourceMap'); // 确保这个也清除
+        console.log('[缓存] 已在执行新搜索前清除旧缓存。');
+    } catch (e) {
+        console.error('清除 sessionStorage 失败:', e);
+    }
+    // --- 新增结束 ---
+
     const searchInput = DOMCache.get('searchInput');
     const searchResultsContainer = DOMCache.get('searchResults');
 
@@ -470,30 +483,20 @@ function search(options = {}) {
         return;
     }
 
-    // 只有当不是豆瓣触发的搜索时，才调用 showLoading。豆瓣触发时，其调用处已处理。
-    // 或者，如果 options.onComplete 不存在 (意味着不是豆瓣那种带回调的调用方式)，则认为是普通搜索。
-    let isNormalSearch = !options.doubanQuery; // 简单判断是否为普通搜索
+    let isNormalSearch = !options.doubanQuery;
 
     if (isNormalSearch && typeof showLoading === 'function') {
-        showLoading(`正在搜索“${query}”`); // 普通搜索也显示全局 loading
+        showLoading(`正在搜索“${query}”`);
     }
 
-    // 只有非豆瓣触发的搜索才保存历史（或按您之前的逻辑调整）
     if (!options.doubanQuery) {
         if (typeof saveSearchHistory === 'function') saveSearchHistory(query);
     }
 
-    // Always record the search, including Douban queries
-    // if (typeof saveSearchHistory === 'function') {
-    //     saveSearchHistory(query);
-    // }
-
     const selectedAPIs = AppState.get('selectedAPIs');
     if (!selectedAPIs || selectedAPIs.length === 0) {
         if (searchResultsContainer) searchResultsContainer.innerHTML = '<div class="text-center py-4 text-gray-400">请至少选择一个API源</div>';
-        // 如果是普通搜索触发的loading，这里需要hide
         if (isNormalSearch && typeof hideLoading === 'function') hideLoading();
-        // 豆瓣的 onComplete 也会处理 hideLoading
         if (typeof options.onComplete === 'function') options.onComplete();
         return;
     }
@@ -506,11 +509,9 @@ function search(options = {}) {
             if (searchResultsContainer) searchResultsContainer.innerHTML = `<div class="text-center py-4 text-red-400">搜索出错: ${error.message}</div>`;
         })
         .finally(() => {
-            // 如果是普通搜索触发的loading，在这里hide
             if (isNormalSearch && typeof hideLoading === 'function') {
                 hideLoading();
             }
-            // 豆瓣的 onComplete 也会处理 hideLoading
             if (typeof options.onComplete === 'function') {
                 options.onComplete();
             }
@@ -575,10 +576,9 @@ function renderSearchResults(results, doubanSearchedTitle = null) {
     if (!searchResultsContainer || !resultsArea || !searchResultsCountElement) return;
 
     let allResults = [];
-    let errors = [];
-    // (假设 allResults 和 errors 已正确填充)
+    // 不再关心错误的具体信息，只收集成功的结果
     results.forEach(result => {
-        if (result.code === 200 && Array.isArray(result.list)) {
+        if (result.code === 200 && Array.isArray(result.list) && result.list.length > 0) {
             const resultsWithSource = result.list.map(item => ({
                 ...item,
                 source_name: result.apiName || (typeof API_SITES !== 'undefined' && API_SITES[result.apiId]?.name) || '未知来源',
@@ -587,8 +587,6 @@ function renderSearchResults(results, doubanSearchedTitle = null) {
                     APISourceManager.getCustomApiInfo(parseInt(result.apiId.replace('custom_', '')))?.url : ''
             }));
             allResults = allResults.concat(resultsWithSource);
-        } else if (result.msg) {
-            errors.push(result.msg);
         }
     });
 
@@ -638,13 +636,7 @@ function renderSearchResults(results, doubanSearchedTitle = null) {
             messageSuggestion = "请尝试其他关键词或更换数据源。";
         }
 
-        let errorBlockHTML = '';
-        if (errors.length > 0) {
-            const errorMessages = errors.map(err => sanitizeText(err)).join('<br>');
-            errorBlockHTML = `<div class="mt-4 text-xs text-red-300">${errorMessages}</div>`;
-        }
-
-        // 使用类似老代码的结构和样式 (Tailwind CSS)
+        // 使用类似老代码的结构和样式 (Tailwind CSS) - 已移除错误详情部分
         searchResultsContainer.innerHTML = `
             <div class="col-span-full text-center py-10 sm:py-16">
                 <svg class="mx-auto h-12 w-12 text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -653,7 +645,6 @@ function renderSearchResults(results, doubanSearchedTitle = null) {
                 </svg>
                 <h3 class="mt-2 text-lg font-medium text-gray-300">${messageTitle}</h3>
                 <p class="mt-1 text-sm text-gray-500">${messageSuggestion}</p>
-                ${errorBlockHTML}
             </div>
         `;
         // 确保 searchArea 布局正确
@@ -676,7 +667,7 @@ function renderSearchResults(results, doubanSearchedTitle = null) {
     gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4';
 
     const fragment = document.createDocumentFragment();
-    allResults.forEach(item => { /* ... 渲染卡片 ... */
+    allResults.forEach(item => {
         try {
             fragment.appendChild(createResultItemUsingTemplate(item));
         } catch (error) {
@@ -685,18 +676,6 @@ function renderSearchResults(results, doubanSearchedTitle = null) {
     });
     gridContainer.appendChild(fragment);
     searchResultsContainer.appendChild(gridContainer);
-
-    if (errors.length > 0) {
-        // ... (显示 API 错误信息)
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'mt-4 p-3 bg-red-900 bg-opacity-30 rounded text-sm text-red-300 space-y-1'; // 优化错误显示
-        errors.forEach(errMsg => {
-            const errorLine = document.createElement('p');
-            errorLine.textContent = sanitizeText(errMsg);
-            errorDiv.appendChild(errorLine);
-        });
-        searchResultsContainer.appendChild(errorDiv); // 将错误信息也放入 searchResultsContainer
-    }
 
     // 调整搜索区域布局
     const searchArea = getElement('searchArea');

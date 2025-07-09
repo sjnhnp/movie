@@ -116,11 +116,11 @@ docker run -d \
   -e SETTINGS_PASSWORD="your-settings-password" \
   --name movie \
   ghcr.io/sjnhnp/sjnhnp/movie:latest
-  ```
+```
 
   或者 docker-compose.yml
 
-  ```
+```
   version: '3.8'
 
 services:
@@ -134,7 +134,7 @@ services:
       - PASSWORD=your-secret-password
       - SETTINGS_PASSWORD=your-settings-password
     restart: unless-stopped
-    ```
+```
 
 ## 配置修改
 

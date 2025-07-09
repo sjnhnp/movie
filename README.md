@@ -114,6 +114,7 @@ docker run -d \
   -p 8080:8080 \
   -e PASSWORD="your-secret-password" \
   -e SETTINGS_PASSWORD="your-settings-password" \
+  --restart unless-stopped \
   --name movie \
   ghcr.io/sjnhnp/sjnhnp/movie:latest
 ```

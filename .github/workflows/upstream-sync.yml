@@ -1,0 +1,49 @@
+name: Upstream Sync
+
+# 权限设置，允许 workflow 写入内容到你的仓库
+permissions:
+  contents: write
+
+on:
+  # 定时任务：每天凌晨4点（UTC+8 时间 12点）执行一次
+  schedule:
+    - cron: "0 4 * * *"
+  # 允许手动触发
+  workflow_dispatch:
+
+jobs:
+  sync_latest_from_upstream:
+    name: Sync latest commits from upstream repo
+    runs-on: ubuntu-latest
+    # 只有当这个仓库是一个 fork 时才运行
+    if: ${{ github.event.repository.fork }}
+
+    steps:
+      # 步骤 1: 检出你的仓库代码
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+        with:
+          # 使用 personal access token (PAT) 而不是 GITHUB_TOKEN
+          # 这样可以触发下游的 CI/CD 流程（例如 Docker 镜像构建）
+          token: ${{ secrets.PAT }} 
+
+      # 步骤 2: 执行同步操作
+      - name: Sync upstream changes
+        id: sync
+        uses: aormsby/Fork-Sync-With-Upstream-action@v3.4.1
+        with:
+          # 上游仓库地址，这里填写您项目的主仓库
+          upstream_sync_repo: sjnhnp/movie
+          # 上游仓库的分支
+          upstream_sync_branch: main
+          # 您需要同步的目标分支
+          target_sync_branch: main
+          # 使用上面 checkout 步骤中用到的同一个 PAT
+          target_repo_token: ${{ secrets.PAT }}
+
+      # 步骤 3: 检查同步状态
+      - name: Sync check
+        if: failure()
+        run: |
+          echo "[Error] 由于上游仓库工作流文件的更改，GitHub 自动暂停了定时更新。您可能需要手动同步一次您的 fork。"
+          exit 1

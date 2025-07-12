@@ -95,6 +95,7 @@ function playVideo(url, title, episodeIndex, sourceName = '', sourceCode = '', v
             sourceName: sourceName,
             sourceCode: sourceCode,
             vod_id: vodId,
+            year: year,
             episodes: AppState.get('currentEpisodes') || []
         };
         addToViewingHistory(videoInfoForHistory);
@@ -119,7 +120,7 @@ function playVideo(url, title, episodeIndex, sourceName = '', sourceCode = '', v
     const universalId = generateUniversalId(title, year, episodeIndex);
     playerUrl.searchParams.set('universalId', universalId);
 
-    // ← 在这一行后面，插入广告过滤开关参数
+    // 插入广告过滤开关参数
     const adOn = getBoolConfig(PLAYER_CONFIG.adFilteringStorage, PLAYER_CONFIG.adFilteringEnabled);
     playerUrl.searchParams.set('af', adOn ? '1' : '0');
 
@@ -177,7 +178,7 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
 
     let historyItem = null;
     let episodesList = [];
-    let vodId = '', actualSourceName = '', actualSourceCode = '';
+    let vodId = '', actualSourceName = '', actualSourceCode = '', videoYear = '';
 
     try {
         const history = JSON.parse(localStorage.getItem('viewingHistory') || '[]');
@@ -191,12 +192,13 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
             vodId = historyItem.vod_id || '';
             actualSourceName = historyItem.sourceName || '';
             actualSourceCode = historyItem.sourceCode || '';
+            videoYear = historyItem.year || ''; // 确保年份信息被读取
         }
     } catch (e) {
+        console.error("读取历史记录失败:", e);
     }
 
-    // 优先拉最新集数
-    let gotFreshEpisodes = false;
+    // 优先尝试拉取最新数据
     if (vodId && actualSourceCode) {
         try {
             let apiUrl = `/api/detail?id=${encodeURIComponent(vodId)}&source=${encodeURIComponent(actualSourceCode)}`;
@@ -206,63 +208,67 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
             }
 
             const detailResp = await fetch(apiUrl);
+            if (!detailResp.ok) throw new Error(`API请求失败: ${detailResp.status}`);
+
             const detailData = await detailResp.json();
             if (detailData.code === 200 && Array.isArray(detailData.episodes) && detailData.episodes.length > 0) {
+                // 只要成功获取，就直接使用最新的数据，不再进行复杂校验
                 episodesList = detailData.episodes;
-                gotFreshEpisodes = true;
-
-                AppState.set('currentEpisodes', episodesList);
-                AppState.set('currentVideoTitle', title);
-                AppState.set('currentEpisodeIndex', episodeIndex);
-                // 更新 localStorage
-                localStorage.setItem('currentEpisodes', JSON.stringify(episodesList));
-                localStorage.setItem('currentVideoTitle', title);
-                localStorage.setItem('currentEpisodeIndex', episodeIndex.toString());
+                console.log("[playFromHistory] 成功获取最新剧集列表，直接使用。");
             } else {
-                // 回退到旧history里的数据
-                if (historyItem && Array.isArray(historyItem.episodes) && historyItem.episodes.length > 0) {
-                    episodesList = historyItem.episodes;
-                }
+                // 如果API返回错误码，则回退
+                throw new Error(detailData.msg || 'API返回数据无效');
             }
         } catch (e) {
-            // 拉取失败 fallback
+            // 任何失败（网络、API错误等），都安全回退到使用历史记录中的数据
+            console.warn(`[playFromHistory] 获取最新数据失败 (${e.message})，回退到历史数据。`);
             if (historyItem && Array.isArray(historyItem.episodes) && historyItem.episodes.length > 0) {
                 episodesList = historyItem.episodes;
             }
         }
-    } else if (historyItem && Array.isArray(historyItem.episodes) && historyItem.episodes.length > 0) {
+    } else if (historyItem && Array.isArray(historyItem.episodes)) {
+        // 如果历史项中没有ID，直接使用历史的episodes
         episodesList = historyItem.episodes;
-    } else {
+    }
+
+    // 如果到这里 episodesList 依然为空，做最后一次补救
+    if (episodesList.length === 0) {
         episodesList = AppState.get('currentEpisodes') || JSON.parse(localStorage.getItem('currentEpisodes') || '[]');
     }
 
+    // --- 后续跳转逻辑 ---
     if (episodesList.length > 0) {
         AppState.set('currentEpisodes', episodesList);
         localStorage.setItem('currentEpisodes', JSON.stringify(episodesList));
     }
 
-    AppState.set('currentEpisodeIndex', episodeIndex);
+    let actualEpisodeIndex = episodeIndex;
+    // 确保索引在有效范围内
+    if (actualEpisodeIndex >= episodesList.length) {
+        actualEpisodeIndex = episodesList.length > 0 ? episodesList.length - 1 : 0;
+    }
+
+    // 关键：finalUrl 必须从更新后的 episodesList 中获取
+    const finalUrl = (episodesList.length > 0 && episodesList[actualEpisodeIndex]) ? episodesList[actualEpisodeIndex] : url;
+
+    AppState.set('currentEpisodeIndex', actualEpisodeIndex);
     AppState.set('currentVideoTitle', title);
-    localStorage.setItem('currentEpisodeIndex', episodeIndex.toString());
+    localStorage.setItem('currentEpisodeIndex', actualEpisodeIndex.toString());
     localStorage.setItem('currentVideoTitle', title);
 
-    // 跳转到 player.html
     const playerUrl = new URL('player.html', window.location.origin);
-    playerUrl.searchParams.set('url', url);
+    playerUrl.searchParams.set('url', finalUrl); // 使用最终确定的URL
     playerUrl.searchParams.set('title', title);
-    playerUrl.searchParams.set('index', episodeIndex.toString());
-    if (vodId) {
-        playerUrl.searchParams.set('id', vodId);
-    }
-    if (actualSourceName) {
-        playerUrl.searchParams.set('source', actualSourceName);
-    }
-    if (actualSourceCode) {
-        playerUrl.searchParams.set('source_code', actualSourceCode);
-    }
-    if (playbackPosition > 0) {
-        playerUrl.searchParams.set('position', playbackPosition.toString());
-    }
+    playerUrl.searchParams.set('index', actualEpisodeIndex.toString());
+    if (vodId) playerUrl.searchParams.set('id', vodId);
+    if (actualSourceName) playerUrl.searchParams.set('source', actualSourceName);
+    if (actualSourceCode) playerUrl.searchParams.set('source_code', actualSourceCode);
+    if (videoYear) playerUrl.searchParams.set('year', videoYear); // 确保年份信息被传递
+    if (playbackPosition > 0) playerUrl.searchParams.set('position', playbackPosition.toString());
+
+    const uid = generateUniversalId(title, videoYear, actualEpisodeIndex);
+    playerUrl.searchParams.set('universalId', uid);
+
     const adOn = typeof getBoolConfig !== 'undefined' && typeof PLAYER_CONFIG !== 'undefined'
         ? getBoolConfig(PLAYER_CONFIG.adFilteringStorage, PLAYER_CONFIG.adFilteringEnabled)
         : PLAYER_CONFIG?.adFilteringEnabled ?? false;
@@ -270,7 +276,6 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
 
     window.location.href = playerUrl.toString();
 }
-
 
 /**
  * 从localStorage获取布尔配置
@@ -451,8 +456,6 @@ function initializeEventListeners() {
             }
 
             localStorage.setItem('preloadCount', count.toString());
-
-            // 注意：这里直接修改PLAYER_CONFIG。更健壮的解决方案可能涉及在config.js模块中使用setter
             PLAYER_CONFIG.preloadCount = count;
 
             showToast(`预加载数量已设置为 ${count}`, 'info');
@@ -462,8 +465,6 @@ function initializeEventListeners() {
         const savedCount = localStorage.getItem('preloadCount');
         const preloadCount = savedCount ? parseInt(savedCount) : 2;
         preloadCountInput.value = preloadCount;
-
-        // 注意：这里直接修改PLAYER_CONFIG。更健壮的解决方案可能涉及在config.js模块中使用setter
         PLAYER_CONFIG.preloadCount = preloadCount;
     }
 }
@@ -474,7 +475,6 @@ function initializeUIComponents() {
 }
 
 // 执行搜索
-
 function search(options = {}) {
     // ---在每次新搜索开始时，强制清除所有旧的搜索结果缓存 ---
     try {
@@ -893,8 +893,8 @@ function resetToHome() {
     // 回到「初始版面」
     /* ---- 恢复搜索区默认样式 ---- */
     if (searchArea) {
-        searchArea.classList.add('flex-1');   // 重新撑满页面
-        searchArea.classList.remove('mb-8');  // 移除搜索结果页加的外边距
+        searchArea.classList.add('flex-1');   
+        searchArea.classList.remove('mb-8');  
         searchArea.classList.remove('hidden');
     }
 

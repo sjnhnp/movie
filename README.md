@@ -1,7 +1,8 @@
-# X - 纯粹的在线影音8ru播放器
+# X - 纯粹的在线影音播放器
 
 基于 [**LibreSpark/LibreTV**](https://github.com/LibreSpark/LibreTV) 的深度优化重构，保持作为`播放器的纯粹`。
-> * **播放器**: [**Vidstack Player**](https://github.com/vidstack/player) 
+> * **采用的播放器**: [**Vidstack Player**](https://github.com/vidstack/player) 
+
 > 采用dplayer版本请移步到分支[for-dplayer](https://github.com/sjnhnp/movie/tree/for-dplayer)
 
 ## 🚀 与上游主要差异
@@ -54,8 +55,6 @@
 | **单击** | 锁屏状态下 | 暂停|
 | **双击** | 左侧/右侧 | 快退10s/快进10s |
 | **左右滑动** | 播放器区域 | 进度条回退/前进|
-| **Android系统返回手势** | 锁屏状态下 | 退出全屏播放 |
-| **ios系统拖拉** | 锁屏状态下 | 退出全屏播放 |
 
 ### 🖥️ 桌面端鼠标操作 
 

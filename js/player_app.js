@@ -25,7 +25,6 @@ let currentVideoYear = '';
 let currentVideoTypeName = '';
 let lastFailedAction = null;
 let availableAlternativeSources = [];
-// 新增：用于存储广告过滤状态的全局变量
 let adFilteringEnabled = false;
 let universalId = '';
 
@@ -36,7 +35,6 @@ function generateUniversalId(title, year, episodeIndex) {
     const normalizedYear = year ? year : 'unknown';
     return `${normalizedTitle}_${normalizedYear}_${episodeIndex}`;
 }
-
 
 // 实用工具函数
 function showToast(message, type = 'info', duration = 3000) {
@@ -100,7 +98,6 @@ function showError(message) {
     }
     showMessage(message, 'error');
 }
-
 
 function formatPlayerTime(seconds) {
     if (isNaN(seconds) || seconds < 0) return "00:00";
@@ -186,13 +183,11 @@ async function processVideoUrl(url) {
             /\/\/.*\.(ts|jpg|png)\?ad=/i
         ];
         const lines = m3u8Text.split('\n');
-        const baseUrl = url;           // 原始 m3u8 地址
+        const baseUrl = url;
         const cleanLines = [];
 
         for (let line of lines) {
-            // 跳过广告相关标签或片段
             if (adPatterns.some(p => p.test(line))) {
-                // 如果是标签直接丢弃
                 continue;
             }
 
@@ -336,7 +331,9 @@ function addPlayerEventListeners() {
     player.addEventListener('end', () => {
         videoHasEnded = true;
         saveCurrentProgress();
-        clearVideoProgressForEpisode(currentEpisodeIndex);
+        clearVideoProgressForEpisode(
+            universalId || generateUniversalId(currentVideoTitle, currentVideoYear, currentEpisodeIndex)
+        );
         if (autoplayEnabled && currentEpisodeIndex < currentEpisodes.length - 1) {
             setTimeout(() => {
                 if (videoHasEnded && !isUserSeeking) playNextEpisode();
@@ -356,6 +353,7 @@ async function playEpisode(index) {
     if (isNavigatingToEpisode || index < 0 || index >= currentEpisodes.length) {
         return;
     }
+    universalId = generateUniversalId(currentVideoTitle, currentVideoYear, index);
 
     if (player && player.currentTime > 5) {
         saveVideoSpecificProgress();
@@ -542,8 +540,16 @@ function updateUIForNewEpisode() {
 function updateBrowserHistory(newEpisodeUrl) {
     const newUrlForBrowser = new URL(window.location.href);
     newUrlForBrowser.searchParams.set('url', newEpisodeUrl);
+    newUrlForBrowser.searchParams.set(
+        'universalId',
+        generateUniversalId(currentVideoTitle, currentVideoYear, currentEpisodeIndex)
+    );
     newUrlForBrowser.searchParams.set('index', currentEpisodeIndex.toString());
     newUrlForBrowser.searchParams.delete('position');
+    newUrlForBrowser.searchParams.set(
+        'universalId',
+        generateUniversalId(currentVideoTitle, currentVideoYear, currentEpisodeIndex)
+    );
     window.history.pushState({ path: newUrlForBrowser.toString(), episodeIndex: currentEpisodeIndex }, '', newUrlForBrowser.toString());
 }
 
@@ -652,7 +658,8 @@ function saveToHistory() {
             episodes: window.currentEpisodes,
             playbackPosition: Math.floor(player.currentTime),
             duration: Math.floor(player.duration) || 0,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            year: currentVideoYear
         };
         window.addToViewingHistory(videoInfo);
     } catch (e) {
@@ -676,6 +683,7 @@ function saveCurrentProgress() {
                 playbackPosition: Math.floor(currentTime),
                 duration: Math.floor(duration),
                 timestamp: Date.now(),
+                year: currentVideoYear,
                 episodes: window.currentEpisodes
             };
             window.addToViewingHistory(videoInfo);
@@ -1019,62 +1027,90 @@ function setupLineSwitching() {
     }
 }
 
-async function switchLine(newSourceCode, newVodId) {
+async function switchLine(newSourceCode, newVodId_IGNORED) {
     if (!player || !currentVideoTitle) {
         showError("无法切换线路：播放器或视频信息丢失");
         return;
     }
-    if (!newVodId) {
-        showError("切换失败：缺少目标视频ID。");
+
+    const targetSourceInfo = availableAlternativeSources.find(source => source.code === newSourceCode);
+
+    if (!targetSourceInfo || !targetSourceInfo.vod_id) {
+        showError(`切换失败：未能在可用线路中找到“${newSourceCode}”的有效ID。`);
         return;
     }
+
+    const correctVodId = targetSourceInfo.vod_id;
+    console.log(`[SwitchLine] 正在切换到线路: ${targetSourceInfo.name}, 使用正确ID: ${correctVodId}`);
+
+    vodIdForPlayer = correctVodId;
+
     const timeToSeek = player.currentTime;
     const loadingEl = document.getElementById('loading');
     const errorEl = document.getElementById('error');
     if (loadingEl) loadingEl.style.display = 'flex';
     if (errorEl) errorEl.style.display = 'none';
+
     let apiInfo;
     try {
         apiInfo = APISourceManager.getSelectedApi(newSourceCode);
         if (!apiInfo) throw new Error(`未找到线路 ${newSourceCode} 的信息`);
-        let detailUrl = `/api/detail?id=${newVodId}&source=${newSourceCode}`;
+
+        let detailUrl = `/api/detail?id=${correctVodId}&source=${newSourceCode}`;
         if (apiInfo.isCustom) {
             detailUrl += `&customApi=${encodeURIComponent(apiInfo.url)}`;
         }
+
         const detailRes = await fetch(detailUrl);
         const detailData = await detailRes.json();
-        if (detailData.code !== 200 || !detailData.episodes || detailData.episodes.length === 0) {
+
+        if (detailData.code !== 200 || !detailData.episodes || !detailData.episodes.length === 0) {
             throw new Error(`在线路“${apiInfo.name}”上获取剧集列表失败`);
         }
-        const newEpisodes = detailData.episodes;
-        if (currentEpisodeIndex >= newEpisodes.length) {
-            throw new Error(`新线路的剧集数(${newEpisodes.length})少于当前集数(${currentEpisodeIndex + 1})`);
+
+        const newEps = detailData.episodes;
+
+        const oldEps = [...currentEpisodes];
+        let acceptNew = false;
+        if (oldEps.length > 1) {
+            if (newEps.length >= oldEps.length) acceptNew = true;
+        } else {
+            if (newEps.length === 1) acceptNew = true;
         }
-        const newEpisodeUrl = newEpisodes[currentEpisodeIndex];
-        currentEpisodes = newEpisodes;
-        window.currentEpisodes = newEpisodes;
-        localStorage.setItem('currentEpisodes', JSON.stringify(newEpisodes));
+        if (!acceptNew && oldEps.length > 0) {
+            throw new Error(`数据校验失败，为保证安全已中止切换。`);
+        }
+
+        currentEpisodes = newEps;
+        window.currentEpisodes = newEps;
+        localStorage.setItem('currentEpisodes', JSON.stringify(newEps));
+
+        const newEpisodeUrl = (currentEpisodeIndex < newEps.length) ? newEps[currentEpisodeIndex] : newEps[0];
+
         const newUrlForBrowser = new URL(window.location.href);
         newUrlForBrowser.searchParams.set('source_code', newSourceCode);
         newUrlForBrowser.searchParams.set('source', apiInfo.name);
-        newUrlForBrowser.searchParams.set('id', newVodId);
+        newUrlForBrowser.searchParams.set('id', correctVodId);
         newUrlForBrowser.searchParams.set('url', newEpisodeUrl);
         if (universalId) {
             newUrlForBrowser.searchParams.set('universalId', universalId);
         }
         window.history.replaceState({}, '', newUrlForBrowser.toString());
+
         nextSeekPosition = timeToSeek;
-        const processedUrl = await processVideoUrl(newEpisodeUrl); // 切换时也处理
+        const processedUrl = await processVideoUrl(newEpisodeUrl);
         player.src = { src: processedUrl, type: 'application/x-mpegurl' };
         player.play();
+
         renderEpisodes();
         showMessage(`已切换到线路: ${apiInfo.name}`, 'success');
         if (loadingEl) loadingEl.style.display = 'none';
+
     } catch (err) {
         console.error("切换线路失败:", err);
-        lastFailedAction = { type: 'switchLine', payload: { sourceCode: newSourceCode, vodId: newVodId } };
+        lastFailedAction = { type: 'switchLine', payload: { sourceCode: newSourceCode, vodId: correctVodId } };
         const lineName = apiInfo ? apiInfo.name : '未知线路';
-        const errorMessage = err.message.includes(lineName) ? err.message : `在“${lineName}”上切换失败: ${err.message}`;
+        const errorMessage = err.message.includes(lineName) ? err.message : `切换“${lineName}”失败: ${err.message}`;
         showError(errorMessage);
         if (loadingEl) loadingEl.style.display = 'none';
     }

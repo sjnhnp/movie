@@ -378,7 +378,6 @@ function handleSearchTagClick(e) {
     }
 }
 
-
 /**
  * 渲染搜索历史标签
  */
@@ -560,7 +559,16 @@ function addToViewingHistory(videoInfo) {
         // 使用统一工具生成「剧 + 集」级唯一键，避免同名不同集互相覆盖
         const internalShowIdentifier = getUniqueEpisodeId(videoInfo);
 
-        const idx = history.findIndex(item => item.internalShowIdentifier === internalShowIdentifier);
+        // 先用内部标识精确查重
+        let idx = history.findIndex(item => item.internalShowIdentifier === internalShowIdentifier);
+        // 如未找到，再用「标题+源+集」做一次宽松查重（兼容旧纪录缺 vod_id/year）
+        if (idx === -1) {
+            idx = history.findIndex(item =>
+                item.title === videoInfo.title &&
+                item.sourceCode === videoInfo.sourceCode &&
+                item.episodeIndex === videoInfo.episodeIndex
+            );
+        }
 
         if (idx !== -1) { // 如果这部剧已在历史中
             const item = history[idx];
@@ -570,14 +578,13 @@ function addToViewingHistory(videoInfo) {
             item.playbackPosition = videoInfo.playbackPosition;
             item.duration = videoInfo.duration;
             item.timestamp = Date.now();
-            // 如果新的videoInfo提供了更完整的剧集列表，则更新
+            item.year = videoInfo.year || item.year;
+
             if (videoInfo.episodes && videoInfo.episodes.length > 0) {
-                // 简单的检查，如果长度不同或第一个元素不同，就认为需要更新（可以做得更复杂）
                 if (!item.episodes || item.episodes.length !== videoInfo.episodes.length || (item.episodes[0] !== videoInfo.episodes[0])) {
                     item.episodes = [...videoInfo.episodes];
                 }
             }
-            // 其他信息如 title, sourceName, sourceCode, vod_id, internalShowIdentifier 应该保持不变
             item.sourceName = videoInfo.sourceName || item.sourceName; // 保留旧的，除非新的明确提供
 
             history.splice(idx, 1); // 移除旧条目
@@ -593,13 +600,14 @@ function addToViewingHistory(videoInfo) {
                 internalShowIdentifier: internalShowIdentifier, // 保存这个内部标识符
                 playbackPosition: videoInfo.playbackPosition,
                 duration: videoInfo.duration,
+                year: videoInfo.year,
                 timestamp: Date.now(),
                 episodes: (videoInfo.episodes && videoInfo.episodes.length > 0) ? [...videoInfo.episodes] : []
             };
             history.unshift(newItem);
         }
 
-        if (history.length > HISTORY_MAX_ITEMS) { // HISTORY_MAX_ITEMS 在 ui.js 定义 [cite: 1059]
+        if (history.length > HISTORY_MAX_ITEMS) { 
             history.splice(HISTORY_MAX_ITEMS);
         }
         localStorage.setItem('viewingHistory', JSON.stringify(history));
@@ -727,8 +735,6 @@ function loadViewingHistory() {
     historyList.innerHTML = '';
     historyList.appendChild(frag);
     if (history.length > 5) historyList.classList.add('pb-4');
-
-    // 移除旧的事件监听器和添加新的事件委托的代码已移至attachEventListeners函数
 }
 
 /**
@@ -774,7 +780,6 @@ function attachEventListeners() {
         closeModalButton.addEventListener('click', closeModal);
     }
 
-    // 优化：将委托事件监听器移到这里一次性设置
     // 搜索历史标签点击事件委托
     const recentSearches = getElement('recentSearches');
     if (recentSearches) {
@@ -795,9 +800,6 @@ function attachEventListeners() {
  * 初始化其他可能的事件监听器
  */
 function initializeAdditionalListeners() {
-    // API选择按钮 - 保留单独的事件监听器
-    // 注: 由于这些按钮数量有限且不会动态变化，使用单独的事件监听器更直接清晰
-    // 如果未来这些按钮会动态增减，可考虑改为事件委托模式
     const apiSelectButtons = document.querySelectorAll('[data-action="selectAllAPIs"]');
     if (apiSelectButtons.length > 0) {
         const apiSelectHandler = function () {
@@ -838,7 +840,6 @@ window.toggleSettings = toggleSettings;
 window.toggleHistory = toggleHistory;
 window.addToViewingHistory = addToViewingHistory;
 window.clearViewingHistory = clearViewingHistory;
-// window.playFromHistory = playFromHistory;
 window.saveSearchHistory = saveSearchHistory;
 window.clearSearchHistory = clearSearchHistory;
 window.renderSearchHistory = renderSearchHistory;

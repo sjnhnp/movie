@@ -28,10 +28,36 @@ let availableAlternativeSources = [];
 let adFilteringEnabled = false;
 let universalId = '';
 
+// 提取核心标题，用于匹配同一作品的不同版本
+function getCoreTitle(title) {
+    if (typeof title !== 'string') return '';
+
+    // 第一步：像以前一样，移除标题后面跟着的括号、空格等所有内容
+    let coreTitle = title.replace(/[\s\(（【\[].*/, "").trim();
+
+    // 第二步：处理像“爱人国语”这样没有分隔符的常见后缀
+    // 定义一个常见的版本后缀列表
+    const commonSuffixes = [
+        '国语', '粤语', '台配', '中字', 
+        '高清', 'HD', '版', '季'
+    ];
+    
+    // 构建一个正则表达式，用于匹配结尾处的这些后缀
+    // 例如，会生成 /(国语|粤语|...)$/i
+    const suffixRegex = new RegExp(`(${commonSuffixes.join('|')})$`, 'i');
+
+    // 从第一步处理过的标题末尾，移除这些后缀
+    coreTitle = coreTitle.replace(suffixRegex, '').trim();
+    
+    return coreTitle;
+}
+
 // 生成视频统一标识符，用于跨线路共享播放进度
 function generateUniversalId(title, year, episodeIndex) {
-    // 移除标题中的特殊字符和空格，转换为小写 
-    const normalizedTitle = title.toLowerCase().replace(/[^\w\u4e00-\u9fa5]/g, '').replace(/\s+/g, '');
+    // 1. 先提取核心标题
+    const coreTitle = getCoreTitle(title);
+    // 2. 再对核心标题进行归一化
+    const normalizedTitle = coreTitle.toLowerCase().replace(/[^\w\u4e00-\u9fa5]/g, '').replace(/\s+/g, '');
     const normalizedYear = year ? year : 'unknown';
     return `${normalizedTitle}_${normalizedYear}_${episodeIndex}`;
 }
@@ -406,7 +432,6 @@ async function doEpisodeSwitch(index, url) {
     }
 }
 
-
 (async function initializePage() {
     document.addEventListener('DOMContentLoaded', async () => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -435,26 +460,26 @@ async function doEpisodeSwitch(index, url) {
         if (sourceMapJSON) {
             try {
                 const sourceMap = JSON.parse(sourceMapJSON);
-                const videoKey = urlParams.get('videoKey');
-                if (videoKey && sourceMap[videoKey]) {
-                    availableAlternativeSources = sourceMap[videoKey];
-                } else {
-                    const titleParam = urlParams.get('title') ? decodeURIComponent(urlParams.get('title')) : '';
-                    const yearParam = urlParams.get('year') || '';
-                    const fallbackKey = `${titleParam}|${yearParam}`;
-                    if (sourceMap[fallbackKey]) {
-                        availableAlternativeSources = sourceMap[fallbackKey];
-                    } else {
-                        for (const key in sourceMap) {
-                            if (key.startsWith(`${titleParam}|`)) {
-                                availableAlternativeSources = sourceMap[key];
-                                break;
-                            }
+                const clickedTitle = urlParams.get('title') ? fullyDecode(urlParams.get('title')) : '';
+                const clickedYear = urlParams.get('year') || '';
+
+                const coreClickedTitle = getCoreTitle(clickedTitle);
+
+                const relevantSources = [];
+                for (const key in sourceMap) {
+                    if (sourceMap.hasOwnProperty(key)) {
+                        const [keyTitle, keyYear] = key.split('|');
+                        const coreKeyTitle = getCoreTitle(keyTitle);
+
+                        if (coreKeyTitle === coreClickedTitle && (!clickedYear || !keyYear || keyYear === clickedYear)) {
+                            // 直接将完整的 item 对象添加到聚合列表中
+                            relevantSources.push(...sourceMap[key]);
                         }
                     }
                 }
+                availableAlternativeSources = relevantSources;
             } catch (e) {
-                console.error("从 sessionStorage 读取线路失败:", e);
+                console.error("从 sessionStorage 构建聚合线路列表失败:", e);
                 availableAlternativeSources = [];
             }
         }
@@ -973,24 +998,39 @@ function setupSkipDropdownEvents() {
     });
 }
 
+
 function setupLineSwitching() {
     const button = document.getElementById('line-switch-button');
     const dropdown = document.getElementById('line-switch-dropdown');
     if (!button || !dropdown) return;
+
     const showLinesFromCache = (event) => {
         event.stopPropagation();
         const skipDropdown = document.getElementById('skip-control-dropdown');
         if (skipDropdown) skipDropdown.classList.add('hidden');
         dropdown.innerHTML = '';
-        const currentSourceCode = new URLSearchParams(window.location.search).get('source_code');
+
+        const currentId = vodIdForPlayer;
+
         if (availableAlternativeSources.length > 1) {
             availableAlternativeSources.forEach(source => {
                 const item = document.createElement('button');
-                item.textContent = source.name;
-                item.dataset.sourceCode = source.code;
+
+                const coreTitle = getCoreTitle(source.vod_name);
+                let versionTag = source.vod_name.replace(coreTitle, '').trim();
+                if (!versionTag && source.vod_remarks) {
+                    versionTag = source.vod_remarks;
+                }
+                if (versionTag && !/^[\[\(【（]/.test(versionTag)) {
+                    versionTag = `(${versionTag})`;
+                }
+                item.textContent = `${source.source_name} ${versionTag}`.trim();
+
+                item.dataset.sourceCode = source.source_code;
                 item.dataset.vodId = source.vod_id;
                 item.className = 'w-full text-left px-3 py-2 rounded text-sm transition-colors hover:bg-gray-700';
-                if (source.code === currentSourceCode) {
+
+                if (String(source.vod_id) === currentId) {
                     item.classList.add('line-active', 'bg-blue-600', 'text-white');
                     item.disabled = true;
                 } else {
@@ -1003,6 +1043,7 @@ function setupLineSwitching() {
         }
         dropdown.classList.toggle('hidden');
     };
+
     if (!button._lineSwitchListenerAttached) {
         button.addEventListener('click', showLinesFromCache);
         button._lineSwitchListenerAttached = true;
@@ -1027,91 +1068,84 @@ function setupLineSwitching() {
     }
 }
 
-async function switchLine(newSourceCode, newVodId_IGNORED) {
-    if (!player || !currentVideoTitle) {
-        showError("无法切换线路：播放器或视频信息丢失");
-        return;
-    }
-
-    const targetSourceInfo = availableAlternativeSources.find(source => source.code === newSourceCode);
-
-    if (!targetSourceInfo || !targetSourceInfo.vod_id) {
-        showError(`切换失败：未能在可用线路中找到“${newSourceCode}”的有效ID。`);
-        return;
-    }
-
-    const correctVodId = targetSourceInfo.vod_id;
-    console.log(`[SwitchLine] 正在切换到线路: ${targetSourceInfo.name}, 使用正确ID: ${correctVodId}`);
-
-    vodIdForPlayer = correctVodId;
-
-    const timeToSeek = player.currentTime;
+async function switchLine(newSourceCode, newVodId) {
     const loadingEl = document.getElementById('loading');
-    const errorEl = document.getElementById('error');
     if (loadingEl) loadingEl.style.display = 'flex';
-    if (errorEl) errorEl.style.display = 'none';
 
-    let apiInfo;
     try {
-        apiInfo = APISourceManager.getSelectedApi(newSourceCode);
-        if (!apiInfo) throw new Error(`未找到线路 ${newSourceCode} 的信息`);
-
-        let detailUrl = `/api/detail?id=${correctVodId}&source=${newSourceCode}`;
-        if (apiInfo.isCustom) {
-            detailUrl += `&customApi=${encodeURIComponent(apiInfo.url)}`;
+        const targetSourceItem = availableAlternativeSources.find(
+            item => String(item.vod_id) === newVodId
+        );
+        if (!targetSourceItem) {
+            throw new Error(`未能在可用线路中找到ID为“${newVodId}”的线路信息。`);
         }
 
-        const detailRes = await fetch(detailUrl);
+        const detailRes = await fetch(`/api/detail?id=${newVodId}&source=${newSourceCode}`);
         const detailData = await detailRes.json();
-
         if (detailData.code !== 200 || !detailData.episodes || !detailData.episodes.length === 0) {
-            throw new Error(`在线路“${apiInfo.name}”上获取剧集列表失败`);
+            throw new Error(`在线路“${targetSourceItem.source_name}”上获取剧集列表失败`);
         }
-
+        
         const newEps = detailData.episodes;
+        const timeToSeek = player.currentTime;
 
-        const oldEps = [...currentEpisodes];
-        let acceptNew = false;
-        if (oldEps.length > 1) {
-            if (newEps.length >= oldEps.length) acceptNew = true;
-        } else {
-            if (newEps.length === 1) acceptNew = true;
-        }
-        if (!acceptNew && oldEps.length > 0) {
-            throw new Error(`数据校验失败，为保证安全已中止切换。`);
-        }
-
+        // 1. 更新内存中的全局JS变量
+        vodIdForPlayer = newVodId;
         currentEpisodes = newEps;
         window.currentEpisodes = newEps;
         localStorage.setItem('currentEpisodes', JSON.stringify(newEps));
+        
+        currentVideoTitle = targetSourceItem.vod_name;
+        currentVideoYear = targetSourceItem.vod_year;
+        currentVideoTypeName = targetSourceItem.type_name;
 
-        const newEpisodeUrl = (currentEpisodeIndex < newEps.length) ? newEps[currentEpisodeIndex] : newEps[0];
-
-        const newUrlForBrowser = new URL(window.location.href);
-        newUrlForBrowser.searchParams.set('source_code', newSourceCode);
-        newUrlForBrowser.searchParams.set('source', apiInfo.name);
-        newUrlForBrowser.searchParams.set('id', correctVodId);
-        newUrlForBrowser.searchParams.set('url', newEpisodeUrl);
-        if (universalId) {
-            newUrlForBrowser.searchParams.set('universalId', universalId);
+        // 2. 更新浏览器地址栏URL (无刷新)
+        let targetEpisodeIndex = currentEpisodeIndex;
+        if (targetEpisodeIndex >= newEps.length) {
+            targetEpisodeIndex = newEps.length > 0 ? newEps.length - 1 : 0;
         }
+        const newEpisodeUrl = newEps[targetEpisodeIndex];
+        const newUrlForBrowser = new URL(window.location.href);
+
+        newUrlForBrowser.searchParams.set('url', newEpisodeUrl);
+        newUrlForBrowser.searchParams.set('title', currentVideoTitle);
+        newUrlForBrowser.searchParams.set('index', String(targetEpisodeIndex));
+        newUrlForBrowser.searchParams.set('id', newVodId);
+        newUrlForBrowser.searchParams.set('source', targetSourceItem.source_name);
+        newUrlForBrowser.searchParams.set('source_code', newSourceCode);
+        if (currentVideoYear) newUrlForBrowser.searchParams.set('year', currentVideoYear);
+        if (currentVideoTypeName) newUrlForBrowser.searchParams.set('typeName', currentVideoTypeName);
+
+        const newVideoKey = `${currentVideoTitle}|${currentVideoYear || ''}`;
+        newUrlForBrowser.searchParams.set('videoKey', newVideoKey);
+
+        universalId = generateUniversalId(currentVideoTitle, currentVideoYear, targetEpisodeIndex);
+        newUrlForBrowser.searchParams.set('universalId', universalId);
+        
         window.history.replaceState({}, '', newUrlForBrowser.toString());
 
+        // 3. 更新播放器和页面显示
         nextSeekPosition = timeToSeek;
         const processedUrl = await processVideoUrl(newEpisodeUrl);
+        
+        // 在更新播放源的同时，明确地更新播放器组件的标题
         player.src = { src: processedUrl, type: 'application/x-mpegurl' };
-        player.play();
+        player.title = currentVideoTitle; // 命令播放器UI更新标题
 
+        player.play();
+        
         renderEpisodes();
-        showMessage(`已切换到线路: ${apiInfo.name}`, 'success');
+        updateEpisodeInfo();
+        
+        const dropdown = document.getElementById('line-switch-dropdown');
+        if(dropdown) dropdown.innerHTML = ''; 
+        
         if (loadingEl) loadingEl.style.display = 'none';
+        showMessage(`已切换到线路: ${targetSourceItem.source_name}`, 'success');
 
     } catch (err) {
         console.error("切换线路失败:", err);
-        lastFailedAction = { type: 'switchLine', payload: { sourceCode: newSourceCode, vodId: correctVodId } };
-        const lineName = apiInfo ? apiInfo.name : '未知线路';
-        const errorMessage = err.message.includes(lineName) ? err.message : `切换“${lineName}”失败: ${err.message}`;
-        showError(errorMessage);
+        showError(`切换失败: ${err.message}`);
         if (loadingEl) loadingEl.style.display = 'none';
     }
 }

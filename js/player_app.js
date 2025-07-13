@@ -31,24 +31,34 @@ let universalId = '';
 // 提取核心标题，用于匹配同一作品的不同版本
 function getCoreTitle(title) {
     if (typeof title !== 'string') return '';
-
-    // 第一步：像以前一样，移除标题后面跟着的括号、空格等所有内容
-    let coreTitle = title.replace(/[\s\(（【\[].*/, "").trim();
-
-    // 第二步：处理像“爱人国语”这样没有分隔符的常见后缀
-    // 定义一个常见的版本后缀列表
-    const commonSuffixes = [
-        '国语', '粤语', '台配', '中字', 
-        '高清', 'HD', '版', '季'
+    let coreTitle = title;
+    const versionTags = [
+        '国语', '国', 
+        '粤语', '粤',
+        '台配', '台',
+        '中字', '普通话',
+        '高清', 'HD', '版', '修复版', 'TC', '蓝光', '4K',
     ];
+    // --- 【修改结束】---
     
-    // 构建一个正则表达式，用于匹配结尾处的这些后缀
-    // 例如，会生成 /(国语|粤语|...)$/i
-    const suffixRegex = new RegExp(`(${commonSuffixes.join('|')})$`, 'i');
+    // 2. 创建一个更智能的正则表达式，用于移除被括号或空格包裹的版本标签
+    //    它会跳过包含数字的括号内容，以保护 (第一季) 这样的情况
+    const bracketRegex = new RegExp(`[\\s\\(（【\\[](${versionTags.join('|')})(?![0-9])\\s*[\\)）】\\]]?`, 'gi');
+    coreTitle = coreTitle.replace(bracketRegex, '').trim();
 
-    // 从第一步处理过的标题末尾，移除这些后缀
+    // 3. 创建另一个正则表达式，用于移除末尾的、没有括号的版本标签
+    const suffixRegex = new RegExp(`(${versionTags.join('|')})$`, 'i');
     coreTitle = coreTitle.replace(suffixRegex, '').trim();
     
+    // 4. 定义“第一季”的各种常见写法
+    const seasonOneTags = ['第一季', '第1季', 'Season 1', 'S01', 'Season1'];
+    // 创建一个正则表达式，用于匹配并移除末尾的“第一季”标识
+    const seasonOneRegex = new RegExp(`[\\s\\(（【\\[]?(${seasonOneTags.join('|')})[\\)）】\\]]?$`, 'i');
+    coreTitle = coreTitle.replace(seasonOneRegex, '').trim();
+
+    // 5. 移除所有剩余的空格字符
+    coreTitle = coreTitle.replace(/\s+/g, '');
+
     return coreTitle;
 }
 

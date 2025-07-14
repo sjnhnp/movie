@@ -29,37 +29,53 @@ let adFilteringEnabled = false;
 let universalId = '';
 
 // 提取核心标题，用于匹配同一作品的不同版本
-function getCoreTitle(title) {
-    if (typeof title !== 'string') return '';
-    let coreTitle = title;
-    const versionTags = [
-        '国语', '国', 
-        '粤语', '粤',
-        '台配', '台',
-        '中字', '普通话',
-        '高清', 'HD', '版', '修复版', 'TC', '蓝光', '4K',
+function getCoreTitle(title, typeName = '') {
+    if (typeof title !== 'string') {
+        return '';
+    }
+
+    let baseName = title;
+
+    // 步骤 1: 使用正则表达式，仅对电影类型移除副标题
+    const movieKeywords = [
+        '电影', '剧情', '动作', '冒险', '同性', '喜剧', '奇幻',
+        '恐怖', '悬疑', '惊悚', '灾难', '爱情', '犯罪', '科幻', '抢先',
+        '动画', '歌舞', '战争', '经典', '网络', '其它', '理论', '纪录'
     ];
-    // --- 【修改结束】---
-    
-    // 2. 创建一个更智能的正则表达式，用于移除被括号或空格包裹的版本标签
-    //    它会跳过包含数字的括号内容，以保护 (第一季) 这样的情况
+    const movieRegex = new RegExp(movieKeywords.join('|'));
+    if (typeName && movieRegex.test(typeName)) {
+        baseName = baseName.replace(/[:：].*/, '').trim();
+    }
+
+    // 步骤 2: 提取并统一季数
+    const numeralMap = { '一': '1', '二': '2', '三': '3', '四': '4', '五': '5', '六': '6', '七': '7', '八': '8', '九': '9', '十': '10' };
+    let normalizedTitle = title.replace(/[一二三四五六七八九十]/g, (match) => numeralMap[match]);
+
+    let seasonNumber = 1;
+    const seasonMatch = normalizedTitle.match(/(?:第|Season\s*)(\d+)[季部]/i);
+    if (seasonMatch) {
+        seasonNumber = parseInt(seasonMatch[1], 10);
+    }
+    const seasonIdentifier = `_S${String(seasonNumber).padStart(2, '0')}`;
+
+    // 步骤 3: 从基础名称中移除所有版本和季数标签，得到纯净的剧名
+    const seasonRegex = new RegExp('[\\s\\(（【\\[]?(?:第[一二三四五六七八九十\\d]+[季部]|Season\\s*\\d+)[\\)）】\\]]?', 'gi');
+    baseName = baseName.replace(seasonRegex, '').trim();
+
+    const versionTags = ['国语', '国', '粤语', '粤', '台配', '台', '中字', '普通话', '高清', 'HD', '版', '修复版', 'TC', '蓝光', '4K'];
     const bracketRegex = new RegExp(`[\\s\\(（【\\[](${versionTags.join('|')})(?![0-9])\\s*[\\)）】\\]]?`, 'gi');
-    coreTitle = coreTitle.replace(bracketRegex, '').trim();
-
-    // 3. 创建另一个正则表达式，用于移除末尾的、没有括号的版本标签
+    baseName = baseName.replace(bracketRegex, '').trim();
     const suffixRegex = new RegExp(`(${versionTags.join('|')})$`, 'i');
-    coreTitle = coreTitle.replace(suffixRegex, '').trim();
-    
-    // 4. 定义“第一季”的各种常见写法
-    const seasonOneTags = ['第一季', '第1季', 'Season 1', 'S01', 'Season1'];
-    // 创建一个正则表达式，用于匹配并移除末尾的“第一季”标识
-    const seasonOneRegex = new RegExp(`[\\s\\(（【\\[]?(${seasonOneTags.join('|')})[\\)）】\\]]?$`, 'i');
-    coreTitle = coreTitle.replace(seasonOneRegex, '').trim();
+    baseName = baseName.replace(suffixRegex, '').trim();
 
-    // 5. 移除所有剩余的空格字符
-    coreTitle = coreTitle.replace(/\s+/g, '');
+    baseName = baseName.replace(/\s+/g, '').trim();
 
-    return coreTitle;
+    // 步骤 4: 使用正确的变量 `movieRegex` 来进行判断
+    if (typeName && movieRegex.test(typeName) && !seasonMatch) {
+        return baseName;
+    }
+
+    return `${baseName}${seasonIdentifier}`;
 }
 
 // 生成视频统一标识符，用于跨线路共享播放进度
@@ -435,7 +451,6 @@ async function doEpisodeSwitch(index, url) {
     updateBrowserHistory(url);
 
     if (player) {
-        // 【修改】切换剧集时也要经过URL处理
         const processedUrl = await processVideoUrl(url);
         player.src = { src: processedUrl, type: 'application/x-mpegurl' };
         player.play().catch(e => console.warn("Autoplay after episode switch was prevented.", e));
@@ -446,11 +461,8 @@ async function doEpisodeSwitch(index, url) {
     document.addEventListener('DOMContentLoaded', async () => {
         const urlParams = new URLSearchParams(window.location.search);
 
-        // 【修改】读取 af 参数
         adFilteringEnabled = urlParams.get('af') === '1';
-
         universalId = urlParams.get('universalId') || '';
-
         let episodeUrlForPlayer = urlParams.get('url');
 
         function fullyDecode(str) {
@@ -464,25 +476,27 @@ async function doEpisodeSwitch(index, url) {
         currentEpisodeIndex = parseInt(urlParams.get('index') || '0', 10);
         vodIdForPlayer = urlParams.get('id') || '';
         currentVideoYear = urlParams.get('year') || '';
-        currentVideoTypeName = urlParams.get('typeName') || '';
+        currentVideoTypeName = urlParams.get('typeName') || ''; // 已获取当前视频的 typeName
 
         const sourceMapJSON = sessionStorage.getItem('videoSourceMap');
         if (sourceMapJSON) {
             try {
                 const sourceMap = JSON.parse(sourceMapJSON);
-                const clickedTitle = urlParams.get('title') ? fullyDecode(urlParams.get('title')) : '';
-                const clickedYear = urlParams.get('year') || '';
 
-                const coreClickedTitle = getCoreTitle(clickedTitle);
+                const coreClickedTitle = getCoreTitle(currentVideoTitle, currentVideoTypeName);
 
                 const relevantSources = [];
                 for (const key in sourceMap) {
                     if (sourceMap.hasOwnProperty(key)) {
-                        const [keyTitle, keyYear] = key.split('|');
-                        const coreKeyTitle = getCoreTitle(keyTitle);
+                        const sourceItem = sourceMap[key][0];
+                        if (!sourceItem) continue;
+
+                        const coreKeyTitle = getCoreTitle(sourceItem.vod_name, sourceItem.type_name);
+
+                        const clickedYear = currentVideoYear;
+                        const keyYear = sourceItem.vod_year;
 
                         if (coreKeyTitle === coreClickedTitle && (!clickedYear || !keyYear || keyYear === clickedYear)) {
-                            // 直接将完整的 item 对象添加到聚合列表中
                             relevantSources.push(...sourceMap[key]);
                         }
                     }
@@ -528,7 +542,7 @@ async function doEpisodeSwitch(index, url) {
                     if (wantsToResume) {
                         nextSeekPosition = savedProgress;
                     } else {
-                        clearVideoProgressForEpisode(currentEpisodeIndex);
+                        clearVideoProgressForEpisode(universalId);
                         nextSeekPosition = 0;
                     }
                 }
@@ -1008,7 +1022,6 @@ function setupSkipDropdownEvents() {
     });
 }
 
-
 function setupLineSwitching() {
     const button = document.getElementById('line-switch-button');
     const dropdown = document.getElementById('line-switch-dropdown');
@@ -1026,15 +1039,43 @@ function setupLineSwitching() {
             availableAlternativeSources.forEach(source => {
                 const item = document.createElement('button');
 
-                const coreTitle = getCoreTitle(source.vod_name);
-                let versionTag = source.vod_name.replace(coreTitle, '').trim();
-                if (!versionTag && source.vod_remarks) {
-                    versionTag = source.vod_remarks;
+                const vodName = source.vod_name || '';
+                const remarks = source.vod_remarks || '';
+
+                const allVersionTags = ['国语', '国', '粤语', '粤', '台配', '台', '中字', '普通话', '高清', 'HD', '修复版', 'TC', '蓝光', '4K'];
+                const seasonRegex = /(第[一二三四五六七八九十\d]+[季部]|Season\s*\d+)/i;
+
+                const foundTags = [];
+                allVersionTags.forEach(tag => {
+                    if (vodName.includes(tag)) {
+                        foundTags.push(tag);
+                    }
+                });
+
+                // 为了避免 "国语" 和 "国" 同时被匹配，做一个简单的去重
+                if (foundTags.includes('国语') && foundTags.includes('国')) {
+                    foundTags.splice(foundTags.indexOf('国'), 1);
                 }
-                if (versionTag && !/^[\[\(【（]/.test(versionTag)) {
-                    versionTag = `(${versionTag})`;
+                if (foundTags.includes('粤语') && foundTags.includes('粤')) {
+                    foundTags.splice(foundTags.indexOf('粤'), 1);
                 }
-                item.textContent = `${source.source_name} ${versionTag}`.trim();
+                if (foundTags.includes('台配') && foundTags.includes('台')) {
+                    foundTags.splice(foundTags.indexOf('台'), 1);
+                }
+
+                const seasonMatch = vodName.match(seasonRegex);
+                if (seasonMatch) {
+                    foundTags.push(seasonMatch[0]);
+                }
+                if (remarks) {
+                    foundTags.push(remarks);
+                }
+
+                let tagsDisplay = '';
+                if (foundTags.length > 0) {
+                    tagsDisplay = `(${foundTags.join(', ')})`;
+                }
+                item.textContent = `${source.source_name} ${tagsDisplay}`.trim();
 
                 item.dataset.sourceCode = source.source_code;
                 item.dataset.vodId = source.vod_id;
@@ -1095,7 +1136,7 @@ async function switchLine(newSourceCode, newVodId) {
         if (detailData.code !== 200 || !detailData.episodes || !detailData.episodes.length === 0) {
             throw new Error(`在线路“${targetSourceItem.source_name}”上获取剧集列表失败`);
         }
-        
+
         const newEps = detailData.episodes;
         const timeToSeek = player.currentTime;
 
@@ -1104,7 +1145,7 @@ async function switchLine(newSourceCode, newVodId) {
         currentEpisodes = newEps;
         window.currentEpisodes = newEps;
         localStorage.setItem('currentEpisodes', JSON.stringify(newEps));
-        
+
         currentVideoTitle = targetSourceItem.vod_name;
         currentVideoYear = targetSourceItem.vod_year;
         currentVideoTypeName = targetSourceItem.type_name;
@@ -1131,25 +1172,25 @@ async function switchLine(newSourceCode, newVodId) {
 
         universalId = generateUniversalId(currentVideoTitle, currentVideoYear, targetEpisodeIndex);
         newUrlForBrowser.searchParams.set('universalId', universalId);
-        
+
         window.history.replaceState({}, '', newUrlForBrowser.toString());
 
         // 3. 更新播放器和页面显示
         nextSeekPosition = timeToSeek;
         const processedUrl = await processVideoUrl(newEpisodeUrl);
-        
+
         // 在更新播放源的同时，明确地更新播放器组件的标题
         player.src = { src: processedUrl, type: 'application/x-mpegurl' };
         player.title = currentVideoTitle; // 命令播放器UI更新标题
 
         player.play();
-        
+
         renderEpisodes();
         updateEpisodeInfo();
-        
+
         const dropdown = document.getElementById('line-switch-dropdown');
-        if(dropdown) dropdown.innerHTML = ''; 
-        
+        if (dropdown) dropdown.innerHTML = '';
+
         if (loadingEl) loadingEl.style.display = 'none';
         showMessage(`已切换到线路: ${targetSourceItem.source_name}`, 'success');
 

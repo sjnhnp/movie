@@ -22,13 +22,13 @@ window.SITE_CONFIG = SITE_CONFIG;
 
 // API站点配置
 const API_SITES = { 
-    yzzy: { api: 'https://api.yzzy-api.com/inc/apijson.php', name: '优质资源' },
+    heimuer: { api: 'https://json.heimuer.xyz/api.php/provide/vod', name: '黑木耳', detail: 'https://heimuer.tv' },  
     bfzy: { api: 'https://bfzyapi.com/api.php/provide/vod', name: '暴风资源' },
     dyttzy: { api: 'http://caiji.dyttzyapi.com/api.php/provide/vod', name: '电影天堂', detail: 'http://caiji.dyttzyapi.com' },
-    heimuer: { api: 'https://json.heimuer.xyz/api.php/provide/vod', name: '黑木耳', detail: 'https://heimuer.tv' },  
     tyyszy: { api: 'https://tyyszy.com/api.php/provide/vod', name: '天涯资源' },  
     mdzy: { api: 'https://www.mdzyapi.com/api.php/provide/vod', name: '魔都资源' },  
-    maotai: { api: 'https://caiji.maotaizy.cc/api.php/provide/vod', name: '茅台资源' }, 
+    maotai: { api: 'https://caiji.maotaizy.cc/api.php/provide/vod', name: '茅台资源' },
+    yzzy: { api: 'https://api.yzzy-api.com/inc/apijson.php', name: '优质资源' }, 
     mozhua: { api: 'https://mozhuazy.com/api.php/provide/vod', name: '魔爪资源' }, 
     ruyi: { api: 'https://cj.rycjapi.com/api.php/provide/vod', name: '如意资源' }, 
     wolong: { api: 'https://wolongzyw.com/api.php/provide/vod', name: '卧龙资源' }, 
@@ -46,10 +46,10 @@ const API_SITES = {
 };
 
 window.API_SITES = API_SITES; 
-const DEFAULT_SELECTED_APIS = ["heimuer", "bfzy", "yzzy", "maotai", "mdzy", "tyyszy", "dyttzy"];
+const DEFAULT_SELECTED_APIS = ["heimuer", "bfzy", "dyttzy", "maotai", "tyyszy"];
 window.DEFAULT_SELECTED_APIS = DEFAULT_SELECTED_APIS;
 
-// 聚合搜索配置 (与 renew.txt 原有保持一致)
+// 聚合搜索配置
 const AGGREGATED_SEARCH_CONFIG = { 
     enabled: true, 
     timeout: 8000, // 单个源超时时间（毫秒） 
@@ -58,7 +58,7 @@ const AGGREGATED_SEARCH_CONFIG = {
     showSourceBadges: true 
 };
 
-// API请求配置 (已更新 path 字段)
+// API请求配置
 const API_CONFIG = { 
     search: {
         path: '?ac=videolist&wd=', // 更新：仅含查询参数 
@@ -82,7 +82,7 @@ const API_CONFIG = {
 const M3U8_PATTERN = /\$https?:\/\/[^"'\s]+?\.m3u8/g;
 
 // 自定义播放器URL
-const CUSTOM_PLAYER_URL = 'player.html'; // 使用相对路径引用本地player.html 
+const CUSTOM_PLAYER_URL = 'player.html'; 
 
 // 预加载集数开关
 const DEFAULTS = { 

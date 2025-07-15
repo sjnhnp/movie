@@ -20,24 +20,25 @@ const SITE_CONFIG = {
 
 window.SITE_CONFIG = SITE_CONFIG; 
 
-// API站点配置（已更新 api 字段以包含完整路径）
+// API站点配置
 const API_SITES = { 
-    jmzy: { api: 'https://api.jmzy.com/api.php/provide/vod', name: '金马资源' },
+    yzzy: { api: 'https://api.yzzy-api.com/inc/apijson.php', name: '优质资源' },
     bfzy: { api: 'https://bfzyapi.com/api.php/provide/vod', name: '暴风资源' },
     dyttzy: { api: 'http://caiji.dyttzyapi.com/api.php/provide/vod', name: '电影天堂', detail: 'http://caiji.dyttzyapi.com' },
     heimuer: { api: 'https://json.heimuer.xyz/api.php/provide/vod', name: '黑木耳', detail: 'https://heimuer.tv' },  
     tyyszy: { api: 'https://tyyszy.com/api.php/provide/vod', name: '天涯资源' },  
+    mdzy: { api: 'https://www.mdzyapi.com/api.php/provide/vod', name: '魔都资源' },  
+    maotai: { api: 'https://caiji.maotaizy.cc/api.php/provide/vod', name: '茅台资源' }, 
+    mozhua: { api: 'https://mozhuazy.com/api.php/provide/vod', name: '魔爪资源' }, 
+    ruyi: { api: 'https://cj.rycjapi.com/api.php/provide/vod', name: '如意资源' }, 
     wolong: { api: 'https://wolongzyw.com/api.php/provide/vod', name: '卧龙资源' }, 
     dbzy: { api: 'https://caiji.dbzy5.com/api.php/provide/vod', name: '豆瓣资源' },  
-    hwba: { api: 'https://cjhwba.com/api.php/provide/vod', name: '华为吧资源' },  
-    ruyi: { api: 'https://cj.rycjapi.com/api.php/provide/vod', name: '如意资源' }, 
-    maotai: { api: 'https://caiji.maotaizy.cc/api.php/provide/vod', name: '茅台资源' },  
+    hwba: { api: 'https://cjhwba.com/api.php/provide/vod', name: '华为吧资源' },   
+    jmzy: { api: 'https://api.jmzy.com/api.php/provide/vod', name: '金马资源' },
     zy360: { api: 'https://360zy.com/api.php/provide/vod', name: '360资源' }, 
     jisu: { api: 'https://jszyapi.com/api.php/provide/vod', name: '极速资源', detail: 'https://jszyapi.com' }, 
     huya: { api: 'https://www.huyaapi.com/api.php/provide/vod', name: '虎牙资源', detail: 'https://www.huyaapi.com', },  
-    mozhua: { api: 'https://mozhuazy.com/api.php/provide/vod', name: '魔爪资源' }, 
-    mdzy: { api: 'https://www.mdzyapi.com/api.php/provide/vod', name: '魔都资源' },  
-    zuid: { api: 'https://api.zuidapi.com/api.php/provide/vod', name: '最大资源' }, 
+    zuid: { api: 'https://api.zuidapi.com/api.php/provide/vod', name: '最大资源' },  
     baidu: { api: 'https://api.apibdzy.com/api.php/provide/vod', name: '百度云资源' }, 
     wujin: { api: 'https://api.wujinapi.me/api.php/provide/vod', name: '无尽资源' }, 
     wwzy: { api: 'https://wwzy.tv/api.php/provide/vod', name: '旺旺短剧' },
@@ -45,8 +46,8 @@ const API_SITES = {
 };
 
 window.API_SITES = API_SITES; 
-const DEFAULT_SELECTED_APIS = ["heimuer", "bfzy", "tyyszy", "dyttzy", "jmzy"];
-window.DEFAULT_SELECTED_APIS = DEFAULT_SELECTED_APIS; // 将其设为全局变量
+const DEFAULT_SELECTED_APIS = ["heimuer", "bfzy", "yzzy", "maotai", "mdzy", "tyyszy", "dyttzy"];
+window.DEFAULT_SELECTED_APIS = DEFAULT_SELECTED_APIS;
 
 // 聚合搜索配置 (与 renew.txt 原有保持一致)
 const AGGREGATED_SEARCH_CONFIG = { 

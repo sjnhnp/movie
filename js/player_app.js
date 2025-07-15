@@ -89,6 +89,17 @@ function generateUniversalId(title, year, episodeIndex) {
 }
 
 // 实用工具函数
+function hidePlayerOverlays() {
+    const errorElement = document.getElementById('error');
+    if (errorElement) {
+        errorElement.style.display = 'none';
+    }
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.style.display = 'none';
+    }
+}
+
 function showToast(message, type = 'info', duration = 3000) {
 
     const toast = document.getElementById('toast');
@@ -135,18 +146,14 @@ function showMessage(text, type = 'info', duration = 3000) {
     }, duration);
 }
 
-
 function showError(message) {
-    const loadingEl = document.getElementById('loading');
+    hidePlayerOverlays();
+
     const errorElement = document.getElementById('error');
     if (errorElement) {
         const errorTextElement = errorElement.querySelector('.text-xl.font-bold');
         if (errorTextElement) errorTextElement.textContent = message;
         errorElement.style.display = 'flex';
-        if (loadingEl) {
-            loadingEl.classList.remove('hidden');
-            loadingEl.style.display = 'flex';
-        }
     }
     showMessage(message, 'error');
 }
@@ -166,7 +173,6 @@ function getShowIdentifier(perEpisode = true) {
 
     if (vid) return `${currentVideoTitle}_${sc}_${vid}${ep}`;
 
-    // If no video ID is available, use the first episode's URL to create a consistent identifier for the show.
     const raw = (currentEpisodes && currentEpisodes.length > 0) ? currentEpisodes[0] : '';
     if (!raw) return `${currentVideoTitle}_${sc}${ep}`;
 
@@ -211,11 +217,7 @@ function showProgressRestoreModal(opts) {
     });
 }
 
-/**
- * 根据广告过滤设置，异步处理视频URL。
- * @param {string} url 原始视频URL
- * @returns {Promise<string>} 处理后的视频URL (可能是原始URL或Blob URL)
- */
+// 根据广告过滤设置，异步处理视频URL。
 async function processVideoUrl(url) {
     // 如果未启用广告过滤，直接返回原始 URL
     if (!adFilteringEnabled) {
@@ -243,7 +245,6 @@ async function processVideoUrl(url) {
                 continue;
             }
 
-            // 处理加密密钥(key)的相对路径，将其转换为绝对路径
             if (line.startsWith('#EXT-X-KEY')) {
                 const uriMatch = line.match(/URI="([^"]+)"/);
                 if (uriMatch && uriMatch[1]) {
@@ -257,10 +258,8 @@ async function processVideoUrl(url) {
                 }
             }
 
-            // 如果当前行是片段 URI（简单按 .ts/.m3u8 判断）
             else if (line && !line.startsWith('#') && /\.(ts|m3u8)(\?|$)/i.test(line.trim())) {
                 try {
-                    // new URL 可以自动把相对路径、// 开头、绝对路径等都补全成完整 URL
                     line = new URL(line.trim(), baseUrl).href;
                 } catch (e) {
                     console.warn('URL 补全失败，保留原行:', line, e);
@@ -271,7 +270,6 @@ async function processVideoUrl(url) {
 
         const filteredM3u8 = cleanLines.join('\n');
 
-        // 3. 生成 Blob URL
         const blob = new Blob([filteredM3u8], { type: 'application/vnd.apple.mpegurl' });
         return URL.createObjectURL(blob);
 
@@ -300,13 +298,13 @@ async function initPlayer(videoUrl, title) {
         player = null;
     }
 
-    // 【修改】在创建播放器前处理URL
+    // 在创建播放器前处理URL
     const processedUrl = await processVideoUrl(videoUrl);
 
     try {
         player = await VidstackPlayer.create({
             target: playerContainer,
-            // 【修改】使用处理过的URL
+            // 使用处理过的URL
             src: { src: processedUrl, type: 'application/x-mpegurl' },
             title: title,
             autoplay: true,
@@ -402,6 +400,8 @@ function addPlayerEventListeners() {
 }
 
 async function playEpisode(index) {
+    hidePlayerOverlays();
+
     if (isNavigatingToEpisode || index < 0 || index >= currentEpisodes.length) {
         return;
     }
@@ -418,11 +418,10 @@ async function playEpisode(index) {
         const currentUniversalId = generateUniversalId(currentVideoTitle, currentVideoYear, index);
         const allProgress = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
         const savedProgress = allProgress[currentUniversalId];
-
         if (savedProgress && savedProgress > 5) {
             const wantsToResume = await showProgressRestoreModal({
                 title: "继续播放？",
-                content: `《${currentVideoTitle}》第 ${index + 1}，<br> <span style="color:#00ccff">${formatPlayerTime(savedProgress)}</span> `,
+                content: `《${currentVideoTitle}》第 ${index + 1} 集，<br> <span style="color:#00ccff">${formatPlayerTime(savedProgress)}</span> `,
                 confirmText: "YES",
                 cancelText: "NO"
             });
@@ -443,15 +442,28 @@ async function playEpisode(index) {
     doEpisodeSwitch(index, currentEpisodes[index]);
 }
 
-async function doEpisodeSwitch(index, url) {
+async function doEpisodeSwitch(index, episodeString) {
+    let playUrl = episodeString;
+    if (episodeString && episodeString.includes('$')) {
+        playUrl = episodeString.split('$')[1];
+    }
+
+    // 增加一个检查，确保一个有效的URL
+    if (!playUrl || !playUrl.startsWith('http')) {
+        showError(`无效的播放链接: ${playUrl || '链接为空'}`);
+        console.error("解析出的播放链接无效:", playUrl);
+        isNavigatingToEpisode = false;
+        return;
+    }
+
     currentEpisodeIndex = index;
     window.currentEpisodeIndex = index;
 
     updateUIForNewEpisode();
-    updateBrowserHistory(url);
+    updateBrowserHistory(playUrl);
 
     if (player) {
-        const processedUrl = await processVideoUrl(url);
+        const processedUrl = await processVideoUrl(playUrl);
         player.src = { src: processedUrl, type: 'application/x-mpegurl' };
         player.play().catch(e => console.warn("Autoplay after episode switch was prevented.", e));
     }
@@ -476,7 +488,7 @@ async function doEpisodeSwitch(index, url) {
         currentEpisodeIndex = parseInt(urlParams.get('index') || '0', 10);
         vodIdForPlayer = urlParams.get('id') || '';
         currentVideoYear = urlParams.get('year') || '';
-        currentVideoTypeName = urlParams.get('typeName') || ''; // 已获取当前视频的 typeName
+        currentVideoTypeName = urlParams.get('typeName') || '';
 
         const sourceMapJSON = sessionStorage.getItem('videoSourceMap');
         if (sourceMapJSON) {
@@ -588,17 +600,16 @@ function updateUIForNewEpisode() {
 
 function updateBrowserHistory(newEpisodeUrl) {
     const newUrlForBrowser = new URL(window.location.href);
+
     newUrlForBrowser.searchParams.set('url', newEpisodeUrl);
+
     newUrlForBrowser.searchParams.set(
         'universalId',
         generateUniversalId(currentVideoTitle, currentVideoYear, currentEpisodeIndex)
     );
     newUrlForBrowser.searchParams.set('index', currentEpisodeIndex.toString());
     newUrlForBrowser.searchParams.delete('position');
-    newUrlForBrowser.searchParams.set(
-        'universalId',
-        generateUniversalId(currentVideoTitle, currentVideoYear, currentEpisodeIndex)
-    );
+
     window.history.pushState({ path: newUrlForBrowser.toString(), episodeIndex: currentEpisodeIndex }, '', newUrlForBrowser.toString());
 }
 
@@ -636,7 +647,6 @@ function setupPlayerControls() {
     const lockButton = document.getElementById('lock-button');
     if (lockButton) lockButton.addEventListener('click', toggleLockScreen);
 }
-
 
 function handleKeyboardShortcuts(e) {
     if (!player || (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName))) return;
@@ -799,27 +809,60 @@ function clearCurrentVideoAllEpisodeProgresses() {
 function renderEpisodes() {
     const grid = document.getElementById('episode-grid');
     if (!grid) { setTimeout(renderEpisodes, 100); return; }
+
     const container = document.getElementById('episodes-container');
-    if (container) {
-        container.classList.toggle('hidden', currentEpisodes.length <= 1);
-    }
+    if (container) { container.classList.toggle('hidden', currentEpisodes.length <= 1); }
+
     const countSpan = document.getElementById('episodes-count');
-    if (countSpan) countSpan.textContent = `共 ${currentEpisodes.length} 集`;
+    if (countSpan) { countSpan.textContent = `共 ${currentEpisodes.length} 集`; }
+
+    // 定义综艺类型关键词
+    const varietyShowTypes = ['综艺', '脱口秀', '真人秀'];
+    const isVarietyShow = varietyShowTypes.some(type => currentVideoTypeName && currentVideoTypeName.includes(type));
+
+    // 根据类型切换容器的CSS类
+    if (isVarietyShow) {
+        // 综艺
+        grid.className = 'episode-grid-container variety-grid-layout';
+    } else {
+        // 非综艺
+        grid.className = 'episode-grid grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2';
+    }
+
     grid.innerHTML = '';
     if (!currentEpisodes.length) {
         grid.innerHTML = '<div class="col-span-full text-center text-gray-400 py-4">没有可用的剧集</div>';
         return;
     }
-    const order = [...Array(currentEpisodes.length).keys()];
-    if (episodesReversed) order.reverse();
-    order.forEach(idx => {
+
+    const orderedEpisodes = episodesReversed ? [...currentEpisodes].reverse() : [...currentEpisodes];
+    orderedEpisodes.forEach((episodeData, index) => {
+        const originalIndex = episodesReversed ? (currentEpisodes.length - 1 - index) : index;
+
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = idx === currentEpisodeIndex ? 'p-2 rounded episode-active' : 'p-2 rounded bg-[#222] hover:bg-[#333] text-gray-300';
-        btn.textContent = idx + 1;
-        btn.dataset.index = idx;
+        btn.dataset.index = originalIndex;
+
+        const parts = (episodeData || '').split('$');
+        const episodeName = parts.length > 1 ? parts[0].trim() : '';
+
+        // 根据是否为综艺决定按钮文本和标题
+        if (isVarietyShow && episodeName) {
+            btn.textContent = episodeName;
+            btn.title = episodeName;
+        } else {
+            btn.textContent = originalIndex + 1;
+            btn.title = `第 ${originalIndex + 1} 集`;
+        }
+
+        // 高亮当前播放的集数
+        if (originalIndex === currentEpisodeIndex) {
+            btn.classList.add('episode-active');
+        }
+
         grid.appendChild(btn);
     });
+
     if (!grid._sListenerBound) {
         grid.addEventListener('click', evt => {
             const target = evt.target.closest('button[data-index]');
@@ -1052,7 +1095,7 @@ function setupLineSwitching() {
                     }
                 });
 
-                // 为了避免 "国语" 和 "国" 同时被匹配，做一个简单的去重
+                // 简单的去重：为了避免 "国语" 和 "国" 同时被匹配
                 if (foundTags.includes('国语') && foundTags.includes('国')) {
                     foundTags.splice(foundTags.indexOf('国'), 1);
                 }
@@ -1140,7 +1183,6 @@ async function switchLine(newSourceCode, newVodId) {
         const newEps = detailData.episodes;
         const timeToSeek = player.currentTime;
 
-        // 1. 更新内存中的全局JS变量
         vodIdForPlayer = newVodId;
         currentEpisodes = newEps;
         window.currentEpisodes = newEps;
@@ -1150,7 +1192,6 @@ async function switchLine(newSourceCode, newVodId) {
         currentVideoYear = targetSourceItem.vod_year;
         currentVideoTypeName = targetSourceItem.type_name;
 
-        // 2. 更新浏览器地址栏URL (无刷新)
         let targetEpisodeIndex = currentEpisodeIndex;
         if (targetEpisodeIndex >= newEps.length) {
             targetEpisodeIndex = newEps.length > 0 ? newEps.length - 1 : 0;
@@ -1175,13 +1216,11 @@ async function switchLine(newSourceCode, newVodId) {
 
         window.history.replaceState({}, '', newUrlForBrowser.toString());
 
-        // 3. 更新播放器和页面显示
         nextSeekPosition = timeToSeek;
         const processedUrl = await processVideoUrl(newEpisodeUrl);
 
-        // 在更新播放源的同时，明确地更新播放器组件的标题
         player.src = { src: processedUrl, type: 'application/x-mpegurl' };
-        player.title = currentVideoTitle; // 命令播放器UI更新标题
+        player.title = currentVideoTitle;
 
         player.play();
 
@@ -1230,9 +1269,17 @@ function setupRememberEpisodeProgressToggle() {
 }
 
 function retryLastAction() {
+    hidePlayerOverlays();
+
     const errorEl = document.getElementById('error');
     if (errorEl) errorEl.style.display = 'none';
+
     if (!lastFailedAction) {
+        if (player && player.currentSrc) {
+            console.log("重试：重新加载当前视频源。");
+            player.src = player.currentSrc; // 重新设置源
+            player.play().catch(e => console.error("重试播放失败", e));
+        }
         return;
     }
     if (lastFailedAction.type === 'switchLine') {
@@ -1245,7 +1292,7 @@ function retryLastAction() {
         lastFailedAction = null;
         if (player && player.currentSrc) {
             player.src = player.currentSrc;
-            player.play();
+            player.play().catch(e => console.error("重试播放失败", e));
         }
     }
 }

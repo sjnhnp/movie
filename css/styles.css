@@ -1,7 +1,9 @@
 /* -------- 1. 全局 CSS 变量（保留） -------- */
 :root {
-  --primary-color: #d4af37;  /* 改为金色 */
-  --primary-light: #f4e4bc;  /* 改为浅金色 */
+  --primary-color: #d4af37;
+  /* 改为金色 */
+  --primary-light: #f4e4bc;
+  /* 改为浅金色 */
   --secondary-color: #0f1622;
   --accent-color: #ff3c78;
   --text-color: #e6f2ff;
@@ -105,7 +107,7 @@ button,
   overflow: hidden;
   text-overflow: ellipsis;
   -webkit-line-clamp: 2;
-  line-clamp: 2; 
+  line-clamp: 2;
   line-height: 1.2rem;
   word-break: break-word;
   hyphens: auto;
@@ -464,7 +466,7 @@ body {
     border-radius: 50%;
     padding: 0.25rem;
   }
-  
+
   .history-item .delete-btn:active {
     background-color: rgba(239, 68, 68, 0.2);
     transform: scale(0.95);
@@ -824,7 +826,8 @@ body {
 
 /* 清空历史按钮 - 修复黑色背景问题 */
 .history-panel .mt-4.text-center.sticky.bottom-0 {
-  background: transparent !important; /* 移除背景色 */
+  background: transparent !important;
+  /* 移除背景色 */
   padding: 0.75rem 1rem;
   margin: 0;
 }
@@ -837,10 +840,12 @@ body {
   padding: 0.75rem 1.5rem;
   width: 100%;
   box-sizing: border-box;
-  color: #d4af37; /* 添加文字颜色 */
+  color: #d4af37;
+  /* 添加文字颜色 */
   font-weight: 500;
   transition: all 0.3s ease;
 }
+
 .history-panel .clear-history-btn:hover {
   background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.15)) !important;
   border-color: rgba(212, 175, 55, 0.4);
@@ -863,17 +868,55 @@ body {
 
 /* 移动端：始终显示删除按钮 */
 @media (max-width: 768px) {
-.history-item .history-item-delete-btn {
-  opacity: 1;
-  /* 为了在移动端有更好的点击效果，可以加一点样式 */
-  background-color: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 50%;
-  padding: 0.2rem; /* 微调点击区域 */
+  .history-item .history-item-delete-btn {
+    opacity: 1;
+    /* 为了在移动端有更好的点击效果，可以加一点样式 */
+    background-color: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 50%;
+    padding: 0.2rem;
+    /* 微调点击区域 */
+  }
+
+  .history-item .history-item-delete-btn:active {
+    background-color: rgba(239, 68, 68, 0.2);
+    transform: scale(0.95);
+  }
 }
 
-.history-item .history-item-delete-btn:active {
-  background-color: rgba(239, 68, 68, 0.2);
-  transform: scale(0.95);
+/* 综艺按钮专用样式 (首页弹窗) */
+.variety-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
 }
+
+/* 综艺节目按钮的样式 (仅在.variety-grid-layout容器内生效) */
+.variety-grid-layout .episode-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: white;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+  width: 100%;
+}
+
+.variety-grid-layout .episode-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--primary-color);
+}
+
+/* 全局激活按钮的样式 (对所有类型节目都有效) */
+.episode-active {
+  background: #3b82f6 !important;
+  border-color: #60a5fa !important;
+  color: #fff !important;
+  font-weight: bold;
 }

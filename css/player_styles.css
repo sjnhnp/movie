@@ -1,8 +1,9 @@
-/* 基本布局和播放器相关样式 */
+/* 基本布局和播放器相关样式（现代简约风格） */
 .player-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
+  background: var(--page-gradient-start);
 }
 
 /* 播放器区域 */
@@ -226,49 +227,139 @@ input:disabled+.slider {
   /* 最彻底的解决方案 */
 }
 
+/* 确保播放器原生控制条不会覆盖功能按钮菜单 */
+.vds-controls {
+  z-index: 50 !important;
+  /* 低于功能菜单的z-index */
+}
+
+media-player .vds-controls {
+  z-index: 50 !important;
+}
+
+media-player .vds-controls-group {
+  z-index: 50 !important;
+}
+
+/* 确保所有播放器UI元素都不会覆盖功能菜单 */
+media-player * {
+  z-index: 50 !important;
+}
+
+/* 但是要确保下拉菜单有更高的z-index */
+#play-settings-dropdown,
+#line-switch-dropdown,
+#skip-control-dropdown {
+  z-index: 10000 !important;
+}
+
+/* 功能控制条容器也需要高z-index */
+.player-control-bar {
+  position: relative;
+  z-index: 100;
+}
+
+/* 功能控制条的父容器 - 减小padding */
+.p-6.bg-white\/5 {
+  position: relative;
+  z-index: 100;
+  padding: 0.75rem !important;
+  /* 大幅减小padding */
+}
+
+/* 确保功能控制条容器有足够高的z-index */
+.bg-white\/5.backdrop-blur-md {
+  position: relative;
+  z-index: 100;
+  padding: 0.75rem !important;
+  /* 大幅减小padding */
+}
+
 /* end 锁屏样式 */
 
-/* 选集按钮样式（未选中） */
+/* 选集按钮样式（现代简约风格） */
 #episode-grid button:not(.episode-active) {
-  background: #222;
-  color: #d1d5db;
-  border: 1px solid #333;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.875rem;
 }
 
 #episode-grid button:not(.episode-active):hover {
-  background: #333;
-  color: #fff
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* 仅图标按钮的统一尺寸 */
+/* 选集按钮激活状态（现代简约风格） */
+.episode-active {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color)) !important;
+  border-color: var(--primary-color) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+  transform: translateY(-1px) !important;
+  border-radius: 8px !important;
+  /* 保持与非选中状态一致的圆角 */
+}
+
+/* 现代简约图标按钮样式 */
 .icon-btn {
-  padding: 0.5rem;
+  padding: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 统一播放控制按钮样式 */
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 统一播放控制按钮样式（现代简约风格） */
 #prev-episode,
 #next-episode {
-  /* 减小按钮尺寸，与控制栏按钮保持一致 */
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 10px;
+  /* 稍微减小圆角 */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  /* 减小间距 */
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  /* 减小阴影 */
+  padding: 0.5rem 0.75rem;
+  /* 减小padding */
+  font-size: 0.875rem;
+  /* 减小字体 */
 }
 
 #prev-episode:hover:not(:disabled),
 #next-episode:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
   color: #ffffff;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
 
 #prev-episode:active:not(:disabled),
@@ -278,7 +369,7 @@ input:disabled+.slider {
 
 #prev-episode:disabled,
 #next-episode:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
 }
@@ -289,35 +380,71 @@ input:disabled+.slider {
   height: 18px;
 }
 
-/* 确保集数信息也有一致的样式 */
+/* 确保集数信息也有一致的现代简约样式 */
 #episode-info-span {
   font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 500;
+  /* 减小字体 */
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  /* 与按钮保持一致 */
+  padding: 0.5rem 0.75rem;
+  /* 减小padding，与按钮一致 */
+  height: auto;
+  /* 确保高度自适应 */
+  display: none;
+  align-items: center;
+  justify-content: center;
 }
 
 /* 统一所有控制按钮的间距和排版 */
-.flex.items-center.justify-between.p-4 {
+.flex.items-center.justify-between.p-6 {
   padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
+  /* 大幅减小padding */
+  margin-bottom: 0.25rem;
+  /* 减小底部间距 */
 }
 
 /* 响应式调整 */
 @media (max-width: 768px) {
+
   #prev-episode,
   #next-episode {
-    padding: 0.4rem 0.6rem;
-    font-size: 0.8125rem;
+    padding: 0.375rem 0.5rem;
+    /* 进一步减小padding */
+    font-size: 0.75rem;
+    /* 进一步减小字体 */
+    gap: 0.375rem;
+    /* 减小图标和文字间距 */
+    min-height: 36px;
+    /* 设置最小高度 */
   }
-  
+
   #prev-episode svg,
   #next-episode svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    /* 减小图标 */
+    height: 14px;
   }
-  
+
   #episode-info-span {
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
+    /* 进一步减小字体 */
+    padding: 0.375rem 0.5rem;
+    /* 与按钮保持一致 */
+    min-height: 36px;
+    /* 与按钮保持一致的高度 */
+  }
+
+  /* 进一步减小移动端区域间距 */
+  .flex.items-center.justify-between.p-6 {
+    padding: 0.5rem 0.75rem;
+    /* 移动端更小的padding */
+    margin-bottom: 0.125rem;
+    /* 更小的底部间距 */
   }
 }
 
@@ -399,42 +526,189 @@ input:disabled+.slider {
   display: none
 }
 
-/* 让整排控件靠右 */
+/* 现代简约控制条布局 */
 .player-control-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  justify-content: flex-end;
+  flex-wrap: nowrap;
   align-items: center;
+  justify-content: flex-end;
+  /* 按钮靠右对齐 */
+  gap: 10px;
+  /* 统一固定间距 */
+  width: 100%;
 }
 
-@media (max-width: 900px) {
+/* 控制按钮容器包装器 */
+.player-control-bar-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 控制按钮容器 */
+.control-btn-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 统一控制按钮样式 */
+.control-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+/* 锁屏按钮激活状态的高亮样式 */
+.control-btn.lock-active {
+  background: var(--primary-color) !important;
+  color: white !important;
+  border-color: var(--accent-color) !important;
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
+  transform: translateY(-1px);
+}
+
+/* 新增：被禁用的控制按钮容器的样式 */
+.control-btn-container.control-disabled {
+  pointer-events: none; /* 彻底禁用鼠标事件，无法再触发 hover 或 click */
+  opacity: 0.4;         /* 视觉上变暗，表示不可用 */
+  filter: grayscale(80%); /* （可选）进一步灰度化，增强禁用感 */
+}
+
+/* 强化：确保锁屏按钮激活时，其容器的透明度不会被错误影响 */
+#lock-button.lock-active {
+  opacity: 1 !important;
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* 统一控制图标大小 */
+.control-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* 桌面端显示文字 */
+@media (min-width: 769px) {
   .player-control-bar {
-    gap: 0.8rem;
+    justify-content: flex-end;
+    /* 桌面端按钮靠右对齐 */
+    gap: 0.75rem;
+    /* 适当增加按钮间距 */
   }
 
-  .icon-btn {
-    padding: 0.6rem;
+  .control-btn {
+    padding: 0.5rem 0.75rem;
+    /* 与上一集/下一集按钮保持一致的padding */
+    gap: 0.5rem;
+    /* 与上一集/下一集按钮保持一致的图标文字间距 */
+    min-height: 44px;
+    /* 确保与上一集/下一集按钮高度一致 */
+  }
+
+  .control-text {
+    display: inline;
   }
 }
 
+/* 移动端样式 - 只显示图标，统一大小 */
 @media (max-width: 768px) {
-  .player-control-bar {
-    gap: 0.6rem;
+
+  /* 控制按钮容器包装器 */
+  .player-control-bar-wrapper {
+    width: 100%;
   }
 
-  .icon-btn {
-    padding: 0.5rem;
+  /* 控制按钮容器 */
+  .control-btn-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+
+  .player-control-bar {
+    gap: 0;
+    /* 移除间距 */
+    justify-content: space-between;
+    /* 均匀分布 */
+    flex-wrap: nowrap;
+    /* 防止换行 */
+    width: 100%;
+    /* 确保占满宽度 */
+  }
+
+  .control-btn {
+    width: 100%;
+    /* 占满容器宽度 */
+    height: 40px;
+    /* 固定高度 */
+    min-width: unset;
+    /* 移除最小宽度限制 */
+    min-height: 40px;
+    /* 确保最小高度 */
+    padding: 0;
+    /* 移除内边距 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    border-radius: 8px;
+    /* 稍微减小圆角，更统一 */
+  }
+
+  /* 移动端隐藏文字 */
+  .control-text {
+    display: none !important;
+  }
+
+  /* 统一所有按钮内的图标大小 */
+  .control-icon {
+    width: 18px !important;
+    /* 统一所有图标大小 */
+    height: 18px !important;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 480px) {
   .player-control-bar {
     gap: 0.25rem;
+    /* 更小的间距 */
+    justify-content: space-evenly;
+    /* 更均匀的分布 */
   }
 
-  .icon-btn {
-    padding: 0.2rem;
+  .control-btn {
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0.5rem;
+    flex: 1;
+    /* 让按钮平均分配空间 */
+    max-width: 50px;
+    /* 限制最大宽度 */
+  }
+
+  .control-btn svg {
+    width: 14px;
+    height: 14px;
   }
 }
 
@@ -647,7 +921,7 @@ input:disabled+.slider {
     0 10px 30px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.05);
   padding: 16px;
-  z-index: 2222;
+  z-index: 10000;
   margin-bottom: 8px;
   backdrop-filter: blur(20px);
 }
@@ -807,13 +1081,39 @@ input:disabled+.slider {
   background: linear-gradient(145deg, rgba(20, 24, 35, 0.95), rgba(30, 35, 50, 0.95));
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 
+  box-shadow:
     0 10px 30px rgba(0, 0, 0, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.05);
   padding: 12px;
-  z-index: 2223;
+  z-index: 10000;
   margin-bottom: 8px;
   backdrop-filter: blur(20px);
+}
+
+/* 移动端防止溢出 */
+@media (max-width: 768px) {
+  #line-switch-dropdown {
+    width: clamp(160px, 80vw, 200px);
+    padding: 10px;
+    /* 防止溢出到屏幕左侧 */
+    left: auto;
+    right: 0;
+    transform: translateX(0);
+  }
+
+  /* 如果按钮靠近右边缘，调整下拉菜单位置 */
+  .line-switch-container:last-child #line-switch-dropdown,
+  .line-switch-container:nth-last-child(-n+2) #line-switch-dropdown {
+    right: 0;
+    left: auto;
+  }
+
+  /* 如果按钮靠近左边缘，调整下拉菜单位置 */
+  .line-switch-container:first-child #line-switch-dropdown,
+  .line-switch-container:nth-child(-n+2) #line-switch-dropdown {
+    left: 0;
+    right: auto;
+  }
 }
 
 #line-switch-dropdown:not(.hidden) {
@@ -908,7 +1208,7 @@ input:disabled+.slider {
     width: clamp(160px, 80vw, 200px);
     padding: 10px;
   }
-  
+
   #line-switch-dropdown button {
     padding: 8px 10px;
     font-size: 0.8125rem;
@@ -921,6 +1221,109 @@ input:disabled+.slider {
   text-align: center;
   color: rgba(255, 255, 255, 0.5);
   font-size: 0.875rem;
+}
+
+/* 播放设置下拉菜单样式 */
+.play-settings-container {
+  position: relative;
+  display: inline-block;
+}
+
+#play-settings-dropdown {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  width: clamp(180px, 50vw, 220px);
+  background: linear-gradient(145deg, rgba(20, 24, 35, 0.95), rgba(30, 35, 50, 0.95));
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  padding: 16px;
+  z-index: 10000;
+  margin-bottom: 8px;
+  backdrop-filter: blur(20px);
+}
+
+/* 移动端防止设置菜单溢出 */
+@media (max-width: 768px) {
+  #play-settings-dropdown {
+    width: clamp(160px, 80vw, 200px);
+    padding: 14px;
+    /* 防止溢出到屏幕右侧 */
+    left: auto;
+    right: 0;
+    transform: translateX(0);
+  }
+
+  /* 如果按钮靠近右边缘，调整下拉菜单位置 */
+  .play-settings-container:last-child #play-settings-dropdown,
+  .play-settings-container:nth-last-child(-n+2) #play-settings-dropdown {
+    right: 0;
+    left: auto;
+  }
+
+  /* 如果按钮靠近左边缘，调整下拉菜单位置 */
+  .play-settings-container:first-child #play-settings-dropdown,
+  .play-settings-container:nth-child(-n+2) #play-settings-dropdown {
+    left: 0;
+    right: auto;
+  }
+}
+
+/* 播放速率选择框样式 */
+#playback-speed-select {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+#playback-speed-select:focus {
+  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+#playback-speed-select option {
+  background: rgba(20, 24, 35, 0.95);
+  color: #ffffff;
+}
+
+#play-settings-dropdown:not(.hidden) {
+  display: block;
+  animation: dropdown-fade-in 0.2s ease-out;
+}
+
+#play-settings-dropdown .flex {
+  margin-bottom: 12px;
+}
+
+#play-settings-dropdown .flex:last-child {
+  margin-bottom: 0;
+}
+
+#play-settings-dropdown span {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  #play-settings-dropdown {
+    width: clamp(160px, 80vw, 200px);
+    padding: 14px;
+  }
+
+  #play-settings-dropdown span {
+    font-size: 0.8125rem;
+  }
 }
 
 /* 顶部导航栏 */
@@ -997,6 +1400,8 @@ header {
   opacity: 0;
   transition: opacity .3s ease-in-out;
 }
+
+/* 最终综艺按钮专用样式 (播放页)  */
 
 /* 综艺节目容器的自适应网格布局 */
 .variety-grid-layout {

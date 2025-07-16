@@ -1,20 +1,20 @@
-/* -------- 1. 全局 CSS 变量（保留） -------- */
+/* -------- 1. 全局 CSS 变量（现代简约风格） -------- */
 :root {
-  --primary-color: #d4af37;
-  /* 改为金色 */
-  --primary-light: #f4e4bc;
-  /* 改为浅金色 */
-  --secondary-color: #0f1622;
-  --accent-color: #ff3c78;
-  --text-color: #e6f2ff;
-  --text-muted: #8599b2;
-  --border-color: rgba(0, 204, 255, 0.15);
-  --page-gradient-start: #0f1622;
-  --page-gradient-end: #192231;
-  --card-gradient-start: #121b29;
-  --card-gradient-end: #1c2939;
-  --card-accent: rgba(0, 204, 255, 0.12);
-  --card-hover-border: rgba(0, 204, 255, 0.5);
+  --primary-color: #6366f1;  /* 现代紫色 */
+  --primary-light: #a5b4fc;  /* 浅紫色 */
+  --secondary-color: #0f0f23;  /* 深蓝黑 */
+  --accent-color: #8b5cf6;  /* 优雅紫色 */
+  --text-color: #f8fafc;  /* 纯净白 */
+  --text-muted: #94a3b8;  /* 温和灰 */
+  --border-color: rgba(148, 163, 184, 0.1);  /* 极淡边框 */
+  --page-gradient-start: #0f0f23;  /* 深色起始 */
+  --page-gradient-end: #1e1e3f;  /* 深色结束 */
+  --card-gradient-start: #1a1a2e;  /* 卡片渐变起始 */
+  --card-gradient-end: #16213e;  /* 卡片渐变结束 */
+  --card-accent: rgba(99, 102, 241, 0.05);  /* 极淡紫色 */
+  --card-hover-border: rgba(99, 102, 241, 0.3);  /* 悬停边框 */
+  --surface-color: #1e293b;  /* 表面颜色 */
+  --surface-hover: #334155;  /* 表面悬停 */
 }
 
 /* -------- 2. 统一滚动条样式（全局应用） -------- */
@@ -55,16 +55,24 @@ body::-webkit-scrollbar-thumb:hover,
   background-color: #555;
 }
 
-/* -------- 3. 页面背景（保留多层点状背景） -------- */
+/* -------- 3. 页面背景（现代简约风格） -------- */
 .page-bg {
   background:
     linear-gradient(180deg, var(--page-gradient-start), var(--page-gradient-end)),
-    radial-gradient(circle at 25px 25px, rgba(0, 204, 255, 0.04) 2px, transparent 3px),
-    radial-gradient(circle at 75px 75px, rgba(255, 60, 120, 0.02) 1px, transparent 2px),
-    radial-gradient(circle at 50px 50px, rgba(150, 255, 250, 0.015) 1px, transparent 2px);
-  background-blend-mode: normal;
-  background-size: cover, 100px 100px, 50px 50px, 75px 75px;
+    radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.02) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.01) 0%, transparent 50%);
+  background-attachment: fixed;
   min-height: 100vh;
+}
+
+/* 修复Android Chrome地址栏隐藏时底部白色背景问题 */
+html, body {
+  background-color: var(--page-gradient-start);
+  min-height: 100vh;
+  /* 确保页面至少占满视口高度 */
+  overflow-x: hidden;
+  /* 防止水平滚动 */
 }
 
 /* -------- 4. 按钮 & 卡片过渡（优化） -------- */
@@ -81,17 +89,19 @@ button,
   will-change: transform, border-color, box-shadow;
 }
 
-/* -------- 5. 卡片基本样式 -------- */
+/* -------- 5. 卡片基本样式（现代简约风格） -------- */
 .card-hover {
   border: 1px solid var(--border-color);
-  background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end));
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  background: var(--surface-color);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   overflow: hidden;
-  border-radius: 6px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   height: 100%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* 卡片内容布局优化 */
@@ -107,94 +117,123 @@ button,
   overflow: hidden;
   text-overflow: ellipsis;
   -webkit-line-clamp: 2;
-  line-clamp: 2;
-  line-height: 1.2rem;
+  line-clamp: 2; 
+  line-height: 1.4;
   word-break: break-word;
   hyphens: auto;
-}
-
-/* 卡片悬停效果（保留，难以用Tailwind实现） */
-.card-hover::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, var(--card-accent), transparent);
-  transition: left 0.6s ease;
-}
-
-.card-hover:hover {
-  border-color: var(--card-hover-border);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5);
-}
-
-.card-hover:hover::before {
-  left: 100%;
-}
-
-/* -------- 6. 渐变文字 & 搜索按钮 -------- */
-.gradient-text {
-  background: linear-gradient(to right, var(--primary-color), var(--accent-color));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* 搜索按钮可以用Tailwind类替代，但保留变量一致性 */
-.search-button {
-  background: var(--primary-color);
+  font-weight: 500;
   color: var(--text-color);
 }
 
-.search-button:hover {
-  background: var(--primary-light);
+/* 现代简约悬停效果 */
+.card-hover:hover {
+  border-color: var(--card-hover-border);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
+  background: var(--surface-hover);
 }
 
-/* -------- 7. 设置面板（优化过渡效果） -------- */
+/* 移除旧的光效动画 */
+.card-hover::before {
+  display: none;
+}
+
+/* -------- 6. 渐变文字 & 搜索按钮（现代简约风格） -------- */
+.gradient-text {
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* 现代简约按钮样式 */
+.search-button {
+  background: var(--primary-color);
+  color: var(--text-color);
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.search-button:hover {
+  background: var(--accent-color);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+/* 修复搜索按钮在移动端的图标居中问题 */
+@media (max-width: 640px) {
+  #homeButton svg,
+  button[aria-label="搜索按钮"] svg {
+    margin-right: 0 !important;
+  }
+  
+  #homeButton,
+  button[aria-label="搜索按钮"] {
+    justify-content: center !important;
+    padding: 0.75rem !important;
+    min-width: 48px;
+  }
+}
+
+/* -------- 7. 设置面板（现代简约风格） -------- */
 .settings-panel {
   transform: translateX(100%);
-  transition: transform 0.3s ease;
-  background: linear-gradient(135deg, var(--page-gradient-end), var(--page-gradient-start));
-  border-left: 1px solid var(--primary-color);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(15, 15, 35, 0.95);
+  backdrop-filter: blur(20px);
+  border-left: 1px solid var(--border-color);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .settings-panel.show {
   transform: translateX(0);
 }
 
-/* -------- 8. 开关样式（合并重复规则） -------- */
-/* 合并开关背景样式 */
+/* -------- 8. 开关样式（现代简约风格） -------- */
+/* 现代开关背景样式 */
 #yellowFilterToggle:checked+.toggle-bg,
-#adFilterToggle:checked+.toggle-bg {
+#adFilterToggle:checked+.toggle-bg,
+#doubanToggle:checked+.toggle-bg,
+#preloadingToggle:checked+.toggle-bg {
   background-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
-/* 合并开关点样式 */
+/* 现代开关点样式 */
 #yellowFilterToggle:checked~.toggle-dot,
-#adFilterToggle:checked~.toggle-dot {
+#adFilterToggle:checked~.toggle-dot,
+#doubanToggle:checked~.toggle-dot,
+#preloadingToggle:checked~.toggle-dot {
   transform: translateX(1.5rem);
-  box-shadow: 0 2px 4px rgba(0, 204, 255, 0.3);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
 }
 
-/* 合并焦点与悬停样式 */
+/* 现代焦点与悬停样式 */
 #yellowFilterToggle:focus+.toggle-bg,
 #yellowFilterToggle:hover+.toggle-bg,
 #adFilterToggle:focus+.toggle-bg,
-#adFilterToggle:hover+.toggle-bg {
-  box-shadow: 0 0 0 2px rgba(0, 204, 255, 0.3);
+#adFilterToggle:hover+.toggle-bg,
+#doubanToggle:focus+.toggle-bg,
+#doubanToggle:hover+.toggle-bg,
+#preloadingToggle:focus+.toggle-bg,
+#preloadingToggle:hover+.toggle-bg {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
-/* 分离过渡效果 */
+/* 现代过渡效果 */
 .toggle-dot {
-  transition: transform 0.3s ease-in-out;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
 }
 
 .toggle-bg {
-  transition: background-color 0.3s ease-in-out;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: var(--text-muted);
+  border-radius: 12px;
 }
 
 /* -------- 9. 表单复选框（保留自定义样式） -------- */
@@ -367,22 +406,26 @@ body {
 }
 
 #modal>div {
-  background: linear-gradient(135deg, var(--card-gradient-start), var(--card-gradient-end));
-  border: 1px solid var(--primary-color);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 204, 255, 0.1);
-  border-radius: 8px;
+  background: rgba(15, 15, 35, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
 }
 
 #episodesGrid button {
-  background: rgba(0, 204, 255, 0.08);
-  border: 1px solid rgba(0, 204, 255, 0.2);
-  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  font-weight: 500;
 }
 
 #episodesGrid button:hover {
-  background: rgba(0, 204, 255, 0.15);
+  background: var(--surface-hover);
   border-color: var(--primary-color);
-  box-shadow: 0 0 8px rgba(0, 204, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+  transform: translateY(-1px);
 }
 
 /* -------- 14. 历史记录面板（优化过渡效果） -------- */
@@ -466,7 +509,7 @@ body {
     border-radius: 50%;
     padding: 0.25rem;
   }
-
+  
   .history-item .delete-btn:active {
     background-color: rgba(239, 68, 68, 0.2);
     transform: scale(0.95);
@@ -604,26 +647,45 @@ body {
   letter-spacing: 0.05em;
 }
 
-/* 搜索记录标签样式 (从旧代码恢复) */
+/* 搜索记录标签样式（现代简约风格） */
 .search-tag {
-  background-color: var(--secondary-color);
-  color: var(--text-muted);
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.375rem;
-  font-size: 0.75rem;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-  /* 添加 color 过渡 */
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  color: var(--text-color);
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  /* 鼠标悬停变手，否则default */
   display: inline-block;
+  position: relative;
+  overflow: hidden;
+}
+
+.search-tag::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+  transition: left 0.5s ease;
 }
 
 .search-tag:hover {
-  background-color: var(--card-gradient-start);
+  background: rgba(99, 102, 241, 0.1);
   border-color: var(--primary-color);
   color: var(--primary-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+}
+
+.search-tag:hover::before {
+  left: 100%;
 }
 
 /* 搜索卡片结果居中*/
@@ -786,6 +848,32 @@ body {
   height: 1.25rem;
 }
 
+/* -------- 模态框标题样式优化 -------- */
+#modalTitle {
+  font-size: 1.5rem !important; /* 24px，比text-3xl(30px)更内敛 */
+  font-weight: 600 !important; /* 比font-bold(700)更优雅 */
+  line-height: 1.4 !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* 移动端进一步优化标题大小 */
+@media (max-width: 768px) {
+  #modalTitle {
+    font-size: 1.25rem !important; /* 20px，移动端更小 */
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+  }
+}
+
+/* 超小屏幕进一步优化 */
+@media (max-width: 480px) {
+  #modalTitle {
+    font-size: 1.125rem !important; /* 18px，超小屏幕最小 */
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+  }
+}
+
 /* 让删除按钮不额外撑高内容 */
 .search-tag+span[role=button] {
   margin-left: 0.45em;
@@ -799,11 +887,14 @@ body {
   cursor: pointer;
 }
 
-/* -------- 历史面板优化 -------- */
+/* -------- 历史面板优化（现代简约风格） -------- */
 .history-panel {
-  background: linear-gradient(145deg, rgba(15, 22, 34, 0.98), rgba(25, 34, 49, 0.98)) !important;
+  background: rgba(15, 15, 35, 0.95) !important;
+  backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border-color);
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
 }
 
 /* Webkit 滚动条样式 */
@@ -816,42 +907,40 @@ body {
 }
 
 .history-panel::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(99, 102, 241, 0.3);
   border-radius: 3px;
 }
 
 .history-panel::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(99, 102, 241, 0.5);
 }
 
-/* 清空历史按钮 - 修复黑色背景问题 */
+/* 清空历史按钮 - 现代简约风格 */
 .history-panel .mt-4.text-center.sticky.bottom-0 {
   background: transparent !important;
-  /* 移除背景色 */
   padding: 0.75rem 1rem;
   margin: 0;
 }
 
 .history-panel .clear-history-btn {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.08)) !important;
-  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: rgba(99, 102, 241, 0.1) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3);
   border-radius: 12px;
   margin: 0;
   padding: 0.75rem 1.5rem;
   width: 100%;
   box-sizing: border-box;
-  color: #d4af37;
-  /* 添加文字颜色 */
+  color: var(--primary-color);
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .history-panel .clear-history-btn:hover {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.25), rgba(212, 175, 55, 0.15)) !important;
-  border-color: rgba(212, 175, 55, 0.4);
-  color: #f4e4bc;
+  background: rgba(99, 102, 241, 0.2) !important;
+  border-color: var(--primary-color);
+  color: var(--primary-light);
   transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 /* --- 观看历史删除按钮优化 --- */
@@ -868,23 +957,23 @@ body {
 
 /* 移动端：始终显示删除按钮 */
 @media (max-width: 768px) {
-  .history-item .history-item-delete-btn {
-    opacity: 1;
-    /* 为了在移动端有更好的点击效果，可以加一点样式 */
-    background-color: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 50%;
-    padding: 0.2rem;
-    /* 微调点击区域 */
-  }
+.history-item .history-item-delete-btn {
+  opacity: 1;
+  /* 为了在移动端有更好的点击效果，可以加一点样式 */
+  background-color: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 50%;
+  padding: 0.2rem; /* 微调点击区域 */
+}
 
-  .history-item .history-item-delete-btn:active {
-    background-color: rgba(239, 68, 68, 0.2);
-    transform: scale(0.95);
-  }
+.history-item .history-item-delete-btn:active {
+  background-color: rgba(239, 68, 68, 0.2);
+  transform: scale(0.95);
+}
 }
 
 /* 综艺按钮专用样式 (首页弹窗) */
+/* 综艺节目容器的自适应网格布局 */
 .variety-grid-layout {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));

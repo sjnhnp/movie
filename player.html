@@ -46,21 +46,21 @@
     <div class="player-container relative">
 
         <!-- 顶部导航栏 -->
-        <header class="flex items-center justify-between p-4">
-            <button id="back-button" class="flex items-center gap-2 text-white hover:text-blue-400 transition-colors"
+        <header class="flex items-center justify-between p-6">
+            <button id="back-button" class="flex items-center gap-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl px-4 py-2.5 text-white/90 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
                 aria-label="返回">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="feather feather-arrow-left" aria-hidden="true">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
-                <span class="font-semibold">返回</span>
+                <span class="font-medium">返回</span>
             </button>
             <div class="flex items-center ml-auto">
                 <button id="fullscreen-button"
-                    class="text-white hover:text-blue-400 allow-when-locked transition-colors" aria-label="全屏">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl p-3 text-white/90 hover:text-white allow-when-locked transition-all duration-300 shadow-lg hover:shadow-xl" aria-label="全屏">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         class="feather feather-maximize" aria-hidden="true">
                         <path
@@ -96,11 +96,11 @@
         </div>
 
         <!-- 播放控制和剧集信息 -->
-        <div class="flex items-center justify-between p-4">
+        <div class="flex items-center justify-between p-6">
             <button id="prev-episode"
-                class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg flex items-center gap-2 transition-colors"
+                class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl px-5 py-3 text-white/90 hover:text-white flex items-center gap-3 transition-all duration-300 shadow-lg hover:shadow-xl font-medium"
                 aria-label="上一集">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="feather feather-skip-back">
                     <polygon points="19 20 9 12 19 4 19 20"></polygon>
@@ -108,12 +108,12 @@
                 </svg>
                 <span>上一集</span>
             </button>
-            <span id="episode-info-span" class="text-lg font-medium text-gray-300"></span>
+            <span id="episode-info-span" class="text-xl font-semibold text-white/90 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-2 hidden"></span>
             <button id="next-episode"
-                class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg flex items-center gap-2 transition-colors"
+                class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl px-5 py-3 text-white/90 hover:text-white flex items-center gap-3 transition-all duration-300 shadow-lg hover:shadow-xl font-medium"
                 aria-label="下一集">
                 <span>下一集</span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                     class="feather feather-skip-forward">
                     <polygon points="5 4 15 12 5 20 5 4"></polygon>
@@ -123,99 +123,150 @@
         </div>
 
         <!-- 功能控制条 -->
-        <div class="p-4 bg-gray-900 rounded-lg mx-4 mb-4">
-            <div class="player-control-bar">
-                <div class="flex items-center gap-2">
-                    <span id="autoplay-label" class="control-label">自动播放</span>
-                    <label class="switch">
-                        <input type="checkbox" id="autoplay-next" checked aria-labelledby="autoplay-label">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span id="remember-episode-progress-label" class="control-label">记住进度</span> <label class="switch">
-                        <input type="checkbox" id="remember-episode-progress-toggle" checked
-                            aria-labelledby="remember-episode-progress-label"> <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="relative line-switch-container">
-                    <button id="line-switch-button"
-                        class="icon-btn bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors flex items-center gap-1 px-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                        </svg>
-                        <span class="text-sm">线路</span>
-                    </button>
-                    <div id="line-switch-dropdown" class="hidden"></div>
-                </div>
-                <div class="relative skip-control-container">
-                    <button id="skip-control-button" title="跳过设置"
-                        class="icon-btn bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
-                        aria-label="跳过片头片尾">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 5l7 7-7 7M15 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                    <div id="skip-control-dropdown"
-                        class="hidden absolute right-0 bottom-full mb-2 bg-gray-900 rounded shadow-lg p-3 w-48">
-                        <div class="flex items-center mb-2">
-                            <label for="skip-intro-input" class="text-gray-300 text-sm mr-2 shrink-0">跳片头</label>
-                            <input id="skip-intro-input" type="number" min="0" step="1" placeholder="秒"
-                                class="w-full bg-gray-800 text-gray-300 rounded p-1 text-sm">
+        <div class="p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl mx-6 mb-6 shadow-xl">
+            <!-- 新增控制按钮容器 -->
+            <div class="player-control-bar-wrapper">
+                <div class="player-control-bar">
+                    <!-- 合并的播放设置按钮 -->
+                    <div class="control-btn-container play-settings-container">
+                        <button id="play-settings-button" title="播放设置"
+                            class="control-btn bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl p-3 text-white/90 hover:text-white transition-all duration-300 flex items-center gap-2 font-medium"
+                            aria-label="播放设置">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="control-icon" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                            </svg>
+                            <span class="control-text text-sm">设置</span>
+                        </button>
+                        <div id="play-settings-dropdown" class="hidden absolute right-0 bottom-full mb-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-xl p-4 w-56">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-white/90 text-sm font-medium">自动播放</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="autoplay-next" checked aria-label="自动播放">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-white/90 text-sm font-medium">记住进度</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="remember-episode-progress-toggle" checked aria-label="记住进度">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-white/90 text-sm font-medium">播放速率</span>
+                                <select id="playback-speed-select" class="bg-white/10 text-white/90 rounded-lg px-2 py-1 text-sm border border-white/20 focus:border-white/40 focus:outline-none">
+                                    <option value="0.5">0.5x</option>
+                                    <option value="0.75">0.75x</option>
+                                    <option value="1" selected>1x</option>
+                                    <option value="1.25">1.25x</option>
+                                    <option value="1.5">1.5x</option>
+                                    <option value="2">2x</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="flex items-center mb-4">
-                            <label for="skip-outro-input" class="text-gray-300 text-sm mr-2 shrink-0">跳片尾</label>
-                            <input id="skip-outro-input" type="number" min="0" step="1" placeholder="秒"
-                                class="w-full bg-gray-800 text-gray-300 rounded p-1 text-sm">
+                    </div>
+                    
+                    <!-- 线路切换按钮 -->
+                    <div class="control-btn-container line-switch-container">
+                        <button id="line-switch-button"
+                            class="control-btn bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl p-3 text-white/90 hover:text-white transition-all duration-300 flex items-center gap-2 font-medium">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="control-icon" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                            </svg>
+                            <span class="control-text text-sm">线路</span>
+                        </button>
+                        <div id="line-switch-dropdown" class="hidden"></div>
+                    </div>
+                    
+                    <!-- 跳过控制按钮 -->
+                    <div class="control-btn-container skip-control-container">
+                        <button id="skip-control-button" title="跳过设置"
+                            class="control-btn bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl p-3 text-white/90 hover:text-white transition-all duration-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="control-icon" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5l7 7-7 7M15 5l7 7-7 7" />
+                            </svg>
+                            <span class="control-text text-sm">跳过</span>
+                        </button>
+                        <div id="skip-control-dropdown"
+                            class="hidden absolute right-0 bottom-full mb-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-xl p-4 w-52">
+                            <div class="flex items-center mb-3">
+                                <label for="skip-intro-input" class="text-white/90 text-sm mr-3 shrink-0 font-medium">跳片头</label>
+                                <input id="skip-intro-input" type="number" min="0" step="1" placeholder="秒"
+                                    class="w-full bg-white/10 text-white/90 rounded-lg p-2 text-sm border border-white/20 focus:border-white/40 focus:outline-none">
+                            </div>
+                            <div class="flex items-center mb-4">
+                                <label for="skip-outro-input" class="text-white/90 text-sm mr-3 shrink-0 font-medium">跳片尾</label>
+                                <input id="skip-outro-input" type="number" min="0" step="1" placeholder="秒"
+                                    class="w-full bg-white/10 text-white/90 rounded-lg p-2 text-sm border border-white/20 focus:border-white/40 focus:outline-none">
+                            </div>
+                            <button id="apply-skip-settings"
+                                class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white rounded-lg p-2 mb-2 text-sm font-medium transition-all duration-300">应用</button>
+                            <button id="reset-skip-settings"
+                                class="w-full bg-white/10 hover:bg-white/20 text-white/90 hover:text-white rounded-lg p-2 text-sm font-medium transition-all duration-300 border border-white/20">重置</button>
                         </div>
-                        <button id="apply-skip-settings"
-                            class="w-full bg-blue-600 hover:bg-blue-700 text-white rounded p-2 mb-2 text-sm">应用</button>
-                        <button id="reset-skip-settings"
-                            class="w-full bg-red-600 hover:bg-red-700 text-white rounded p-2 text-sm">重置</button>
+                    </div>
+                    
+                    <!-- 复制链接按钮 -->
+                    <div class="control-btn-container">
+                        <button onclick="copyLinks()" title="复制当前视频链接"
+                            class="control-btn bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl p-3 text-white/90 hover:text-white transition-all duration-300"
+                            aria-label="复制链接">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="control-icon" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                            <span class="control-text text-sm">复制</span>
+                        </button>
+                    </div>
+                    
+                    <!-- 剧集顺序按钮 -->
+                    <div class="control-btn-container">
+                        <button id="order-button"
+                            class="control-btn bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl p-3 text-white/90 hover:text-white transition-all duration-300"
+                            aria-label="切换剧集顺序">
+                            <svg id="order-icon" xmlns="http://www.w3.org/2000/svg" class="control-icon" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" style="transition: transform 0.3s ease;">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                            <span class="control-text text-sm">顺序</span>
+                        </button>
+                    </div>
+                    
+                    <!-- 锁屏按钮 -->
+                    <div class="control-btn-container">
+                        <button id="lock-button"
+                            class="control-btn bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl p-3 text-white/90 hover:text-white transition-all duration-300"
+                            aria-label="锁定/解锁屏幕控制">
+                            <svg id="lock-icon" xmlns="http://www.w3.org/2000/svg" class="control-icon" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            <span class="control-text text-sm">锁屏</span>
+                        </button>
                     </div>
                 </div>
-                <button onclick="copyLinks()" title="复制当前视频链接"
-                    class="icon-btn bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
-                    aria-label="复制链接">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                    </svg>
-                </button>
-                <button id="order-button"
-                    class="icon-btn bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
-                    aria-label="切换剧集顺序">
-                    <svg id="order-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" style="transition: transform 0.3s ease;">
-                        <polyline points="6 9 12 15 18 9"></polyline>
-                    </svg>
-                </button>
-                <button id="lock-button"
-                    class="icon-btn bg-gray-800 hover:bg-gray-700 text-gray-300 rounded transition-colors"
-                    aria-label="锁定/解锁屏幕控制">
-                    <svg id="lock-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                    </svg>
-                </button>
             </div>
         </div>
 
         <!-- 剧集选择 -->
-        <div id="episodes-container" class="mt-2 mx-4 mb-4 hidden" role="navigation" aria-label="剧集选择">
-            <div class="flex justify-between items-center mb-2">
-                <h2 class="text-xl font-bold">选集</h2>
-                <span id="episodes-count" class="text-gray-400"></span>
+        <div id="episodes-container" class="mt-2 mx-6 mb-6 hidden" role="navigation" aria-label="剧集选择">
+            <div class="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-white/90">选集</h2>
+                    <span id="episodes-count" class="text-white/60 bg-white/10 px-3 py-1 rounded-lg text-sm font-medium"></span>
+                </div>
+                <div id="episode-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 max-h-80 overflow-y-auto"></div>
             </div>
-            <div id="episode-grid"></div>
         </div>
 
         <!-- 快捷键和消息提示 -->

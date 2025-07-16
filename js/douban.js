@@ -1,4 +1,3 @@
-// douban.js
 // 用同一个 Overlay，反复插拔
 let globalLoadingOverlay = null;
 // 常量配置区域 
@@ -873,3 +872,19 @@ function resetTagsToDefault() {
   renderRecommend(doubanCurrentTag, doubanPageSize, doubanPageStart);
   showToast('已恢复默认标签', 'success');
 }
+
+/**
+ * 检查豆瓣热门区是否需要加载内容
+ */
+function reloadDoubanIfNeeded() {
+  const isEnabled = utils.storage.get(CONFIG.STORAGE_KEYS.ENABLED, false);
+  const doubanResultsContainer = utils.getElement('douban-results');
+
+  // 检查：如果豆瓣功能已开启，并且其内容容器确实是空的
+  if (isEnabled && doubanResultsContainer && doubanResultsContainer.children.length === 0) {
+      console.log('[Douban] Returning home, reloading Douban Hot content...');
+      // 使用模块内部的状态变量，加载当前选中的热门内容
+      renderRecommend(doubanCurrentTag, doubanPageSize, 0);
+  }
+}
+window.reloadDoubanIfNeeded = reloadDoubanIfNeeded;

@@ -224,15 +224,12 @@ const APISourceManager = {
 
     /**
      * Select all APIs
-     * @param {boolean} selectAll - Whether to select all APIs
-     * @param {boolean} excludeAdult - Whether to exclude adult APIs
      */
-    selectAllAPIs: function (selectAll = true, excludeAdult = false) {
-        // IMPORTANT: HTML using this function via onclick must be updated to call APISourceManager.selectAllAPIs(...)
-        const checkboxes = document.querySelectorAll('#apiCheckboxes input[type="checkbox"]');
+    selectAllAPIs: function (selectAll = true) {
+        // 获取所有内置和自定义API的复选框
+        const checkboxes = document.querySelectorAll('#apiCheckboxes input[type="checkbox"], #customApisList input[type="checkbox"]');
         checkboxes.forEach(box => {
-            if (excludeAdult && box.classList.contains('api-adult')) box.checked = false;
-            else box.checked = selectAll;
+            box.checked = selectAll;
         });
         this.updateSelectedAPIs();
         this.checkAdultAPIsSelected();
@@ -470,15 +467,12 @@ const APISourceManager = {
     }
 };
 
-
 // 导出模块
 window.APISourceManager = APISourceManager;
 
-
-window.selectAllAPIs = function (selectAll, excludeAdult) {
-    APISourceManager.selectAllAPIs(selectAll, excludeAdult);
+window.selectAllAPIs = function (selectAll) {
+    APISourceManager.selectAllAPIs(selectAll);
 };
-
 
 window.showAddCustomApiForm = function () {
     APISourceManager.showAddCustomApiForm();

@@ -223,7 +223,7 @@ let lastFocusedElement = null;
  * @param {string} content 模态框内容
  * @param {string} title 模态框标题（可选）
  */
-function showModal(content, title = '') {
+function showModal(contentNode, title = '') {
     const modal = getElement('modal');
     const modalContent = getElement('modalContent');
     const modalTitle = getElement('modalTitle');
@@ -234,7 +234,9 @@ function showModal(content, title = '') {
     lastFocusedElement = document.activeElement;
 
     // 设置内容
-    modalContent.innerHTML = content;
+    modalContent.innerHTML = ''; // 先清空旧内容
+    modalContent.appendChild(contentNode); // 直接附加带有事件监听的DOM节点
+
     if (modalTitle && title) modalTitle.textContent = title;
 
     // 显示模态框
@@ -607,7 +609,7 @@ function addToViewingHistory(videoInfo) {
             history.unshift(newItem);
         }
 
-        if (history.length > HISTORY_MAX_ITEMS) { 
+        if (history.length > HISTORY_MAX_ITEMS) {
             history.splice(HISTORY_MAX_ITEMS);
         }
         localStorage.setItem('viewingHistory', JSON.stringify(history));

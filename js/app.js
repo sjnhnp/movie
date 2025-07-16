@@ -501,9 +501,15 @@ function search(options = {}) {
 
     const selectedAPIs = AppState.get('selectedAPIs');
     if (!selectedAPIs || selectedAPIs.length === 0) {
-        if (searchResultsContainer) searchResultsContainer.innerHTML = '<div class="text-center py-4 text-gray-400">请至少选择一个API源</div>';
-        if (isNormalSearch && typeof hideLoading === 'function') hideLoading();
-        if (typeof options.onComplete === 'function') options.onComplete();
+        if (typeof showToast === 'function') {
+            showToast('请至少选择一个API源', 'warning');
+        }
+        if (isNormalSearch && typeof hideLoading === 'function') {
+            hideLoading();
+        }
+        if (typeof options.onComplete === 'function') {
+            options.onComplete();
+        }
         return;
     }
 

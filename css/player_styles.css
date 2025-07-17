@@ -242,9 +242,10 @@ media-player .vds-controls-group {
 }
 
 /* 确保所有播放器UI元素都不会覆盖功能菜单 */
-media-player * {
-  z-index: 50 !important;
-}
+/* media-player * {
+  z-index: 50 !important;
+} 
+*/
 
 /* 但是要确保下拉菜单有更高的z-index */
 #play-settings-dropdown,

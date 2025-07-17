@@ -309,12 +309,13 @@ async function initPlayer(videoUrl, title) {
             title: title,
             autoplay: true,
             preload: 'auto',
-            layout: new VidstackPlayerLayout(),
+            layout: new VidstackPlayerLayout({
+                seekTime: 10,
+                //clickToFullscreen: true
+            }),
             // layout: new PlyrLayout(),
-            // controls: true,
             playsInline: true,
             crossOrigin: true,
-            layout: new VidstackPlayerLayout(),
             keyTarget: 'document',
             keyShortcuts: {
                 togglePaused: 'k Space',

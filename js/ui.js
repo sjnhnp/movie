@@ -230,23 +230,18 @@ function showModal(contentNode, title = '') {
 
     if (!modal || !modalContent) return;
 
-    // 保存当前焦点元素，以便关闭时恢复
     lastFocusedElement = document.activeElement;
 
-    // 设置内容
     modalContent.innerHTML = ''; // 先清空旧内容
     modalContent.appendChild(contentNode); // 直接附加带有事件监听的DOM节点
 
     if (modalTitle && title) modalTitle.textContent = title;
 
-    // 显示模态框
     modal.classList.remove('hidden');
     modal.setAttribute('aria-hidden', 'false');
 
-    // 设置焦点陷阱
     setupFocusTrap(modal);
 
-    // 将焦点移至模态框内的第一个可聚焦元素
     const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
     if (focusableElements.length) {
         focusableElements[0].focus();

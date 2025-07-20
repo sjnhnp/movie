@@ -59,28 +59,38 @@ function sanitizeText(text) {
     return text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-function playVideo(episodeString, title, episodeIndex, sourceName = '', sourceCode = '', vodId = '', year = '', typeName = '', videoKey = '') {
+async function playVideo(episodeString, title, episodeIndex, sourceName = '', sourceCode = '', vodId = '', year = '', typeName = '', videoKey = '') {
     if (!episodeString) {
         showToast('无效的视频链接', 'error');
         return;
     }
-
     // 分割剧集字符串，提取真实的URL用于播放
     let playUrl = episodeString;
     if (episodeString.includes('$')) {
-        const parts = episodeString.split('$');
-        playUrl = parts[parts.length - 1];
+        playUrl = episodeString.split('$')[1];
     }
-
     if (!playUrl || !playUrl.startsWith('http')) {
         showToast('视频链接格式无效', 'error');
         console.error('解析出的播放链接无效:', playUrl);
         return;
     }
-
+    // 检查是否需要等待获取真实地址
+    const isSpecialSource = !sourceCode.startsWith('custom_') && API_SITES[sourceCode] && API_SITES[sourceCode].detail;
+    if (isSpecialSource) {
+        const detailUrl = `/api/detail?id=${vodId}&source=${sourceCode}`;
+        try {
+            const response = await fetch(detailUrl);
+            const data = await response.json();
+            if (data.code === 200 && Array.isArray(data.episodes)) {
+                // 使用真实地址更新播放链接
+                playUrl = data.episodes[episodeIndex];
+            }
+        } catch (e) {
+            console.log('后台获取真实地址失败（播放前）', e);
+        }
+    }
     AppState.set('currentEpisodeIndex', episodeIndex);
     AppState.set('currentVideoTitle', title);
-
     if (typeof addToViewingHistory === 'function') {
         const videoInfoForHistory = {
             url: playUrl,
@@ -95,6 +105,10 @@ function playVideo(episodeString, title, episodeIndex, sourceName = '', sourceCo
         addToViewingHistory(videoInfoForHistory);
     }
 
+    // 将原始剧集名称存入localStorage，供播放页使用
+    const originalEpisodeNames = AppState.get('originalEpisodeNames') || [];
+    localStorage.setItem('originalEpisodeNames', JSON.stringify(originalEpisodeNames));
+
     const playerUrl = new URL('player.html', window.location.origin);
     playerUrl.searchParams.set('url', playUrl);
     playerUrl.searchParams.set('title', title);
@@ -105,12 +119,10 @@ function playVideo(episodeString, title, episodeIndex, sourceName = '', sourceCo
     if (year) playerUrl.searchParams.set('year', year);
     if (typeName) playerUrl.searchParams.set('typeName', typeName);
     if (videoKey) playerUrl.searchParams.set('videoKey', videoKey);
-
     const universalId = generateUniversalId(title, year, episodeIndex);
     playerUrl.searchParams.set('universalId', universalId);
     const adOn = getBoolConfig(PLAYER_CONFIG.adFilteringStorage, PLAYER_CONFIG.adFilteringEnabled);
     playerUrl.searchParams.set('af', adOn ? '1' : '0');
-
     window.location.href = playerUrl.toString();
 }
 
@@ -258,7 +270,7 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0) {
     window.location.href = playerUrl.toString();
 }
 
-//从localStorage获取布尔配置
+// 从localStorage获取布尔配置
 function getBoolConfig(key, defaultValue) {
     const value = localStorage.getItem(key);
     if (value === null) return defaultValue;
@@ -1142,40 +1154,67 @@ window.toggleEpisodeOrderUI = toggleEpisodeOrderUI;
 
 // 显示视频剧集模态框
 async function showVideoEpisodesModal(id, title, sourceCode, apiUrl, fallbackData) {
-    showLoading('处理中...');
+    // 1. 立即打开弹窗（原代码核心逻辑）
     const videoDataMap = AppState.get('videoDataMap');
     const videoData = videoDataMap ? videoDataMap.get(id.toString()) : null;
     if (!videoData) {
-        hideLoading();
+        hideLoading(); // 立即关闭加载
         showToast('缓存中找不到视频数据，请刷新后重试', 'error');
-        console.error(`无法从 AppState 缓存中找到 vod_id 为 ${id} 的视频数据。`);
         return;
     }
 
+    // 2. 直接渲染弹窗（不等待真实地址，先用缓存）
     let episodes = [];
+    // 保存原始剧集名称
+    const originalEpisodeNames = [];
     if (videoData.vod_play_url) {
+        // 用缓存数据先渲染弹窗（原代码逻辑）
         const playFroms = (videoData.vod_play_from || '').split('$$$');
         const urlGroups = videoData.vod_play_url.split('$$$');
         const selectedApi = APISourceManager.getSelectedApi(sourceCode);
         const sourceName = selectedApi ? selectedApi.name : '';
         let sourceIndex = playFroms.indexOf(sourceName);
-        if (sourceIndex === -1) {
-            console.warn(`源名称 "${sourceName}" 未在播放列表源 [${playFroms.join(', ')}] 中找到，将默认使用第一个源。`);
-            sourceIndex = 0;
-        }
+        if (sourceIndex === -1) sourceIndex = 0;
         if (urlGroups[sourceIndex]) {
             episodes = urlGroups[sourceIndex].split('#').filter(item => item && item.includes('$'));
+            // 提取原始剧集名称（如"01"、"20200101"、"hd"）
+            episodes.forEach(ep => {
+                const parts = ep.split('$');
+                originalEpisodeNames.push(parts[0].trim()); // 保存名称部分
+            });
         }
     }
+    // 将原始名称存入AppState，供后续使用
+    AppState.set('originalEpisodeNames', originalEpisodeNames);
 
-    if (episodes.length === 0) {
-        hideLoading();
-        showToast('解析剧集列表失败', 'error');
-        console.error('解析后的 episodes 数组为空。原始 videoData:', videoData);
-        return;
+    // 3. 后台异步获取真实地址（不阻塞弹窗显示）
+    const isSpecialSource = !sourceCode.startsWith('custom_') && API_SITES[sourceCode] && API_SITES[sourceCode].detail;
+    if (isSpecialSource) {
+        // 真实地址获取放在弹窗打开后执行（原代码逻辑）
+        setTimeout(async () => {
+            try {
+                const detailUrl = `/api/detail?id=${id}&source=${sourceCode}`;
+                const response = await fetch(detailUrl);
+                const detailData = await response.json();
+                if (detailData.code === 200 && Array.isArray(detailData.episodes)) {
+                    // 用真实地址更新按钮（不刷新弹窗，仅替换链接）
+                    episodes = detailData.episodes;
+                    AppState.set('currentEpisodes', episodes);
+                    localStorage.setItem('currentEpisodes', JSON.stringify(episodes));
+                    // 重新渲染按钮（不关闭弹窗）
+                    const episodeGrid = document.querySelector('#modalContent [data-field="episode-buttons-grid"]');
+                    if (episodeGrid) {
+                        episodeGrid.innerHTML = renderEpisodeButtons(episodes, title, sourceCode, sourceNameForDisplay, effectiveTypeName);
+                    }
+                }
+            } catch (e) {
+                console.log('后台获取真实地址失败（不影响弹窗显示）', e);
+            }
+        }, 500); // 延迟执行，确保弹窗已打开
     }
 
-    hideLoading();
+    // 4. 渲染弹窗（原代码逻辑）
+    hideLoading(); // 移除加载提示，立即显示弹窗
     const effectiveTitle = videoData.vod_name || title;
     const effectiveTypeName = videoData.type_name || fallbackData.typeName;
     const sourceNameForDisplay = videoData.source_name || APISourceManager.getSelectedApi(sourceCode)?.name || '未知源';
@@ -1273,41 +1312,49 @@ function renderEpisodeButtons(episodes, videoTitle, sourceCode, sourceName, type
     const vodId = AppState.get('currentVideoId') || '';
     const year = AppState.get('currentVideoYear') || '';
     const videoKey = AppState.get('currentVideoKey') || '';
-    const displayEpisodes = currentReversedState ? [...episodes].reverse() : [...episodes];
-
+    // 优先使用状态中已更新的真实地址（特殊源），否则用原有参数（普通源）
+    const realEpisodes = AppState.get('currentEpisodes') || episodes;
+    const displayEpisodes = currentReversedState ? [...realEpisodes].reverse() : [...realEpisodes];
     const varietyShowTypes = ['综艺', '脱口秀', '真人秀'];
     const isVarietyShow = varietyShowTypes.some(type => typeName && typeName.includes(type));
-
     return displayEpisodes.map((episodeString, displayIndex) => {
         const originalIndex = currentReversedState ? (episodes.length - 1 - displayIndex) : displayIndex;
+
+        // 从AppState获取保存的原始剧集名称
+        const originalEpisodeNames = AppState.get('originalEpisodeNames') || [];
+        // 优先使用原始名称（如果存在且对应索引有效）
+        const originalName = originalEpisodeNames[originalIndex] || '';
+
         const parts = (episodeString || '').split('$');
         const episodeName = parts.length > 1 ? parts[0].trim() : '';
-
         let buttonText = '';
         let buttonTitle = '';
         let buttonClasses = '';
-
         if (isVarietyShow) {
-            // 综艺节目
-            buttonText = episodeName || `第${originalIndex + 1}集`;
+            // 综艺节目：优先用原始名称
+            buttonText = originalName || episodeName || `第${originalIndex + 1}集`;
             buttonTitle = buttonText;
             buttonClasses = 'episode-btn';
         } else {
-            // 非综艺节目
-            buttonText = `第 ${originalIndex + 1} 集`;
+            // 非综艺节目：优先用原始名称
+            if (originalName && (originalName || isNaN(parseInt(originalName, 10)))) {
+                buttonText = originalName;
+            } else if (episodeName && isNaN(parseInt(episodeName, 10))) {
+                buttonText = episodeName;
+            } else {
+                buttonText = `第 ${originalIndex + 1} 集`;
+            }
             buttonTitle = buttonText;
             buttonClasses = 'episode-btn px-2 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded text-xs sm:text-sm transition-colors truncate';
         }
 
         const safeVideoTitle = encodeURIComponent(videoTitle);
         const safeSourceName = encodeURIComponent(sourceName);
-
         // 从剧集字符串中提取真实的播放URL
         let playUrl = episodeString;
         if (episodeString.includes('$')) {
             playUrl = episodeString.split('$').pop();
         }
-
         return `
             <button 
                 onclick="playVideo('${playUrl}', decodeURIComponent('${safeVideoTitle}'), ${originalIndex}, decodeURIComponent('${safeSourceName}'), '${sourceCode}', '${vodId}', '${year}', '${typeName}', '${videoKey}')" 

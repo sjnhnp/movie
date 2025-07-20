@@ -281,14 +281,12 @@ async function processVideoUrl(url) {
 }
 
 // --- 播放器核心逻辑 ---
-
 async function initPlayer(videoUrl, title) {
     const playerContainer = document.getElementById('player');
     if (!playerContainer) {
         showError("播放器容器 (#player) 未找到");
         return;
     }
-
     if (player) {
         // 清理旧的Blob URL
         if (player.currentSrc && player.currentSrc.startsWith('blob:')) {
@@ -297,52 +295,62 @@ async function initPlayer(videoUrl, title) {
         player.destroy();
         player = null;
     }
-
     // 在创建播放器前处理URL
     const processedUrl = await processVideoUrl(videoUrl);
-
-    try {
-        player = await VidstackPlayer.create({
-            target: playerContainer,
-            // 使用处理过的URL
-            src: { src: processedUrl, type: 'application/x-mpegurl' },
-            title: title,
-            autoplay: true,
-            preload: 'auto',
-            layout: new VidstackPlayerLayout({
-                seekTime: 10,
-                //clickToFullscreen: true
-            }),
-            // layout: new PlyrLayout(),
-            playsInline: true,
-            crossOrigin: true,
-            keyTarget: 'document',
-            keyShortcuts: {
-                togglePaused: 'k Space',
-                toggleMuted: 'm',
-                togglePictureInPicture: 'i',
-                // toggleFullscreen: 'f',
-                seekBackward: ['j', 'J', 'ArrowLeft'],
-                seekForward: ['l', 'L', 'ArrowRight'],
-                volumeUp: 'ArrowUp',
-                volumeDown: 'ArrowDown',
-                speedUp: '>',
-                slowDown: '<',
+    let retryCount = 0;
+    const maxRetries = 3;
+    const retryInterval = 3000;
+    const attemptInitPlayer = async () => {
+        try {
+            player = await VidstackPlayer.create({
+                target: playerContainer,
+                // 使用处理过的URL
+                src: { src: processedUrl, type: 'application/x-mpegurl' },
+                title: title,
+                autoplay: true,
+                preload: 'auto',
+                layout: new VidstackPlayerLayout({
+                    seekTime: 10,
+                    //clickToFullscreen: true
+                }),
+                // layout: new PlyrLayout(),
+                playsInline: true,
+                crossOrigin: true,
+                keyTarget: 'document',
+                keyShortcuts: {
+                    togglePaused: 'k Space',
+                    toggleMuted: 'm',
+                    togglePictureInPicture: 'i',
+                    // toggleFullscreen: 'f',
+                    seekBackward: ['j', 'J', 'ArrowLeft'],
+                    seekForward: ['l', 'L', 'ArrowRight'],
+                    volumeUp: 'ArrowUp',
+                    volumeDown: 'ArrowDown',
+                    speedUp: '>',
+                    slowDown: '<',
+                }
+            });
+            window.player = player;
+            addPlayerEventListeners();
+            handleSkipIntroOutro(player);
+            // 应用保存的播放速率
+            const savedSpeed = localStorage.getItem('playbackSpeed') || '1';
+            if (player.playbackRate !== undefined) {
+                player.playbackRate = parseFloat(savedSpeed);
             }
-        });
-        window.player = player;
-        addPlayerEventListeners();
-        handleSkipIntroOutro(player);
-
-        // 应用保存的播放速率
-        const savedSpeed = localStorage.getItem('playbackSpeed') || '1';
-        if (player.playbackRate !== undefined) {
-            player.playbackRate = parseFloat(savedSpeed);
+        } catch (error) {
+            if (retryCount < maxRetries) {
+                retryCount++;
+                setTimeout(() => {
+                    attemptInitPlayer();
+                }, retryInterval);
+            } else {
+                console.error("Vidstack Player 创建失败:", error);
+                showError("播放器初始化失败");
+            }
         }
-    } catch (error) {
-        console.error("Vidstack Player 创建失败:", error);
-        showError("播放器初始化失败");
-    }
+    };
+    await attemptInitPlayer();
 }
 
 function addPlayerEventListeners() {
@@ -453,6 +461,10 @@ async function doEpisodeSwitch(index, episodeString) {
     let playUrl = episodeString;
     if (episodeString && episodeString.includes('$')) {
         playUrl = episodeString.split('$')[1];
+    }
+    // 特殊源链接补充协议校验（避免相对路径问题）
+    if (playUrl && !playUrl.startsWith('http') && playUrl.startsWith('//')) {
+        playUrl = 'https:' + playUrl; // 补全https协议
     }
 
     // 增加一个检查，确保一个有效的URL
@@ -850,6 +862,9 @@ function renderEpisodes() {
         return;
     }
 
+    // 读取localStorage中保存的原始剧集名称
+    const originalEpisodeNames = JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
+
     const orderedEpisodes = episodesReversed ? [...currentEpisodes].reverse() : [...currentEpisodes];
     orderedEpisodes.forEach((episodeData, index) => {
         const originalIndex = episodesReversed ? (currentEpisodes.length - 1 - index) : index;
@@ -861,11 +876,17 @@ function renderEpisodes() {
         const parts = (episodeData || '').split('$');
         const episodeName = parts.length > 1 ? parts[0].trim() : '';
 
+        // 优先使用原始剧集名称（综艺类核心逻辑）
+        // 从保存的原始名称中取对应索引的名称（如“20200101”）
+        const originalName = originalEpisodeNames[originalIndex] || '';
+
         // 根据是否为综艺决定按钮文本和标题
-        if (isVarietyShow && episodeName) {
-            btn.textContent = episodeName;
-            btn.title = episodeName;
+        if (isVarietyShow) {
+            // 综艺：优先用原始名称，其次用剧集数据中的名称，最后用索引
+            btn.textContent = originalName || episodeName || `第${originalIndex + 1}集`;
+            btn.title = btn.textContent;
         } else {
+            // 非综艺：保持原有逻辑（不影响其他类型）
             btn.textContent = originalIndex + 1;
             btn.title = `第 ${originalIndex + 1} 集`;
         }
@@ -1384,9 +1405,9 @@ function setupPlaySettingsEvents() {
             }
         });
 
+
         speedSelect.setAttribute('data-initialized', 'true');
     }
-
     // 记住进度功能已在setupRememberEpisodeProgressToggle中处理
 }
 

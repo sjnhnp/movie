@@ -2,63 +2,38 @@
 // API请求与聚合处理优化版
 // ================================
 
-// 通用fetch，支持超时并返回JSON
-async function fetchWithTimeout(targetUrl, options, timeout = 10000) {
+async function fetchWithTimeout(targetUrl, options, timeout = 10000, responseType = 'json') {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
     try {
-        const response = await fetch(targetUrl, {
-            ...options,
-            signal: controller.signal
-        });
+        const response = await fetch(targetUrl, { ...options, signal: controller.signal });
         clearTimeout(timer);
         if (!response.ok) throw new Error(`请求失败: ${response.status} ${response.statusText} for ${targetUrl}`);
-        return await response.json(); // 期望JSON响应
+        // 根据类型返回结果
+        return responseType === 'text' ? await response.text() : await response.json();
     } catch (error) {
         clearTimeout(timer);
+        // 统一错误信息前缀（区分类型）
+        const typeText = responseType === 'text' ? 'text' : 'JSON';
         if (error instanceof Error && !(error.message.includes(targetUrl))) {
-            error.message = `Error fetching JSON from ${targetUrl}: ${error.message}`;
+            error.message = `Error fetching ${typeText} from ${targetUrl}: ${error.message}`;
         }
         throw error;
     }
 }
-
-// 新增：通用fetch，支持超时并返回TEXT (用于HTML抓取)
-async function fetchTextWithTimeout(targetUrl, options, timeout = 10000) {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeout);
-    try {
-        const response = await fetch(targetUrl, {
-            ...options,
-            signal: controller.signal
-        });
-        clearTimeout(timer);
-        if (!response.ok) throw new Error(`请求失败: ${response.status} ${response.statusText} for ${targetUrl}`);
-        return await response.text(); // 期望TEXT响应
-    } catch (error) {
-        clearTimeout(timer);
-        if (error instanceof Error && !(error.message.includes(targetUrl))) {
-            error.message = `Error fetching text from ${targetUrl}: ${error.message}`;
-        }
-        throw error;
-    }
-}
-
 
 // 处理特殊片源详情 (内置源，需要HTML抓取)
 async function handleSpecialSourceDetail(id, sourceCode) {
     try {
         const detailPageUrl = `${API_SITES[sourceCode].detail}/index.php/vod/detail/id/${id}.html`;
-        // 使用 fetchTextWithTimeout 获取 HTML 内容
-        const htmlContent = await fetchTextWithTimeout(
+        const htmlContent = await fetchWithTimeout(
             PROXY_URL + encodeURIComponent(detailPageUrl),
-            { headers: { 'User-Agent': API_CONFIG.search.headers['User-Agent'] } }
+            { headers: { 'User-Agent': API_CONFIG.search.headers['User-Agent'] } },
+            10000,
+            'text'
         );
 
         let matches = [];
-        if (sourceCode === 'ffzy') {
-            matches = htmlContent.match(/\$(https?:\/\/[^"'\s]+?\/\d{8}\/\d+_[a-f0-9]+\/index\.m3u8)/g) || [];
-        }
         if (matches.length === 0) {
             matches = htmlContent.match(/\$(https?:\/\/[^"'\s]+?\.m3u8)/g) || [];
         }
@@ -96,8 +71,8 @@ async function handleSpecialSourceDetail(id, sourceCode) {
 async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl) {
     try {
         const detailPageUrl = `${customApiDetailBaseUrl}/index.php/vod/detail/id/${id}.html`;
-        // 使用 fetchTextWithTimeout 获取 HTML 内容
-        const htmlContent = await fetchTextWithTimeout(
+        // 使用 fetchWithTimeout 获取 HTML 内容
+        const htmlContent = await fetchWithTimeout(
             PROXY_URL + encodeURIComponent(detailPageUrl),
             { headers: { 'User-Agent': API_CONFIG.search.headers['User-Agent'], 'Accept': 'application/json' } } // Accept header for custom APIs can remain, as some might check it.
         );
@@ -128,117 +103,6 @@ async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl) {
     } catch (e) {
         console.error('自定义API详情获取失败:', e);
         throw new Error(`获取自定义API详情失败: ${e.message}`);
-    }
-}
-
-// 注意：此函数在当前客户端聚合模式下可能未被直接调用。
-// 聚合搜索由 app.js 中的 performSearch 函数通过多次调用 /api/search 实现。
-async function handleAggregatedSearch(searchQuery) {
-    const availableSources = Object.keys(API_SITES)
-        .filter(key => key !== 'aggregated' && key !== 'custom');
-    if (availableSources.length === 0) throw new Error('没有可用的API源');
-
-    const requests = availableSources.map(source =>
-        fetchWithTimeout(
-            PROXY_URL + encodeURIComponent(`${API_SITES[source].api}${API_CONFIG.search.path}${encodeURIComponent(searchQuery)}`),
-            { headers: API_CONFIG.search.headers },
-            AGGREGATED_SEARCH_CONFIG.timeout
-        ).catch(err => {
-            console.warn(`${source}源搜索失败:`, err);
-            return null;
-        })
-    );
-    try {
-        const results = await Promise.all(requests);
-        let all = [];
-        results.forEach((r, i) => {
-            if (r && Array.isArray(r.list))
-                all.push(...r.list.map(item => ({
-                    ...item,
-                    source_name: API_SITES[availableSources[i]].name,
-                    source_code: availableSources[i]
-                })));
-        });
-        if (!all.length) {
-            return JSON.stringify({
-                code: 200, list: [], msg: '所有源均无搜索结果'
-            });
-        }
-        const seen = new Set(), unique = [];
-        for (const item of all) {
-            const k = `${item.source_code}_${item.vod_id}`;
-            if (!seen.has(k)) {
-                seen.add(k); unique.push(item);
-            }
-        }
-        unique.sort((a, b) => {
-            const na = a.vod_name || '', nb = b.vod_name || '';
-            const cmp = na.localeCompare(nb);
-            return cmp !== 0 ? cmp :
-                (a.source_name || '').localeCompare(b.source_name || '');
-        });
-        return JSON.stringify({ code: 200, list: unique });
-    } catch (err) {
-        console.error('聚合搜索处理错误:', err);
-        return JSON.stringify({
-            code: 400,
-            msg: '聚合搜索处理失败: ' + err.message, list: []
-        });
-    }
-}
-
-// 注意：此函数在当前客户端聚合模式下可能未被直接调用。
-// 自定义API的聚合搜索由 app.js 中的 performSearch 函数处理。
-async function handleMultipleCustomSearch(searchQuery, customApiUrls) {
-    const apiUrls = customApiUrls.split(CUSTOM_API_CONFIG.separator)
-        .map(url => url.trim())
-        .filter(url => /^https?:\/\//.test(url))
-        .slice(0, CUSTOM_API_CONFIG.maxSources);
-    if (!apiUrls.length) throw new Error('没有提供有效的自定义API地址');
-
-    const requests = apiUrls.map((apiUrl, i) =>
-        fetchWithTimeout(
-            PROXY_URL + encodeURIComponent(`${apiUrl}${API_CONFIG.search.path}${encodeURIComponent(searchQuery)}`),
-            { headers: API_CONFIG.search.headers },
-            CUSTOM_API_CONFIG.testTimeout
-        ).catch(err => {
-            console.warn(`自定义API ${i + 1} 搜索失败:`, err);
-            return null;
-        })
-    );
-    try {
-        const results = await Promise.all(requests);
-        let all = [];
-        results.forEach((r, i) => {
-            if (r && Array.isArray(r.list))
-                all.push(...r.list.map(item => ({
-                    ...item,
-                    source_name: `${CUSTOM_API_CONFIG.namePrefix}${i + 1}`,
-                    source_code: 'custom',
-                    api_url: apiUrls[i]
-                })));
-        });
-        if (!all.length) {
-            return JSON.stringify({
-                code: 200, list: [], msg: '所有自定义API源均无搜索结果'
-            });
-        }
-        const seen = new Set(), unique = [];
-        for (const item of all) {
-            const k = `${item.api_url || ''}_${item.vod_id}`;
-            if (!seen.has(k)) {
-                seen.add(k);
-                unique.push(item);
-            }
-        }
-        return JSON.stringify({ code: 200, list: unique });
-    } catch (err) {
-        console.error('自定义API聚合搜索处理错误:', err);
-        return JSON.stringify({
-            code: 400,
-            msg: '自定义API聚合搜索处理失败: ' + err.message,
-            list: []
-        });
     }
 }
 
@@ -369,7 +233,7 @@ async function handleApiRequest(url) {
                  // Log the error with more context before re-throwing or returning
                 console.error(`Error in detail processing for source ${sourceCode}, id ${id}:`, error);
                 const errorMsg = error.name === 'AbortError' ? '详情请求超时'
-                    : error.name === 'SyntaxError' ? '详情数据格式无效' // Should be less common now with fetchTextWithTimeout
+                    : error.name === 'SyntaxError' ? '详情数据格式无效' // Should be less common now with fetchWithTimeout
                     : error.message;
                 return JSON.stringify({
                     code: 400,

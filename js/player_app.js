@@ -489,6 +489,10 @@ async function doEpisodeSwitch(index, episodeString) {
 }
 
 (async function initializePage() {
+    // 从localStorage加载最新的custom API配置
+    const customAPIs = JSON.parse(localStorage.getItem('customAPIs') || '[]');
+    AppState.set('customAPIs', customAPIs);
+
     document.addEventListener('DOMContentLoaded', async () => {
         const urlParams = new URLSearchParams(window.location.search);
 
@@ -577,6 +581,31 @@ async function doEpisodeSwitch(index, episodeString) {
                         nextSeekPosition = 0;
                     }
                 }
+            }
+        }
+
+        // 新增：若为自定义detail源，且初始地址无效，自动重新请求
+        const sourceCode = urlParams.get('source_code') || '';
+        const isCustomSpecialSource = sourceCode.startsWith('custom_') &&
+            APISourceManager.getCustomApiInfo(parseInt(sourceCode.replace('custom_', '')))?.detail;
+
+        // 若初始地址无效（无m3u8链接），二次请求真实地址
+        if (isCustomSpecialSource && (!episodeUrlForPlayer || !episodeUrlForPlayer.includes('.m3u8'))) {
+            try {
+                const vodId = urlParams.get('id');
+                const customIndex = parseInt(sourceCode.replace('custom_', ''));
+                const apiInfo = APISourceManager.getCustomApiInfo(customIndex);
+                // 重新调用地址获取接口
+                const detailResult = await handleCustomApiSpecialDetail(vodId, apiInfo.detail);
+                const detailData = JSON.parse(detailResult);
+                if (detailData.code === 200 && detailData.episodes.length > 0) {
+                    // 更新播放地址为最新获取的地址
+                    episodeUrlForPlayer = detailData.episodes[urlParams.get('index') || 0];
+                    // 同步更新缓存，避免下次重复请求
+                    localStorage.setItem('currentEpisodes', JSON.stringify(detailData.episodes));
+                }
+            } catch (e) {
+                console.log('播放页二次请求地址失败（不影响现有体验）:', e);
             }
         }
 

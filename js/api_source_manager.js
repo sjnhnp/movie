@@ -146,11 +146,13 @@ const APISourceManager = {
         const nameInput = DOMCache.get('customApiName') || document.getElementById('customApiName');
         const urlInput = DOMCache.get('customApiUrl') || document.getElementById('customApiUrl');
         const isAdultInput = DOMCache.get('customApiIsAdult') || document.getElementById('customApiIsAdult');
+        const detailInput = DOMCache.get('customApiDetail') || document.getElementById('customApiDetail');
 
         // 填充表单数据
         nameInput.value = api.name;
         urlInput.value = api.url;
         if (isAdultInput) isAdultInput.checked = !!api.isAdult;
+        if (detailInput) detailInput.value = api.detail || '';
 
         // 显示表单
         const form = DOMCache.get('addCustomApiForm') || document.getElementById('addCustomApiForm');
@@ -177,10 +179,12 @@ const APISourceManager = {
         const nameInput = DOMCache.get('customApiName') || document.getElementById('customApiName');
         const urlInput = DOMCache.get('customApiUrl') || document.getElementById('customApiUrl');
         const isAdultInput = DOMCache.get('customApiIsAdult') || document.getElementById('customApiIsAdult');
+        const detailInput = DOMCache.get('customApiDetail') || document.getElementById('customApiDetail');
 
         const name = nameInput.value.trim();
         let url = urlInput.value.trim();
         const isAdult = isAdultInput ? isAdultInput.checked : false;
+        let detail = detailInput ? detailInput.value.trim() : '';
 
         if (!name || !url) {
             showToast('请输入API名称和链接', 'warning');
@@ -193,12 +197,22 @@ const APISourceManager = {
             return;
         }
 
+        // 验证detail URL格式（如果提供）
+        if (detail && !/^https?:\/\/.+/.test(detail)) {
+            showToast('detail链接格式不正确，需以http://或https://开头', 'warning');
+            return;
+        }
+
         // 移除URL末尾的斜杠
         if (url.endsWith('/')) url = url.slice(0, -1);
+        if (detail && detail.endsWith('/')) detail = detail.slice(0, -1);
 
         // 更新API信息
         const updatedCustomAPIs = [...customAPIs];
-        updatedCustomAPIs[index] = { name, url, isAdult };
+        const apiData = { name, url, isAdult };
+        if (detail) apiData.detail = detail;
+
+        updatedCustomAPIs[index] = apiData;
         AppState.set('customAPIs', updatedCustomAPIs);
         localStorage.setItem('customAPIs', JSON.stringify(updatedCustomAPIs));
 
@@ -215,6 +229,7 @@ const APISourceManager = {
         nameInput.value = '';
         urlInput.value = '';
         if (isAdultInput) isAdultInput.checked = false;
+        if (detailInput) detailInput.value = '';
 
         const form = DOMCache.get('addCustomApiForm') || document.getElementById('addCustomApiForm');
         if (form) form.classList.add('hidden');
@@ -265,10 +280,12 @@ const APISourceManager = {
         const nameInput = DOMCache.get('customApiName') || document.getElementById('customApiName');
         const urlInput = DOMCache.get('customApiUrl') || document.getElementById('customApiUrl');
         const isAdultInput = DOMCache.get('customApiIsAdult') || document.getElementById('customApiIsAdult');
+        const detailInput = DOMCache.get('customApiDetail') || document.getElementById('customApiDetail');
 
         const name = nameInput.value.trim();
         let url = urlInput.value.trim();
         const isAdult = isAdultInput ? isAdultInput.checked : false;
+        let detail = detailInput ? detailInput.value.trim() : '';
 
         if (!name || !url) {
             showToast('请输入API名称和链接', 'warning');
@@ -281,12 +298,20 @@ const APISourceManager = {
             return;
         }
 
+        // 验证detail URL格式（如果提供）
+        if (detail && !/^https?:\/\/.+/.test(detail)) {
+            showToast('detail链接格式不正确，需以http://或https://开头', 'warning');
+            return;
+        }
+
         // 移除URL末尾的斜杠
         if (url.endsWith('/')) url = url.slice(0, -1);
+        if (detail && detail.endsWith('/')) detail = detail.slice(0, -1);
 
         // 添加到自定义API列表 - 增加isAdult属性
         const customAPIs = AppState.get('customAPIs');
-        const updatedCustomAPIs = [...customAPIs, { name, url, isAdult }];
+        const apiData = { name, url, isAdult, detail: detail || '' }; // 确保detail字段存在，即使为空
+        const updatedCustomAPIs = [...customAPIs, apiData]; // 使用完整的apiData对象
         AppState.set('customAPIs', updatedCustomAPIs);
         localStorage.setItem('customAPIs', JSON.stringify(updatedCustomAPIs));
 
@@ -310,6 +335,7 @@ const APISourceManager = {
         nameInput.value = '';
         urlInput.value = '';
         if (isAdultInput) isAdultInput.checked = false;
+        if (detailInput) detailInput.value = '';
 
         const form = DOMCache.get('addCustomApiForm') || document.getElementById('addCustomApiForm');
         if (form) form.classList.add('hidden');
@@ -375,10 +401,12 @@ const APISourceManager = {
             const nameInput = DOMCache.get('customApiName') || document.getElementById('customApiName');
             const urlInput = DOMCache.get('customApiUrl') || document.getElementById('customApiUrl');
             const isAdultInput = DOMCache.get('customApiIsAdult') || document.getElementById('customApiIsAdult');
+            const detailInput = DOMCache.get('customApiDetail') || document.getElementById('customApiDetail');
 
             if (nameInput) nameInput.value = '';
             if (urlInput) urlInput.value = '';
             if (isAdultInput) isAdultInput.checked = false;
+            if (detailInput) detailInput.value = '';
 
             // 恢复默认的添加按钮
             const buttonContainer = form.querySelector('div:last-child');

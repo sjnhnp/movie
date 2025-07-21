@@ -24,7 +24,7 @@ window.SITE_CONFIG = SITE_CONFIG;
 const API_SITES = { 
     heimuer: { api: 'https://json.heimuer.xyz/api.php/provide/vod', name: '黑木耳', detail: 'https://heimuer.tv' },  
     bfzy: { api: 'https://bfzyapi.com/api.php/provide/vod', name: '暴风资源' },
-    dyttzy: { api: 'http://caiji.dyttzyapi.com/api.php/provide/vod', name: '电影天堂', detail: 'http://caiji.dyttzyapi.com' },
+    dyttzy: { api: 'https://caiji.dyttzyapi.com/api.php/provide/vod', name: '电影天堂', detail: 'https://caiji.dyttzyapi.com' },
     tyyszy: { api: 'https://tyyszy.com/api.php/provide/vod', name: '天涯资源' },  
     mdzy: { api: 'https://www.mdzyapi.com/api.php/provide/vod', name: '魔都资源' },  
     maotai: { api: 'https://caiji.maotaizy.cc/api.php/provide/vod', name: '茅台资源' },

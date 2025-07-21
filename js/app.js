@@ -351,6 +351,7 @@ function initializeDOMCache() {
     DOMCache.set('addCustomApiForm', document.getElementById('addCustomApiForm'));
     DOMCache.set('customApiName', document.getElementById('customApiName'));
     DOMCache.set('customApiUrl', document.getElementById('customApiUrl'));
+    DOMCache.set('customApiDetail', document.getElementById('customApiDetail'));
     DOMCache.set('customApiIsAdult', document.getElementById('customApiIsAdult'));
 
     // 缓存过滤器相关元素
@@ -544,6 +545,10 @@ function search(options = {}) {
 
 // 执行搜索请求
 async function performSearch(query, selectedAPIs) {
+    // 强制从localStorage刷新custom API数据
+    const customAPIsFromStorage = JSON.parse(localStorage.getItem('customAPIs') || '[]');
+    AppState.set('customAPIs', customAPIsFromStorage);
+    
     const searchPromises = selectedAPIs.map(apiId => {
         let apiUrl = `/api/search?wd=${encodeURIComponent(query)}&source=${apiId}`;
         if (apiId.startsWith('custom_')) {
@@ -1211,6 +1216,46 @@ async function showVideoEpisodesModal(id, title, sourceCode, apiUrl, fallbackDat
                 console.log('后台获取真实地址失败（不影响弹窗显示）', e);
             }
         }, 500); // 延迟执行，确保弹窗已打开
+    }
+
+    // 处理自定义detail源的真实地址获取
+    const customIndex = parseInt(sourceCode.replace('custom_', ''), 10);
+    const apiInfo = APISourceManager.getCustomApiInfo(customIndex); 
+    const isCustomSpecialSource = sourceCode.startsWith('custom_') && apiInfo?.detail;
+    if (isCustomSpecialSource) {
+        // 自定义源弹窗中的异步地址获取
+        setTimeout(async () => {
+            try {
+                const customIndex = parseInt(sourceCode.replace('custom_', ''), 10);
+                const apiInfo = APISourceManager.getCustomApiInfo(customIndex);
+                if (!apiInfo) throw new Error('自定义源信息不存在'); 
+
+                // 获取真实地址
+                const detailResult = await handleCustomApiSpecialDetail(id, apiInfo.detail);
+                const detailData = JSON.parse(detailResult);
+
+                if (detailData.code === 200 && Array.isArray(detailData.episodes)) {
+                    // 关键：立即更新缓存（同步到localStorage和AppState）
+                    const realPlayUrls = detailData.episodes;
+                    AppState.set('currentEpisodes', realPlayUrls); // 更新全局状态
+                    localStorage.setItem('currentEpisodes', JSON.stringify(realPlayUrls)); // 持久化缓存
+
+                    // 同时更新弹窗中的播放地址（避免用户二次点击仍无效）
+                    const episodeGrid = document.querySelector('#modalContent [data-field="episode-buttons-grid"]');
+                    if (episodeGrid) {
+                        episodeGrid.innerHTML = renderEpisodeButtons(
+                            realPlayUrls, // 使用真实地址重新渲染弹窗按钮
+                            title,
+                            sourceCode,
+                            sourceNameForDisplay,
+                            effectiveTypeName
+                        );
+                    }
+                }
+            } catch (e) {
+                console.error('自定义API地址获取失败:', e);
+            }
+        }, 500); // 保持延迟，但确保成功后立即更新缓存
     }
 
     // 4. 渲染弹窗（原代码逻辑）

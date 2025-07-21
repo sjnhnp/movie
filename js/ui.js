@@ -232,6 +232,7 @@ function showModal(contentNode, title = '') {
 
     lastFocusedElement = document.activeElement;
 
+    // 从 .innerHTML 赋值改为 .appendChild
     modalContent.innerHTML = ''; // 先清空旧内容
     modalContent.appendChild(contentNode); // 直接附加带有事件监听的DOM节点
 

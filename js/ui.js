@@ -232,7 +232,7 @@ function showModal(contentNode, title = '') {
 
     lastFocusedElement = document.activeElement;
 
-    // 从 .innerHTML 赋值改为 .appendChild
+    // 关键修复：从 .innerHTML 赋值改为 .appendChild
     modalContent.innerHTML = ''; // 先清空旧内容
     modalContent.appendChild(contentNode); // 直接附加带有事件监听的DOM节点
 
@@ -529,7 +529,8 @@ function handleHistoryListClick(e) {
         const title = historyItem.dataset.title;
         const episodeIndex = parseInt(historyItem.dataset.episodeIndex, 10);
         const playbackPosition = parseInt(historyItem.dataset.playbackPosition, 10);
-        playFromHistory(url, title, episodeIndex, playbackPosition);
+        const typeName = historyItem.dataset.typeName;
+        playFromHistory(url, title, episodeIndex, playbackPosition, typeName);
     }
 }
 
@@ -549,8 +550,9 @@ function formatPlaybackTime(seconds) {
  * @param {Object} videoInfo 视频信息对象
  */
 function addToViewingHistory(videoInfo) {
-
     if (!checkPasswordProtection()) return;
+    const originalEpisodeNames = JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
+
     try {
         let history = getViewingHistory();
 
@@ -587,7 +589,16 @@ function addToViewingHistory(videoInfo) {
 
             history.splice(idx, 1); // 移除旧条目
             history.unshift(item);  // 将更新后的条目移到最前面
-        } else { // 如果是新的剧集条目
+            // 更新原始剧集名称
+            if (videoInfo.originalEpisodeNames) {
+                item.originalEpisodeNames = videoInfo.originalEpisodeNames;
+            } else if (originalEpisodeNames.length > 0) {
+                item.originalEpisodeNames = originalEpisodeNames;
+            }
+        } else {
+            // 如果是新的剧集条目
+            const originalEpisodeNames = AppState.get('originalEpisodeNames') ||
+                JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
             const newItem = {
                 title: videoInfo.title,
                 url: videoInfo.url,
@@ -600,7 +611,9 @@ function addToViewingHistory(videoInfo) {
                 duration: videoInfo.duration,
                 year: videoInfo.year,
                 timestamp: Date.now(),
-                episodes: (videoInfo.episodes && videoInfo.episodes.length > 0) ? [...videoInfo.episodes] : []
+                episodes: (videoInfo.episodes && videoInfo.episodes.length > 0) ? [...videoInfo.episodes] : [],
+                originalEpisodeNames: originalEpisodeNames,
+                typeName: videoInfo.typeName || (window.currentVideoTypeName || '')
             };
             history.unshift(newItem);
         }
@@ -648,8 +661,25 @@ function loadViewingHistory() {
         // 防XSS
         const safeTitle = (item.title || '').replace(/[<>"']/g, c => ({ '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
         const safeSource = (item.sourceName || '未知来源').replace(/[<>"']/g, c => ({ '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-        const episodeText = item.episodeIndex !== undefined ? `第${item.episodeIndex + 1}集` : '';
-
+        let episodeText = '';
+        if (item.episodeIndex !== undefined) {
+            // 优先使用保存的原始剧集名称
+            if (item.originalEpisodeNames && item.originalEpisodeNames.length > item.episodeIndex) {
+                episodeText = item.originalEpisodeNames[item.episodeIndex];
+            } else {
+                // 兼容旧记录
+                if (item.episodes && item.episodes[item.episodeIndex]) {
+                    const episodeString = item.episodes[item.episodeIndex];
+                    if (typeof episodeString === 'string' && episodeString.includes('$')) {
+                        episodeText = episodeString.split('$')[0].trim();
+                    }
+                }
+            }
+            // 如果还是没有，则显示"第X集"
+            if (!episodeText) {
+                episodeText = `第${item.episodeIndex + 1}集`;
+            }
+        }
         const historyItem = document.createElement('div');
         historyItem.className = 'history-item cursor-pointer relative group';
         historyItem.dataset.url = item.url;
@@ -657,6 +687,7 @@ function loadViewingHistory() {
         historyItem.dataset.episodeIndex = item.episodeIndex || 0;
         historyItem.dataset.playbackPosition = item.playbackPosition || 0;
         historyItem.dataset.internalId = item.internalShowIdentifier;
+        historyItem.dataset.typeName = item.typeName || '';
 
         // 构建历史项内容
         const historyInfo = document.createElement('div');

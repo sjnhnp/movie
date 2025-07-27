@@ -89,7 +89,27 @@ button,
   will-change: transform, border-color, box-shadow;
 }
 
-/* -------- 5. 卡片基本样式（现代简约风格） -------- */
+/* -------- 5. 开关样式 -------- */
+.toggle-bg {
+  background-color: rgba(255, 255, 255, 0.2);
+  transition: background-color 0.3s ease-in-out;
+}
+
+.toggle-dot {
+  transform: translateX(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* 选中状态的样式 */
+input[type="checkbox"]:checked + .toggle-bg {
+  background-color: #6366f1 !important; /* 使用主色调 */
+}
+
+input[type="checkbox"]:checked + .toggle-bg + .toggle-dot {
+  transform: translateX(1.5rem); /* 24px = 1.5rem */
+}
+
+/* -------- 6. 卡片基本样式（现代简约风格） -------- */
 .card-hover {
   border: 1px solid var(--border-color);
   background: var(--surface-color);

@@ -1,4 +1,3 @@
-// functions/proxy/[[path]].js
 // -----------------------------------------------------------------------------
 //     • 智能缓存 & M3U8 重写
 // -----------------------------------------------------------------------------
@@ -303,6 +302,7 @@ const processUriLine = (line, baseUrl, cache, logFn) => {
 };
 
 // -------- 媒体播放列表 ---------------------------------------------------------
+// 原代码中处理媒体播放列表的函数
 const processMediaPlaylist = (targetUrl, content, cache, logFn) => {
   const base = getBaseUrl(targetUrl);
   const newline = /\r\n/.test(content) ? "\r\n" : "\n";
@@ -311,13 +311,29 @@ const processMediaPlaylist = (targetUrl, content, cache, logFn) => {
     .map((line) => {
       const t = line.trim();
       if (!t) return "";
-      if (t.startsWith("#EXT-X-KEY") || t.startsWith("#EXT-X-MAP"))
-        return processUriLine(t, base, cache, logFn);
-      if (t.startsWith("#")) return t;
-      const abs = resolveUrl(base, t, cache, logFn);
-      return rewriteUrlToProxy(abs);
+      // 1. 处理密钥文件（新增：确保加密链接也被代理）
+      if (t.startsWith("#EXT-X-KEY") && t.includes("URI=")) {
+        return t.replace(/URI="([^"]+)"/, (_, uri) => {
+          const absUri = resolveUrl(base, uri, cache, logFn);
+          const proxyUri = rewriteUrlToProxy(absUri); // 替换为代理链接
+          return `URI="${proxyUri}"`;
+        });
+      }
+      // 2. 处理地图文件（新增：修复初始化片段链接）
+      if (t.startsWith("#EXT-X-MAP") && t.includes("URI=")) {
+        return t.replace(/URI="([^"]+)"/, (_, uri) => {
+          const absUri = resolveUrl(base, uri, cache, logFn);
+          const proxyUri = rewriteUrlToProxy(absUri);
+          return `URI="${proxyUri}"`;
+        });
+      }
+      // 3. 处理普通分片链接（原逻辑优化）
+      if (!t.startsWith("#")) {
+        const abs = resolveUrl(base, t, cache, logFn);
+        return rewriteUrlToProxy(abs); // 确保所有分片链接都走代理
+      }
+      return t;
     });
-
   return finalLines.join(newline);
 };
 

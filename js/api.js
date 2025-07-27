@@ -1,5 +1,5 @@
 // ================================
-// API请求与聚合处理优化版
+// API请求与聚合处理
 // ================================
 
 async function fetchWithTimeout(targetUrl, options, timeout = 10000, responseType = 'json') {
@@ -329,5 +329,50 @@ async function testSiteAvailability(apiUrl) {
     } catch (e) {
         console.error('站点可用性测试失败:', e);
         return false;
+    }
+}
+
+
+function resolveUrl(baseUrl, relativeUrl) {
+    // 空字符串直接返回
+    if (!relativeUrl) {
+        return '';
+    }
+
+    // —— 1. 协议相对 URL，如 //cdn.example.com/lib.js —— 
+    if (relativeUrl.startsWith('//')) {
+        try {
+            const { protocol } = new URL(baseUrl);
+            return protocol + relativeUrl;
+        } catch (e) {
+            console.warn(`Protocol-relative URL 解析失败:`, e);
+            return relativeUrl;
+        }
+    }
+
+    // —— 2. 绝对 URL：以 scheme: 开头（包括 http: data: blob: 等） —— 
+    if (/^[a-z][a-z0-9+.-]*:/i.test(relativeUrl)) {
+        return relativeUrl;
+    }
+
+    // —— 3. 其余情况交给 URL API 处理 —— 
+    try {
+        return new URL(relativeUrl, baseUrl).toString();
+    } catch (e) {
+        console.warn(`URL 解析失败: base="${baseUrl}", relative="${relativeUrl}"`, e);
+        // —— 4. 回退到简单拼接 —— 
+        let base = baseUrl;
+        let rel = relativeUrl;
+
+        const baseEndsSlash = base.endsWith('/');
+        const relStartsSlash = rel.startsWith('/');
+        if (baseEndsSlash && relStartsSlash) {
+            // 去重斜杠
+            rel = rel.slice(1);
+        } else if (!baseEndsSlash && !relStartsSlash) {
+            // 缺少斜杠
+            base += '/';
+        }
+        return base + rel;
     }
 }

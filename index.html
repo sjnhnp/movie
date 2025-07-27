@@ -6,10 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>X</title>
 
+    <!-- 比如Facebook抓取的预览 -->
     <meta property="og:title" content="X" />
     <meta property="og:description" content="TV Aggregation" />
-    <meta property="og:image" content="https://filmsearch.pages.dev/images/tv1.png" />
-    <meta property="og:url" content="https://filmsearch.pages.dev" />
+    <meta property="og:image" content="https://yourwebsite.com/images/tv1.png" />
+    <meta property="og:url" content="https://yourwebsite.com" />
     <meta property="og:type" content="website" />
 
     <!-- 资源预连接，加快第三方资源加载 -->
@@ -42,29 +43,6 @@
     <!-- 顶部功能按钮区：设置 -->
     <nav aria-label="设置功能" class="fixed top-6 right-6 z-10">
         <div class="flex items-center space-x-3">
-
-            <!--  <a href="https://www.olevod.com/nav/%E7%94%B5%E5%BD%B1/%E5%85%A8%E9%83%A8%E5%9C%B0%E5%8C%BA/%E5%85%A8%E9%83%A8%E5%B9%B4%E4%BB%BD/%E5%85%A8%E9%83%A8%E7%B1%BB%E5%9E%8B/%E5%85%A8%E9%83%A8/%E5%85%A8%E9%83%A8/%E6%9C%80%E6%96%B0.html"
-                target="_blank" rel="noopener noreferrer"
-                class="bg-[#222] hover:bg-[#333] border border-[#333] hover:border-white rounded-lg px-3 py-1.5 flex items-center gap-1 transition-colors"
-                aria-label="抓取最新" type="button">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                </svg>
-                <span class="hidden sm:inline">最新电影</span>
-            </a>  
-
-            <!-- 电视直播按钮 
-            <a href="https://m3u-player.pages.dev/" target="_blank" rel="noopener noreferrer"
-                class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl px-4 py-2.5 flex items-center gap-2 transition-all duration-300 text-white/90 hover:text-white shadow-lg hover:shadow-xl"
-                aria-label="电视">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <rect x="3" y="7" width="18" height="13" rx="2" stroke="currentColor" stroke-width="2" />
-                    <path d="M8 21h8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                    <path d="M12 7V4M12 4 9 7M12 4l3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                </svg>
-                <span class="hidden sm:inline font-medium">电视</span>
-            </a>
 
             <!-- 原有设置按钮 -->
             <button id="settingsButton"
@@ -278,6 +256,30 @@
                     </div>
                 </div>
 
+                <!-- 画质速度检测 -->
+                <div class="bg-white/5 rounded-xl p-4 mb-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label for="speedDetectionToggle" class="text-sm font-medium text-white/90">
+                                画质速度检测
+                            </label>
+                            <p class="text-xs text-white/60 mt-1">
+                                关闭可减少等待
+                            </p>
+                        </div>
+                        <div class="relative inline-block w-12 align-middle select-none">
+                            <input type="checkbox" id="speedDetectionToggle"
+                                class="opacity-0 absolute w-full h-full cursor-pointer z-10" aria-checked="false">
+                            <div
+                                class="toggle-bg bg-white/20 w-12 h-6 rounded-full transition-all duration-300 ease-in-out">
+                            </div>
+                            <div
+                                class="toggle-dot absolute w-5 h-5 bg-white rounded-full top-0.5 left-0.5 transition-all duration-300 ease-in-out shadow-lg">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 播放预加载 -->
                 <div class="bg-white/5 rounded-xl p-4">
                     <div class="flex items-center justify-between">
@@ -329,7 +331,7 @@
                         <h1 class="text-6xl font-bold gradient-text ml-4 tracking-tight">X</h1>
                     </a>
                 </div>
-                <p class="text-white/60 text-lg font-light mb-12">无故卡住, Try关闭去广告</p>
+                <p class="text-white/60 text-lg font-light mb-12">无故卡住, Try关闭去广告<br>搜索结果排序：下载速度</p>
             </header>
             <!-- 搜索区 -->
             <section id="searchArea" class="flex flex-col items-center" aria-label="搜索区">
@@ -521,12 +523,14 @@
 
     <!-- 延迟加载主应用脚本（defer避免阻塞）-->
     <script src="js/config.js" defer></script>
+    <script src="js/simple_quality_detector.js" defer></script>
+    <script src="js/speed_tester.js" defer></script>
     <script src="js/ui.js" defer></script>
     <script src="js/api.js" defer></script>
     <script src="js/api_source_manager.js" defer></script>
+    <script src="js/utils.js" defer></script>
     <script src="js/app.js" defer></script>
     <script src="js/douban.js" defer></script>
-    <!-- 删除 js/sha256.js 的引用 -->
     <script src="js/password.js" defer></script>
 
     <!-- 服务端环境变量注入（Cloudflare Pages场景兼容） -->
@@ -559,8 +563,9 @@
                                 class="result-year hidden text-xs py-0.5 px-1.5 rounded bg-opacity-20 bg-purple-500 text-purple-300">年份</span>
                         </div>
                         <p class="result-remarks hidden text-xs text-gray-400 mb-1 line-clamp-1">更新状态</p>
+
                     </div>
-                    <div class="result-source flex justify-start items-center mt-auto pt-1 border-t border-gray-800">
+                    <div class="result-source flex justify-between items-center mt-auto pt-1 border-t border-gray-800">
                         <span class="result-source-name hidden">数据源</span>
                     </div>
                 </div>
@@ -584,30 +589,38 @@
             </div>
 
             <div data-field="episodesContainer">
-                <div class="mb-4 flex justify-end items-center space-x-2">
-                    <div class="text-sm text-gray-400 mr-auto">共 <span data-field="episode-count">0</span> 集</div>
-                    <button data-action="copy-links" title="复制所有剧集链接"
-                        class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                        </svg>
-                    </button>
-                    <button data-action="toggle-order" title="切换为倒序排列"
-                        class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center">
-                        <svg data-field="order-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" style="transition: transform 0.3s ease;">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                        </svg>
-                    </button>
+                <div class="mb-4 flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <div class="text-sm text-gray-400">共 <span data-field="episode-count">0</span> 集</div>
+                        <span class="px-2 py-0.5 bg-gray-700 text-white text-xs rounded"
+                            data-field="quality-tag">检测中...</span>
+                        <!-- 加载速度显示位置 -->
+                        <span class="px-2 py-0.5 bg-gray-700 text-white text-xs rounded hidden"
+                            data-field="speed-tag"></span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button data-action="copy-links" title="复制所有剧集链接"
+                            class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                        </button>
+                        <button data-action="toggle-order" title="切换为倒序排列"
+                            class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center">
+                            <svg data-field="order-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" style="transition: transform 0.3s ease;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div data-field="episode-buttons-grid"
                     class="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
                 </div>
             </div>
-        </div>
         </div>
     </template>
 </body>

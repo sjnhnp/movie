@@ -27,55 +27,264 @@ let lastFailedAction = null;
 let availableAlternativeSources = [];
 let adFilteringEnabled = false;
 let universalId = '';
+let isWebFullscreen = false;
 
-// 提取核心标题，用于匹配同一作品的不同版本
-function getCoreTitle(title, typeName = '') {
-    if (typeof title !== 'string') {
-        return '';
+// 网页全屏功能
+function toggleWebFullscreen() {
+    const playerContainer = document.querySelector('.player-container');
+    const playerRegion = document.getElementById('player-region');
+
+    // 切换状态
+    isWebFullscreen = !isWebFullscreen;
+    console.log(`Toggling web fullscreen. New state: ${isWebFullscreen}`);
+
+    if (isWebFullscreen) {
+        // 进入网页全屏
+        playerContainer.style.position = 'fixed';
+        playerContainer.style.top = '0';
+        playerContainer.style.left = '0';
+        playerContainer.style.width = '100vw';
+        playerContainer.style.height = '100vh';
+        playerContainer.style.zIndex = '9999';
+        playerContainer.style.background = '#000';
+
+        playerRegion.style.height = '100vh';
+
+        // 隐藏其他元素，包括顶部导航栏
+        const elementsToHide = [
+            'header',
+            '.flex.items-center.justify-between.p-6',
+            '.p-6.bg-white\\/5',
+            '#episodes-container'
+        ];
+
+        elementsToHide.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+                el.style.display = 'none';
+            });
+        });
+
+        // 添加网页全屏状态CSS类
+        document.body.classList.add('web-fullscreen-active');
+        playerContainer.classList.add('web-fullscreen-active');
+
+        addWebFullscreenExitHint();
+        showToast('已进入网页全屏，按W或ESC键退出', 'info', 3000);
+    } else {
+        // 退出网页全屏
+        playerContainer.style.position = '';
+        playerContainer.style.top = '';
+        playerContainer.style.left = '';
+        playerContainer.style.width = '';
+        playerContainer.style.height = '';
+        playerContainer.style.zIndex = '';
+        playerContainer.style.background = '';
+
+        playerRegion.style.height = '60vh';
+
+        // 显示其他元素
+        const elementsToShow = [
+            'header',
+            '.flex.items-center.justify-between.p-6',
+            '.p-6.bg-white\\/5',
+            '#episodes-container'
+        ];
+
+        elementsToShow.forEach(selector => {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+                el.style.display = '';
+            });
+        });
+
+        // 移除网页全屏状态CSS类
+        document.body.classList.remove('web-fullscreen-active');
+        if (playerContainer) {
+            playerContainer.classList.remove('web-fullscreen-active');
+        }
+
+        removeWebFullscreenExitHint();
+        showToast('已退出网页全屏', 'info', 1500);
+    }
+    // 统一在函数末尾更新按钮状态
+    updateWebFullscreenControlButton();
+}
+
+// 添加网页全屏键盘快捷键支持
+function addWebFullscreenKeyboardShortcut() {
+    // 避免重复添加事件监听器
+    if (window.webFullscreenKeyboardAdded) return;
+    window.webFullscreenKeyboardAdded = true;
+
+    document.addEventListener('keydown', (event) => {
+        // 检查是否在输入框中，如果是则不处理快捷键
+        const activeElement = document.activeElement;
+        if (activeElement && (
+            activeElement.tagName === 'INPUT' ||
+            activeElement.tagName === 'TEXTAREA' ||
+            activeElement.isContentEditable
+        )) {
+            return;
+        }
+
+        // W键切换网页全屏
+        if (event.key === 'w' || event.key === 'W') {
+            event.preventDefault();
+            toggleWebFullscreen();
+        }
+
+        // ESC键仅在网页全屏模式下退出
+        if (event.key === 'Escape' && isWebFullscreen) {
+            event.preventDefault();
+            toggleWebFullscreen(); // 调用同一个函数来处理退出逻辑
+        }
+    });
+}
+
+// 添加网页全屏退出提示
+function addWebFullscreenExitHint() {
+    // 避免重复添加
+    if (document.getElementById('web-fullscreen-exit-hint')) return;
+
+    const playerRegion = document.getElementById('player-region');
+    if (!playerRegion) return;
+
+    // 创建退出提示元素
+    const exitHint = document.createElement('div');
+    exitHint.id = 'web-fullscreen-exit-hint';
+    exitHint.innerHTML = `
+        <div style="
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 10000;
+            pointer-events: none;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        ">
+            按 W 或 ESC 键退出网页全屏
+        </div>
+    `;
+
+    playerRegion.appendChild(exitHint);
+
+    // 显示提示
+    setTimeout(() => {
+        const hint = exitHint.querySelector('div');
+        if (hint) hint.style.opacity = '1';
+    }, 100);
+
+    // 3秒后自动隐藏
+    setTimeout(() => {
+        const hint = exitHint.querySelector('div');
+        if (hint) hint.style.opacity = '0';
+        // 动画结束后移除元素，保持DOM清洁
+        setTimeout(() => exitHint.remove(), 300);
+    }, 3000);
+}
+
+// 移除网页全屏退出提示
+function removeWebFullscreenExitHint() {
+    const exitHint = document.getElementById('web-fullscreen-exit-hint');
+    if (exitHint) {
+        exitHint.remove();
+    }
+}
+
+// 初始化自定义右侧控制条
+function initCustomRightControls() {
+    // 避免重复初始化
+    if (window.customRightControlsInitialized) return;
+    window.customRightControlsInitialized = true;
+
+    // 绑定网页全屏按钮点击事件
+    const webFullscreenBtn = document.getElementById('web-fullscreen-control-btn');
+    if (webFullscreenBtn) {
+        webFullscreenBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleWebFullscreen();
+        });
     }
 
-    let baseName = title;
+    // 监听播放器状态变化，同步右侧控制条显示/隐藏
+    if (player) {
+        // 监听播放器控制条显示/隐藏事件
+        player.addEventListener('controls-change', (event) => {
+            const rightControls = document.getElementById('custom-right-controls');
+            if (rightControls) {
+                if (event.detail) {
+                    rightControls.style.opacity = '1';
+                    rightControls.style.pointerEvents = 'auto';
+                } else {
+                    rightControls.style.opacity = '0';
+                    rightControls.style.pointerEvents = 'none';
+                }
+            }
+        });
 
-    // 步骤 1: 使用正则表达式，仅对电影类型移除副标题
-    const movieKeywords = [
-        '电影', '剧情', '动作', '冒险', '同性', '喜剧', '奇幻',
-        '恐怖', '悬疑', '惊悚', '灾难', '爱情', '犯罪', '科幻', '抢先',
-        '动画', '歌舞', '战争', '经典', '网络', '其它', '理论', '纪录'
-    ];
-    const movieRegex = new RegExp(movieKeywords.join('|'));
-    if (typeName && movieRegex.test(typeName)) {
-        baseName = baseName.replace(/[:：].*/, '').trim();
+        // 监听鼠标进入/离开播放器区域
+        const playerRegion = document.getElementById('player-region');
+        if (playerRegion) {
+            let hideTimeout;
+
+            playerRegion.addEventListener('mouseenter', () => {
+                clearTimeout(hideTimeout);
+                const rightControls = document.getElementById('custom-right-controls');
+                if (rightControls && player.dataset.started) {
+                    rightControls.style.opacity = '1';
+                    rightControls.style.pointerEvents = 'auto';
+                }
+            });
+
+            playerRegion.addEventListener('mouseleave', () => {
+                hideTimeout = setTimeout(() => {
+                    const rightControls = document.getElementById('custom-right-controls');
+                    if (rightControls) { // 移除了 !isWebFullscreen 条件
+                        rightControls.style.opacity = '0';
+                        rightControls.style.pointerEvents = 'none';
+                    }
+                }, 3000); // 3秒后隐藏
+            });
+        }
+    }
+}
+
+function updateWebFullscreenControlButton(button) {
+    // 如果没有传入按钮元素，就通过ID查找
+    if (!button) {
+        button = document.getElementById('web-fullscreen-control-btn');
     }
 
-    // 步骤 2: 提取并统一季数
-    const numeralMap = { '一': '1', '二': '2', '三': '3', '四': '4', '五': '5', '六': '6', '七': '7', '八': '8', '九': '9', '十': '10' };
-    let normalizedTitle = title.replace(/[一二三四五六七八九十]/g, (match) => numeralMap[match]);
+    if (button) {
+        // 根据当前状态设置不同的图标
+        button.innerHTML = isWebFullscreen ?
+            // "退出网页全屏" 图标
+            `<svg class="w-5 h-5" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19.913 6.45826V9.56817C19.913 9.68695 20.0566 9.74644 20.1406 9.66245L24.0458 5.75727C24.3061 5.49692 24.7283 5.49692 24.9886 5.75727L26.2143 6.98293C26.4746 7.24328 26.4746 7.66539 26.2143 7.92573L22.3093 11.8306C22.2253 11.9146 22.2848 12.0583 22.4036 12.0583H25.5137C25.8819 12.0583 26.1804 12.3567 26.1804 12.7249V14.4583C26.1804 14.8265 25.8819 15.1249 25.5137 15.1249L19.2468 15.1249C19.2466 15.1249 19.2469 15.1249 19.2468 15.1249H17.5137C17.1455 15.1249 16.8463 14.8265 16.8463 14.4583V6.45826C16.8463 6.09007 17.1448 5.7916 17.513 5.7916H19.2463C19.6145 5.7916 19.913 6.09007 19.913 6.45826Z" fill="currentColor" />
+                <path d="M9.73054 19.9416C9.84933 19.9416 9.90882 20.0852 9.82482 20.1692L5.91991 24.0741C5.65956 24.3345 5.65956 24.7566 5.91991 25.0169L7.14556 26.2426C7.40591 26.5029 7.82802 26.5029 8.08837 26.2426L11.9935 22.3374C12.0775 22.2534 12.2212 22.3129 12.2212 22.4317V25.5416C12.2212 25.9098 12.5196 26.2083 12.8878 26.2083H14.6212C14.9893 26.2083 15.2878 25.9098 15.2878 25.5416L15.2878 17.5416C15.2878 17.1734 14.9893 16.8749 14.6212 16.8749H6.62046C6.25227 16.8749 5.9538 17.1734 5.9538 17.5416V19.2749C5.9538 19.6431 6.25227 19.9416 6.62046 19.9416H9.73054Z" fill="currentColor" />
+            </svg>` :
+            // "进入网页全屏" 图标
+            `<svg class="w-5 h-5" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.3183 12.4856L21.2231 8.58073C21.3071 8.49674 21.2476 8.35312 21.1288 8.35312H18.0189C17.6507 8.35312 17.3522 8.05464 17.3522 7.68645V5.95312C17.3522 5.58493 17.6507 5.28645 18.0189 5.28645H26.0189C26.387 5.28645 26.6862 5.58493 26.6862 5.95312V13.9531C26.6862 14.3213 26.3877 14.6198 26.0196 14.6198H24.2862C23.918 14.6198 23.6196 14.3213 23.6196 13.9531V10.8431C23.6196 10.7243 23.4759 10.6648 23.3919 10.7488L19.4867 14.6541C19.2264 14.9144 18.8043 14.9144 18.5439 14.6541L17.3183 13.4284C17.0579 13.1681 17.0579 12.7459 17.3183 12.4856Z" fill="currentColor" />
+                <path d="M6.1153 26.7135H14.1153C14.4835 26.7135 14.782 26.4151 14.782 26.0469V24.3135C14.782 23.9453 14.4835 23.6469 14.1153 23.6469H11.0053C10.8865 23.6469 10.827 23.5033 10.911 23.4193L14.8159 19.5144C15.0763 19.254 15.0763 18.8319 14.8159 18.5716L13.5903 17.3459C13.3299 17.0856 12.9078 17.0856 12.6474 17.3459L8.74222 21.2512C8.65822 21.3351 8.5146 21.2757 8.5146 21.1569L8.51461 18.0469C8.51461 17.6787 8.21613 17.3802 7.84794 17.3802H6.11461C5.74642 17.3802 5.44794 17.6787 5.44794 18.0469V26.0469C5.44794 26.4151 5.74711 26.7135 6.1153 26.7135Z" fill="currentColor" />
+            </svg>`;
 
-    let seasonNumber = 1;
-    const seasonMatch = normalizedTitle.match(/(?:第|Season\s*)(\d+)[季部]/i);
-    if (seasonMatch) {
-        seasonNumber = parseInt(seasonMatch[1], 10);
+        button.setAttribute('aria-label', isWebFullscreen ? '退出网页全屏' : '网页全屏');
+        button.setAttribute('title', isWebFullscreen ? '退出网页全屏 (W)' : '网页全屏 (W)');
+
+        // 直接在按钮上切换CSS类，使其能响应 .web-fullscreen-active 的样式
+        button.classList.toggle('web-fullscreen-active', isWebFullscreen);
     }
-    const seasonIdentifier = `_S${String(seasonNumber).padStart(2, '0')}`;
-
-    // 步骤 3: 从基础名称中移除所有版本和季数标签，得到纯净的剧名
-    const seasonRegex = new RegExp('[\\s\\(（【\\[]?(?:第[一二三四五六七八九十\\d]+[季部]|Season\\s*\\d+)[\\)）】\\]]?', 'gi');
-    baseName = baseName.replace(seasonRegex, '').trim();
-
-    const versionTags = ['国语', '国', '粤语', '粤', '台配', '台', '中字', '普通话', '高清', 'HD', '版', '修复版', 'TC', '蓝光', '4K'];
-    const bracketRegex = new RegExp(`[\\s\\(（【\\[](${versionTags.join('|')})(?![0-9])\\s*[\\)）】\\]]?`, 'gi');
-    baseName = baseName.replace(bracketRegex, '').trim();
-    const suffixRegex = new RegExp(`(${versionTags.join('|')})$`, 'i');
-    baseName = baseName.replace(suffixRegex, '').trim();
-
-    baseName = baseName.replace(/\s+/g, '').trim();
-
-    // 步骤 4: 使用正确的变量 `movieRegex` 来进行判断
-    if (typeName && movieRegex.test(typeName) && !seasonMatch) {
-        return baseName;
-    }
-
-    return `${baseName}${seasonIdentifier}`;
 }
 
 // 生成视频统一标识符，用于跨线路共享播放进度
@@ -282,75 +491,44 @@ async function processVideoUrl(url) {
 
 // --- 播放器核心逻辑 ---
 async function initPlayer(videoUrl, title) {
-    const playerContainer = document.getElementById('player');
-    if (!playerContainer) {
-        showError("播放器容器 (#player) 未找到");
+    // 直接获取在 HTML 中声明好的播放器元素
+    player = document.getElementById('player');
+
+    if (!player) {
+        showError("播放器元素 (#player) 未在HTML中找到");
         return;
     }
-    if (player) {
-        // 清理旧的Blob URL
-        if (player.currentSrc && player.currentSrc.startsWith('blob:')) {
-            URL.revokeObjectURL(player.currentSrc);
-        }
-        player.destroy();
-        player = null;
+
+    // 在设置新源之前，清理可能存在的旧Blob URL
+    if (player.currentSrc && player.currentSrc.startsWith('blob:')) {
+        URL.revokeObjectURL(player.currentSrc);
     }
-    // 在创建播放器前处理URL
+
     const processedUrl = await processVideoUrl(videoUrl);
-    let retryCount = 0;
-    const maxRetries = 3;
-    const retryInterval = 3000;
-    const attemptInitPlayer = async () => {
-        try {
-            player = await VidstackPlayer.create({
-                target: playerContainer,
-                // 使用处理过的URL
-                src: { src: processedUrl, type: 'application/x-mpegurl' },
-                title: title,
-                autoplay: true,
-                preload: 'auto',
-                layout: new VidstackPlayerLayout({
-                    seekTime: 10,
-                    //clickToFullscreen: true
-                }),
-                // layout: new PlyrLayout(),
-                playsInline: true,
-                crossOrigin: true,
-                keyTarget: 'document',
-                keyShortcuts: {
-                    togglePaused: 'k Space',
-                    toggleMuted: 'm',
-                    togglePictureInPicture: 'i',
-                    // toggleFullscreen: 'f',
-                    seekBackward: ['j', 'J', 'ArrowLeft'],
-                    seekForward: ['l', 'L', 'ArrowRight'],
-                    volumeUp: 'ArrowUp',
-                    volumeDown: 'ArrowDown',
-                    speedUp: '>',
-                    slowDown: '<',
-                }
-            });
-            window.player = player;
-            addPlayerEventListeners();
-            handleSkipIntroOutro(player);
-            // 应用保存的播放速率
-            const savedSpeed = localStorage.getItem('playbackSpeed') || '1';
-            if (player.playbackRate !== undefined) {
-                player.playbackRate = parseFloat(savedSpeed);
-            }
-        } catch (error) {
-            if (retryCount < maxRetries) {
-                retryCount++;
-                setTimeout(() => {
-                    attemptInitPlayer();
-                }, retryInterval);
-            } else {
-                console.error("Vidstack Player 创建失败:", error);
-                showError("播放器初始化失败");
-            }
-        }
-    };
-    await attemptInitPlayer();
+
+    // 为播放器设置属性
+    player.title = title;
+    player.src = { src: processedUrl, type: 'application/x-mpegurl' };
+
+    // 确保核心事件监听器只被添加一次
+    if (!player.dataset.listenersAdded) {
+        addPlayerEventListeners();
+        player.dataset.listenersAdded = 'true';
+    }
+
+    handleSkipIntroOutro(player);
+
+    // 应用保存的播放速率
+    const savedSpeed = localStorage.getItem('playbackSpeed') || '1';
+    player.playbackRate = parseFloat(savedSpeed);
+
+    // 网页全屏功能初始化
+    addWebFullscreenKeyboardShortcut();
+
+    // 等待播放器完全初始化后再初始化右侧控制条
+    setTimeout(() => {
+        initCustomRightControls();
+    }, 100);
 }
 
 function addPlayerEventListeners() {
@@ -516,24 +694,25 @@ async function doEpisodeSwitch(index, episodeString) {
         const sourceMapJSON = sessionStorage.getItem('videoSourceMap');
         if (sourceMapJSON) {
             try {
-                const sourceMap = JSON.parse(sourceMapJSON);
+                // 从JSON重建Map
+                const sourceMap = new Map(JSON.parse(sourceMapJSON));
 
                 const coreClickedTitle = getCoreTitle(currentVideoTitle, currentVideoTypeName);
-
                 const relevantSources = [];
-                for (const key in sourceMap) {
-                    if (sourceMap.hasOwnProperty(key)) {
-                        const sourceItem = sourceMap[key][0];
-                        if (!sourceItem) continue;
 
-                        const coreKeyTitle = getCoreTitle(sourceItem.vod_name, sourceItem.type_name);
+                // 遍历Map中的每一个线路列表
+                for (const sourceList of sourceMap.values()) {
+                    const sourceItem = sourceList[0];
+                    if (!sourceItem) continue;
 
-                        const clickedYear = currentVideoYear;
-                        const keyYear = sourceItem.vod_year;
+                    // 使用与搜索时相同的核心标题提取逻辑进行匹配
+                    const coreKeyTitle = getCoreTitle(sourceItem.vod_name, sourceItem.type_name);
+                    const clickedYear = currentVideoYear;
+                    const keyYear = sourceItem.vod_year;
 
-                        if (coreKeyTitle === coreClickedTitle && (!clickedYear || !keyYear || keyYear === clickedYear)) {
-                            relevantSources.push(...sourceMap[key]);
-                        }
+                    // 如果核心标题匹配且年份兼容，则认为属于同一作品，加入备选列表
+                    if (coreKeyTitle === coreClickedTitle && (!clickedYear || !keyYear || keyYear === clickedYear)) {
+                        relevantSources.push(...sourceList);
                     }
                 }
                 availableAlternativeSources = relevantSources;
@@ -584,7 +763,7 @@ async function doEpisodeSwitch(index, episodeString) {
             }
         }
 
-        // 新增：若为自定义detail源，且初始地址无效，自动重新请求
+        // 若为自定义detail源，且初始地址无效，自动重新请求
         const sourceCode = urlParams.get('source_code') || '';
         const isCustomSpecialSource = sourceCode.startsWith('custom_') &&
             APISourceManager.getCustomApiInfo(parseInt(sourceCode.replace('custom_', '')))?.detail;
@@ -668,6 +847,8 @@ function updateBrowserHistory(newEpisodeUrl) {
 function setupPlayerControls() {
     const backButton = document.getElementById('back-button');
     if (backButton) backButton.addEventListener('click', () => { window.location.href = 'index.html'; });
+
+
 
     const fullscreenButton = document.getElementById('fullscreen-button');
     if (fullscreenButton) {
@@ -774,7 +955,8 @@ function saveToHistory() {
             playbackPosition: Math.floor(player.currentTime),
             duration: Math.floor(player.duration) || 0,
             timestamp: Date.now(),
-            year: currentVideoYear
+            year: currentVideoYear,
+            typeName: currentVideoTypeName
         };
         window.addToViewingHistory(videoInfo);
     } catch (e) {
@@ -799,7 +981,8 @@ function saveCurrentProgress() {
                 duration: Math.floor(duration),
                 timestamp: Date.now(),
                 year: currentVideoYear,
-                episodes: window.currentEpisodes
+                episodes: window.currentEpisodes,
+                typeName: currentVideoTypeName
             };
             window.addToViewingHistory(videoInfo);
         } catch (e) {
@@ -905,7 +1088,7 @@ function renderEpisodes() {
         const parts = (episodeData || '').split('$');
         const episodeName = parts.length > 1 ? parts[0].trim() : '';
 
-        // 优先使用原始剧集名称（综艺类核心逻辑）
+        // 优先使用原始剧集名称
         // 从保存的原始名称中取对应索引的名称（如“20200101”）
         const originalName = originalEpisodeNames[originalIndex] || '';
 
@@ -915,8 +1098,15 @@ function renderEpisodes() {
             btn.textContent = originalName || episodeName || `第${originalIndex + 1}集`;
             btn.title = btn.textContent;
         } else {
-            // 非综艺：保持原有逻辑（不影响其他类型）
+            // 非综艺：
+            // 1 采用优先原始名称
+            //const originalName = (originalEpisodeNames && originalEpisodeNames[originalIndex]) || '';
+            //btn.textContent = originalName || (originalIndex + 1).toString();
+            // btn.title = originalName || `第${originalIndex + 1}集`;
+
+            // 2 采用默认索引
             btn.textContent = originalIndex + 1;
+            // 1和2 共有
             btn.title = `第 ${originalIndex + 1} 集`;
         }
 
@@ -1296,7 +1486,9 @@ async function switchLine(newSourceCode, newVodId) {
 
         currentVideoTitle = targetSourceItem.vod_name;
         currentVideoYear = targetSourceItem.vod_year;
-        currentVideoTypeName = targetSourceItem.type_name;
+        // 没拿到新线路的类型时沿用旧值
+        currentVideoTypeName = targetSourceItem.type_name || currentVideoTypeName;
+        window.currentVideoTypeName = currentVideoTypeName;
 
         let targetEpisodeIndex = currentEpisodeIndex;
         if (targetEpisodeIndex >= newEps.length) {
@@ -1312,7 +1504,7 @@ async function switchLine(newSourceCode, newVodId) {
         newUrlForBrowser.searchParams.set('source', targetSourceItem.source_name);
         newUrlForBrowser.searchParams.set('source_code', newSourceCode);
         if (currentVideoYear) newUrlForBrowser.searchParams.set('year', currentVideoYear);
-        if (currentVideoTypeName) newUrlForBrowser.searchParams.set('typeName', currentVideoTypeName);
+        newUrlForBrowser.searchParams.set('typeName', currentVideoTypeName);
 
         const newVideoKey = `${currentVideoTitle}|${currentVideoYear || ''}`;
         newUrlForBrowser.searchParams.set('videoKey', newVideoKey);
@@ -1460,18 +1652,6 @@ function handleDocumentClick(event) {
     const playSettingsContainer = document.querySelector('.play-settings-container');
     const lineSwitchContainer = document.querySelector('.line-switch-container');
     const skipControlContainer = document.querySelector('.skip-control-container');
-    const playerRegion = document.getElementById('player-region');
-    const playerContainer = document.getElementById('player');
-
-    // 检查是否点击了播放器区域
-    const isPlayerAreaClick = (playerRegion && playerRegion.contains(event.target)) ||
-        (playerContainer && playerContainer.contains(event.target));
-
-    // 如果点击了播放器区域，直接关闭所有下拉菜单
-    if (isPlayerAreaClick) {
-        closeAllDropdowns();
-        return;
-    }
 
     // 如果点击不在任何下拉容器内，关闭所有下拉菜单
     if (playSettingsContainer && !playSettingsContainer.contains(event.target)) {
@@ -1501,18 +1681,6 @@ function handleDocumentTouch(event) {
     const playSettingsContainer = document.querySelector('.play-settings-container');
     const lineSwitchContainer = document.querySelector('.line-switch-container');
     const skipControlContainer = document.querySelector('.skip-control-container');
-    const playerRegion = document.getElementById('player-region');
-    const playerContainer = document.getElementById('player');
-
-    // 检查是否触摸了播放器区域
-    const isPlayerAreaTouch = (playerRegion && playerRegion.contains(event.target)) ||
-        (playerContainer && playerContainer.contains(event.target));
-
-    // 如果触摸了播放器区域，直接关闭所有下拉菜单
-    if (isPlayerAreaTouch) {
-        closeAllDropdowns();
-        return;
-    }
 
     // 如果触摸不在任何下拉容器内，关闭所有下拉菜单
     const isOutsideAllContainers =

@@ -1629,7 +1629,97 @@ function setupPlaySettingsEvents() {
 
         speedSelect.setAttribute('data-initialized', 'true');
     }
-    // 记住进度功能已在setupRememberEpisodeProgressToggle中处理
+
+    // 设置分片广告过滤
+    const adFilterToggle = document.getElementById('adFilterToggle');
+    if (adFilterToggle && !adFilterToggle.hasAttribute('data-initialized')) {
+        // 从URL参数初始化开关状态
+        const urlParams = new URLSearchParams(window.location.search);
+        adFilteringEnabled = urlParams.get('af') === '1';
+        adFilterToggle.checked = adFilteringEnabled;
+
+        adFilterToggle.addEventListener('change', async function (event) {
+            adFilteringEnabled = event.target.checked;
+
+            // 更新localStorage（保持与首页同步）
+            localStorage.setItem('adFilteringEnabled', adFilteringEnabled.toString());
+
+            // 更新URL中的af参数，以便刷新或分享时保留设置
+            const url = new URL(window.location);
+            url.searchParams.set('af', adFilteringEnabled ? '1' : '0');
+            window.history.replaceState({}, '', url);
+
+            showToast(adFilteringEnabled ? '已开启分片广告过滤' : '已关闭分片广告过滤', 'info');
+
+            // 重新加载播放器以应用设置
+            if (player) {
+                const originalUrl = new URLSearchParams(window.location.search).get('url');
+                if (!originalUrl) return;
+
+                // 先记下当前位置
+                const resumeAt = player.currentTime || 0;
+
+                // 先挂监听器，再换 src，保证一定能收到 loadedmetadata
+                if (resumeAt > 0) {
+                    const restore = () => {
+                        player.currentTime = resumeAt;
+                        player.removeEventListener('loadedmetadata', restore);
+                    };
+                    player.addEventListener('loadedmetadata', restore);
+                }
+
+                const processedUrl = await processVideoUrl(originalUrl);
+
+                // 清理旧 blob URL（如有）
+                if (player.currentSrc && player.currentSrc.startsWith('blob:')) {
+                    URL.revokeObjectURL(player.currentSrc);
+                }
+
+                player.src = { src: processedUrl, type: 'application/x-mpegurl' };
+                player.play().catch(e => console.warn('重新加载播放失败:', e));
+            }
+        });
+
+        adFilterToggle.setAttribute('data-initialized', 'true');
+    }
+
+    // 设置预加载开关
+    const preloadToggle = document.getElementById('preloadToggle');
+    if (preloadToggle && !preloadToggle.hasAttribute('data-initialized')) {
+        const preloadEnabled = localStorage.getItem('preloadingEnabled') !== 'false';
+        preloadToggle.checked = preloadEnabled;
+
+        // 添加事件监听器以响应变化
+        preloadToggle.addEventListener('change', function () {
+            localStorage.setItem('preloadingEnabled', this.checked.toString());
+            showToast(this.checked ? '预加载已开启' : '预加载已关闭', 'info');
+        });
+
+        preloadToggle.setAttribute('data-initialized', 'true');
+    }
+
+    // 设置自定义预加载集数
+    const preloadEpisodeCountInput = document.getElementById('preloadEpisodeCount');
+    if (preloadEpisodeCountInput && !preloadEpisodeCountInput.hasAttribute('data-initialized')) {
+        const preloadEpisodeCount = localStorage.getItem('preloadCount') || '3';
+        preloadEpisodeCountInput.value = preloadEpisodeCount;
+
+        // 添加事件监听器以响应变化
+        preloadEpisodeCountInput.addEventListener('change', function () {
+            const count = parseInt(this.value, 10);
+            // 验证输入值是否为有效的正数
+            if (count > 0) {
+                localStorage.setItem('preloadCount', count.toString());
+                showToast(`预加载集数已设置为 ${count}`, 'info');
+            } else {
+                // 如果输入无效，则恢复之前的值
+                this.value = localStorage.getItem('preloadCount') || '3';
+                showToast('请输入有效的预加载集数（正整数）', 'error');
+            }
+        });
+
+        preloadEpisodeCountInput.setAttribute('data-initialized', 'true');
+    }
 }
 
 function closeAllDropdowns() {

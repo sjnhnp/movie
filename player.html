@@ -168,7 +168,7 @@
                         <div id="play-settings-dropdown"
                             class="hidden absolute right-0 bottom-full mb-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-xl p-4 w-56">
                             <div class="flex items-center justify-between mb-3">
-                                <span class="text-white/90 text-sm font-medium">自动播放</span>
+                                <span class="text-white/90 text-sm font-medium">自动连播</span>
                                 <label class="switch">
                                     <input type="checkbox" id="autoplay-next" checked aria-label="自动播放">
                                     <span class="slider"></span>
@@ -181,6 +181,25 @@
                                         aria-label="记住进度">
                                     <span class="slider"></span>
                                 </label>
+                            </div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-white/90 text-sm font-medium">广告过滤</span>
+                                <label class="switch">
+                                    <input type="checkbox" id="adFilterToggle" aria-label="分片广告过滤">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-white/90 text-sm font-medium">预加载</span>
+                                <div class="flex items-center gap-3">
+                                    <label class="switch">
+                                        <input type="checkbox" id="preloadingToggle" aria-label="播放预加载">
+                                        <span class="slider"></span>
+                                    </label>
+                                    <input type="number" min="1" max="10" step="1" id="preloadCountInput"
+                                        class="w-16 bg-white/10 border border-white/20 text-white px-2 py-1 rounded-lg text-sm text-center focus:outline-none focus:border-white/40 transition-all duration-300"
+                                        title="预加载范围1-10" aria-label="预加载集数">
+                                </div>
                             </div>
                             <div class="flex items-center justify-between">
                                 <span class="text-white/90 text-sm font-medium">播放速率</span>

@@ -94,9 +94,9 @@ const CUSTOM_PLAYER_URL = 'player.html';
 
 // 预加载集数开关
 const DEFAULTS = {
-    enablePreloading: true, // 预加载 
-    preloadCount: 2,       // 预加载集数 
-    debugMode: false      // 调试模式 
+    enablePreloading: false, // 预加载 
+    preloadCount: 1,       // 预加载集数 
+    debugMode: true      // 调试模式 
 };
 
 // 播放器配置
@@ -111,9 +111,9 @@ const PLAYER_CONFIG = {
     adFilteringStorage: 'adFilteringEnabled', // 存储广告过滤设置的键名 
     speedDetectionEnabled: getBoolConfig('speedDetectionEnabled', true), // 默认启用画质速度检测
     speedDetectionStorage: 'speedDetectionEnabled', // 存储画质速度检测设置的键名
-    enablePreloading: getBoolConfig('enablePreloading', DEFAULTS.enablePreloading),
+    enablePreloading: getBoolConfig('preloadingEnabled', DEFAULTS.enablePreloading),
     preloadCount: getIntConfig('preloadCount', DEFAULTS.preloadCount, 1, 10),
-    debugMode: getBoolConfig('preloadDebugMode', DEFAULTS.debugMode),
+    debugMode: getBoolConfig('debugMode', DEFAULTS.debugMode),
 };
 
 window.PLAYER_CONFIG = PLAYER_CONFIG;
@@ -168,4 +168,15 @@ function getIntConfig(key, def, min = 0, max = 10) {
         console.warn(`Error reading integer config for ${key}:`, e);
         return def;
     }
+}
+
+// 确保预加载配置在首次访问时生效
+if (localStorage.getItem('preloadingEnabled') === null) {
+    localStorage.setItem('preloadingEnabled', DEFAULTS.enablePreloading.toString());
+}
+if (localStorage.getItem('preloadCount') === null) {
+    localStorage.setItem('preloadCount', DEFAULTS.preloadCount.toString());
+}
+if (localStorage.getItem('debugMode') === null) {
+    localStorage.setItem('debugMode', DEFAULTS.debugMode.toString());
 }

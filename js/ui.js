@@ -387,45 +387,44 @@ function renderSearchHistory() {
 
     const frag = document.createDocumentFragment();
 
-    // 标题与清空按钮
-    const header = document.createElement('div');
-    header.className = "flex justify-between items-center w-full mb-2";
+    const hasExternalHeader = document.getElementById('clearSearchHistory');
+    if (!hasExternalHeader) {
+        const header = document.createElement('div');
+        header.className = "flex justify-between items-center w-full mb-2";
 
-    const titleDiv = document.createElement('div');
-    titleDiv.className = "text-gray-500";
-    titleDiv.textContent = "最近搜索:";
+        const titleDiv = document.createElement('div');
+        titleDiv.className = "text-gray-500";
+        titleDiv.textContent = "最近搜索:";
 
-    const clearBtn = document.createElement('button');
-    clearBtn.id = "clearHistoryBtn";
-    clearBtn.className = "text-gray-500 hover:text-white transition-colors";
-    clearBtn.setAttribute('aria-label', "清除搜索历史");
-    clearBtn.textContent = "清除搜索历史";
-    clearBtn.onclick = clearSearchHistory;
+        const clearBtn = document.createElement('button');
+        clearBtn.id = "clearHistoryBtn";
+        clearBtn.className = "text-gray-500 hover:text-white transition-colors";
+        clearBtn.setAttribute('aria-label', "清除搜索历史");
+        clearBtn.textContent = "清除搜索历史";
+        clearBtn.onclick = clearSearchHistory;
 
-    header.appendChild(titleDiv);
-    header.appendChild(clearBtn);
-    frag.appendChild(header);
+        header.appendChild(titleDiv);
+        header.appendChild(clearBtn);
+        frag.appendChild(header);
+    }
 
-    // 渲染每个标签，自带删除x按钮
     history.forEach(item => {
-        // 外部包裹，让标签和x对齐
         const tagWrap = document.createElement('div');
         tagWrap.className = 'inline-flex items-center mb-2 mr-2';
 
-        // 核心：只用你自己的search-tag class!
         const tag = document.createElement('button');
         tag.className = 'search-tag';
         tag.textContent = item.text;
-        if (item.timestamp) tag.title = `搜索于: ${new Date(item.timestamp).toLocaleString()}`;
+        if (item.timestamp) tag.title =
+            `搜索于: ${new Date(item.timestamp).toLocaleString()}`;
 
-        // 删除按钮
         const deleteBtn = document.createElement('span');
-        deleteBtn.className = 'ml-2 text-gray-400 hover:text-red-500 cursor-pointer select-none flex items-center';
+        deleteBtn.className =
+            'ml-2 text-gray-400 hover:text-red-500 cursor-pointer select-none flex items-center';
         deleteBtn.setAttribute('role', 'button');
         deleteBtn.setAttribute('aria-label', '删除');
         deleteBtn.dataset.deletequery = item.text;
         deleteBtn.style.fontSize = '1.15em';
-
         deleteBtn.innerHTML =
             '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none;">' +
             '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>' +
@@ -439,6 +438,7 @@ function renderSearchHistory() {
     historyContainer.innerHTML = '';
     historyContainer.appendChild(frag);
 }
+
 
 
 /**

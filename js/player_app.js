@@ -206,8 +206,66 @@ function initCustomRightControls() {
     if (window.customRightControlsInitialized) return;
     window.customRightControlsInitialized = true;
 
-    // 绑定网页全屏按钮点击事件
     const webFullscreenBtn = document.getElementById('web-fullscreen-control-btn');
+    const isMobile = () => ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || /Mobi|Android/i.test(navigator.userAgent);
+
+    if (isMobile() && webFullscreenBtn) {
+        webFullscreenBtn.style.display = 'none'; // 在移动端默认隐藏
+
+        let longPressTimer;
+        let touchStartX;
+        let touchStartY;
+
+        const playerRegion = document.getElementById('player-region');
+
+        if (playerRegion) {
+            const handleTouchStart = (e) => {
+                if (e.touches.length === 1) { // 仅处理单指触摸
+                    const touch = e.touches[0];
+                    touchStartX = touch.clientX;
+                    touchStartY = touch.clientY;
+
+                    // 如果触摸点在已经显示的按钮上，则不启动计时器，允许用户直接点击
+                    if (webFullscreenBtn.contains(e.target)) {
+                        clearTimeout(longPressTimer);
+                        return;
+                    }
+
+                    longPressTimer = setTimeout(() => {
+                        webFullscreenBtn.style.display = 'block'; // 长按后显示按钮
+
+                        // 3秒后自动隐藏
+                        setTimeout(() => {
+                            if (webFullscreenBtn) {
+                                webFullscreenBtn.style.display = 'none';
+                            }
+                        }, 3000);
+                    }, 500); // 500毫秒定义为长按
+                }
+            };
+
+            const handleTouchMove = (e) => {
+                if (e.touches.length === 1) {
+                    const touch = e.touches[0];
+                    // 如果手指移动超过10像素，则取消长按计时器
+                    if (Math.abs(touch.clientX - touchStartX) > 10 || Math.abs(touch.clientY - touchStartY) > 10) {
+                        clearTimeout(longPressTimer);
+                    }
+                }
+            };
+
+            const handleTouchEnd = () => {
+                clearTimeout(longPressTimer);
+            };
+
+            playerRegion.addEventListener('touchstart', handleTouchStart);
+            playerRegion.addEventListener('touchmove', handleTouchMove);
+            playerRegion.addEventListener('touchend', handleTouchEnd);
+            playerRegion.addEventListener('touchcancel', handleTouchEnd); // 处理触摸取消事件
+        }
+    }
+
+    // 绑定网页全屏按钮点击事件
     if (webFullscreenBtn) {
         webFullscreenBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -758,6 +816,11 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
 
         setupAllUI();
 
+        // 初始化搜索和历史功能
+        if (typeof initPlayerSearchHistory === 'function') {
+            initPlayerSearchHistory();
+        }
+
         const positionFromUrl = urlParams.get('position');
         if (positionFromUrl) {
             nextSeekPosition = parseInt(positionFromUrl);
@@ -868,7 +931,22 @@ function updateBrowserHistory(newEpisodeUrl) {
 
 function setupPlayerControls() {
     const backButton = document.getElementById('back-button');
-    if (backButton) backButton.addEventListener('click', () => { window.location.href = 'index.html'; });
+    if (backButton) {
+        backButton.addEventListener('click', () => {
+            const playerSearchPerformed = sessionStorage.getItem('playerSearchPerformed');
+
+            if (playerSearchPerformed === 'true') {
+                // 清除播放页搜索状态
+                sessionStorage.removeItem('playerSearchPerformed');
+                sessionStorage.removeItem('playerSearchQuery');
+
+                // 回到首页并尝试恢复搜索状态
+                window.location.href = 'index.html?restore_search=true';
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
+    }
 
 
 

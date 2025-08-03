@@ -454,7 +454,14 @@ document.addEventListener('DOMContentLoaded', function () {
     APISourceManager.init();
     initializeEventListeners();
     renderSearchHistory();
-    restoreSearchFromCache();
+
+    // 检查是否需要恢复搜索状态
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('restore_search') === 'true') {
+        restoreSearchStateFromPlayer();
+    } else {
+        restoreSearchFromCache();
+    }
 });
 
 function initializeAppState() {
@@ -485,6 +492,64 @@ function initializeAppState() {
     } catch (e) {
         console.error('从 sessionStorage 恢复视频元数据缓存失败:', e);
         AppState.set('videoDataMap', new Map());
+    }
+}
+
+/**
+ * 从播放页返回时恢复搜索状态
+ */
+function restoreSearchStateFromPlayer() {
+    try {
+        // 尝试从sessionStorage恢复搜索状态
+        const searchQuery = sessionStorage.getItem('searchQuery');
+        const searchResults = sessionStorage.getItem('searchResults');
+        const selectedAPIs = sessionStorage.getItem('selectedAPIs');
+
+        if (searchQuery && searchResults) {
+            // 恢复搜索框内容
+            const searchInput = DOMCache.get('searchInput');
+            if (searchInput) {
+                searchInput.value = searchQuery;
+            }
+
+            // 恢复API选择状态
+            if (selectedAPIs) {
+                try {
+                    const apis = JSON.parse(selectedAPIs);
+                    AppState.set('selectedAPIs', apis);
+                    localStorage.setItem('selectedAPIs', selectedAPIs);
+                } catch (e) {
+                    console.error('恢复API选择状态失败:', e);
+                }
+            }
+
+            // 恢复搜索结果
+            try {
+                const results = JSON.parse(searchResults);
+                if (Array.isArray(results) && results.length > 0) {
+                    renderSearchResults(results);
+                    if (typeof showToast === 'function') {
+                        showToast(`已恢复搜索结果: "${searchQuery}"`, 'info', 3000);
+                    }
+                }
+            } catch (e) {
+                console.error('恢复搜索结果失败:', e);
+                // 如果恢复失败，重新执行搜索
+                if (typeof performSearch === 'function') {
+                    performSearch(searchQuery, AppState.get('selectedAPIs'));
+                }
+            }
+        }
+
+        // 清理URL参数
+        const url = new URL(window.location);
+        url.searchParams.delete('restore_search');
+        window.history.replaceState({}, document.title, url.toString());
+
+    } catch (error) {
+        console.error('恢复搜索状态失败:', error);
+        // 降级到普通的缓存恢复
+        restoreSearchFromCache();
     }
 }
 
@@ -616,6 +681,18 @@ function search(options = {}) {
     performSearch(query, selectedAPIs)
         .then(resultsData => {
             renderSearchResults(resultsData, options.doubanQuery ? query : null);
+
+            // 保存搜索状态到sessionStorage，供播放页返回时恢复
+            if (!options.doubanQuery) {
+                try {
+                    sessionStorage.setItem('searchQuery', query);
+                    sessionStorage.setItem('searchResults', JSON.stringify(resultsData));
+                    sessionStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
+                } catch (e) {
+                    console.error('保存搜索状态失败:', e);
+                }
+            }
+
             // 缓存结果已加载，无需额外提示
         })
         .catch(error => {

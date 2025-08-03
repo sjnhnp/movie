@@ -1424,16 +1424,6 @@ header {
   height: 56px;
 }
 
-#back-button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 1rem;
-  line-height: 1.5;
-  min-width: 72px;
-  padding: 6px 0;
-}
-
 #fullscreen-button {
   display: flex;
   align-items: center;
@@ -1540,4 +1530,466 @@ header {
 media-fullscreen-button {
   order: 2;
   /* Higher order number comes second */
+}
+
+/* ==================== 播放页搜索和历史面板样式 ==================== */
+
+/* 搜索弹窗新布局样式 */
+#searchPanel .bg-black\/20 {
+  padding: 1.5rem !important; /* 减小整体内边距 */
+}
+
+/* 搜索历史标签样式精致化 */
+#recentSearches {
+  gap: 0.5rem !important; /* 减小标签间距 */
+}
+
+#recentSearches .search-tag {
+  padding: 0.25rem 0.5rem !important; /* 进一步减小内边距 */
+  font-size: 0.8125rem !important; /* 减小字体大小 */
+  border-radius: 0.375rem !important; /* 调整圆角 */
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+}
+
+#recentSearches .search-tag:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  color: rgba(255, 255, 255, 0.95) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* 清除搜索历史按钮样式 */
+#clearSearchHistory {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+#clearSearchHistory:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+
+
+/* 播放页搜索结果画质标签样式 */
+.quality-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.quality-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 响应式优化 */
+@media (max-width: 768px) {
+  #searchPanel .bg-black\/20 {
+    padding: 1rem !important; /* 移动端减小内边距 */
+  }
+  
+  /* 移动端搜索框高度调整 */
+  #searchPanel .h-14 {
+    height: 3rem !important; /* 减小搜索框高度 */
+  }
+  
+  #recentSearches .search-tag {
+    padding: 0.1875rem 0.375rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .quality-tag {
+    font-size: 0.6875rem;
+    padding: 0.1875rem 0.375rem;
+  }
+}
+
+@media (max-width: 480px) {
+  #searchPanel .bg-black\/20 {
+    padding: 0.75rem !important;
+    margin: 0.5rem !important;
+  }
+  
+  #searchPanel .h-14 {
+    height: 2.75rem !important;
+  }
+  
+  #searchInput {
+    font-size: 1rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  #recentSearches .search-tag {
+    padding: 0.125rem 0.25rem !important;
+    font-size: 0.6875rem !important;
+  }
+}
+
+/* 历史面板样式 */
+.history-panel {
+  width: 400px;
+  max-width: 90vw;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 10000 !important;
+}
+
+.history-panel.show {
+  transform: translateX(0) !important;
+}
+
+/* 历史项样式 */
+.history-item {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.history-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.history-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.history-meta {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.5rem;
+}
+
+.history-episode {
+  color: rgba(99, 102, 241, 0.9);
+  font-weight: 500;
+}
+
+.history-source {
+  color: rgba(168, 85, 247, 0.9);
+}
+
+.history-time {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 0.25rem;
+}
+
+.history-progress {
+  margin-top: 0.5rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.progress-filled {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: right;
+}
+
+.history-item-delete-btn {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.history-item:hover .history-item-delete-btn {
+  opacity: 1;
+}
+
+/* 清空历史按钮 */
+.clear-history-btn {
+  background: rgba(239, 68, 68, 0.1);
+  color: rgba(239, 68, 68, 0.9);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.clear-history-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* 搜索面板样式 */
+#searchPanel {
+  backdrop-filter: blur(20px);
+  z-index: 10001 !important;
+}
+
+/* 确保模态框在最上层 */
+#modal {
+  z-index: 10002 !important;
+}
+
+/* 搜索历史标签样式 */
+.search-tag {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-tag:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+/* 加载动画 */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #ffffff;
+  animation: spin 1s ease-in-out infinite;
+}
+
+/* 确保加载提示在最上层 */
+#loading {
+  z-index: 10003 !important;
+}
+
+/* 确保Toast在最上层 */
+#toast {
+  z-index: 10004 !important;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 渐变文字效果 */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* 搜索结果卡片样式 - 与首页保持一致 */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-hover:hover {
+  transform: scale(1.02);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 卡片标题文本溢出处理 - 与首页保持一致 */
+.card-hover h3 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  line-clamp: 2; 
+  line-height: 1.4;
+  word-break: break-word;
+  hyphens: auto;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* 搜索结果卡片优化：横向布局 */
+.search-card-img-container {
+  width: 100px;
+  height: 150px;
+  overflow: hidden;
+  background-color: #191919;
+}
+
+/* 确保图片不会被拉伸，并且能够正确显示 */
+.search-card-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 增加卡片内字体大小 */
+.card-hover h3 {
+  font-size: 0.95rem;
+  line-height: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-hover p {
+  font-size: 0.8rem;
+}
+
+/* 优化卡片内元素间距 */
+.card-hover .p-2 {
+  padding: 0.5rem;
+}
+
+/* 确保卡片标题和元信息有足够空间 */
+.card-hover h3.result-title {
+  min-height: 2.4em;
+  margin-bottom: 0.375rem;
+}
+
+.card-hover .result-meta {
+  min-height: 1.5em;
+  margin-bottom: 0.375rem;
+}
+
+/* 卡片内集数/备注样式 */
+.result-remarks {
+  font-weight: normal;
+}
+
+/* 文本截断样式 - 与首页保持一致 */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 搜索面板中的网格布局 - 与首页保持一致 */
+#searchResults .grid {
+  gap: 1rem;
+}
+
+/* 针对搜索结果卡片修改网格布局以适应横向卡片 */
+@media (max-width: 640px) {
+  #searchResults #results {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+}
+
+/* 响应式调整：在小屏幕上依然保持较好的视觉效果 */
+@media (min-width: 641px) and (max-width: 768px) {
+  #searchResults #results {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+/* 调整网格布局，减少每行卡片数量以适应更大尺寸的卡片 */
+@media (min-width: 769px) and (max-width: 1024px) {
+  #searchResults #results {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 1025px) {
+  #searchResults #results {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .history-panel {
+    width: 320px;
+  }
+  
+  .history-title {
+    font-size: 0.9rem;
+  }
+  
+  .history-meta {
+    font-size: 0.8rem;
+  }
+  
+  .search-tag {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  #searchResults .grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .history-panel {
+    width: 280px;
+  }
+  
+  .card-hover {
+    font-size: 0.875rem;
+  }
+  
+  .card-hover h3 {
+    font-size: 0.9rem;
+  }
 }

@@ -583,11 +583,38 @@
                 <div class="text-gray-400 mb-2">剧情简介:</div>
                 <p class="text-gray-300 leading-relaxed" data-field="content"></p>
             </div>
-            <div class="mb-4">
-                <div class="text-gray-400 mb-2">播放列表:</div>
-                <div class="max-h-60 overflow-y-auto">
-                    <div data-field="episodes" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+            <div data-field="episodesContainer">
+                <div class="mb-4 flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <div class="text-sm text-gray-400">共 <span data-field="episode-count">0</span> 集</div>
+                        <span class="px-2 py-0.5 bg-gray-700 text-white text-xs rounded"
+                            data-field="quality-tag">检测中...</span>
+                        <!-- 加载速度显示位置 -->
+                        <span class="px-2 py-0.5 bg-gray-700 text-white text-xs rounded hidden"
+                            data-field="speed-tag"></span>
                     </div>
+                    <!-- 播放页暂时隐藏这些功能按钮 -->
+                    <div class="flex items-center space-x-2" style="display: none;">
+                        <button data-action="copy-links" title="复制所有剧集链接"
+                            class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                            </svg>
+                        </button>
+                        <button data-action="toggle-order" title="切换为倒序排列"
+                            class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center">
+                            <svg data-field="order-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" style="transition: transform 0.3s ease;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div data-field="episode-buttons-grid"
+                    class="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
                 </div>
             </div>
         </div>

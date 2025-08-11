@@ -147,7 +147,7 @@ function resolveUrl(baseUrl, relativeUrl, cache = new Map()) {
                 return relativeUrl; // 如果 baseUrl 也无效，返回原始相对路径
             }
         } else {
-            // 假设相对于包含基础 URL 资源的目录
+            // 假设相对于包含基础URL资源的目录
             return `${getBaseUrl(baseUrl)}${relativeUrl}`;
         }
     }

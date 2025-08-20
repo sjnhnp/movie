@@ -553,12 +553,17 @@ media-player:focus-within #custom-right-controls {
   padding: 0.5rem;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* iOS Safari 兼容 */
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
   font-size: 0.875rem;
+  /* iOS Safari 兼容性增强 */
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 /* 锁屏按钮激活状态的高亮样式 */
@@ -595,6 +600,15 @@ media-player:focus-within #custom-right-controls {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+  /* iOS Safari SVG 兼容性 */
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* 确保图标在iOS中正确显示 */
+  display: block;
+  pointer-events: none;
 }
 
 /* 桌面端显示文字 */
@@ -659,6 +673,11 @@ media-player:focus-within #custom-right-controls {
   .control-icon {
     width: 18px !important;
     height: 18px !important;
+    /* 移动端图标约束 - 防止溢出 */
+    max-width: 18px !important;
+    max-height: 18px !important;
+    min-width: 18px !important;
+    min-height: 18px !important;
   }
 
   .switch {
@@ -1350,6 +1369,99 @@ header {
   color: white;
   opacity: 0;
   transition: opacity .3s ease-in-out;
+}
+
+/* ===== iOS Safari 专用兼容性样式 ===== */
+/* 检测iOS Safari并应用特定样式 */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari 按钮背景修复 */
+  .control-btn {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    /* 移除可能导致渲染问题的属性 */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    /* 添加实体背景色作为后备 */
+    background-color: rgba(40, 40, 40, 0.8) !important;
+  }
+  
+  .control-btn:hover {
+    background: rgba(255, 255, 255, 0.25) !important;
+    background-color: rgba(60, 60, 60, 0.9) !important;
+  }
+  
+  /* iOS Safari SVG 图标修复 */
+  .control-icon {
+    stroke: #ffffff !important;
+    fill: none !important;
+    opacity: 0.9;
+  }
+  
+  /* 锁屏按钮激活状态在iOS中的特殊处理 */
+  .control-btn.lock-active {
+    background: #48bb78 !important;
+    background-color: #48bb78 !important;
+    border-color: #68d391 !important;
+  }
+  
+  .control-btn.lock-active .control-icon {
+    stroke: #ffffff !important;
+    opacity: 1 !important;
+  }
+}
+
+/* iOS 设备特定的媒体查询 */
+@media screen and (-webkit-min-device-pixel-ratio: 2) and (max-width: 768px) {
+  /* 高分辨率iOS设备的按钮优化 */
+  .control-btn {
+    min-width: 44px !important; /* iOS推荐的最小触摸目标 */
+    min-height: 44px !important;
+    border-width: 1.5px !important;
+  }
+  
+  /* 确保图标在高分辨率设备上不会溢出 */
+  .control-icon {
+    width: 20px !important;
+    height: 20px !important;
+    max-width: 20px !important;
+    max-height: 20px !important;
+  }
+  
+  /* 锁屏图标特殊处理 - 防止溢出 */
+  #lock-button .control-icon {
+    width: 18px !important;
+    height: 18px !important;
+    max-width: 18px !important;
+    max-height: 18px !important;
+    overflow: hidden !important;
+  }
+}
+
+/* JavaScript添加的iOS专用样式类 */
+.ios-control-btn {
+  /* 确保在iOS设备上触摸事件正常工作 */
+  -webkit-tap-highlight-color: transparent !important;
+  touch-action: manipulation !important;
+  /* 修复可能的渲染问题 */
+  transform: translateZ(0) !important;
+  -webkit-transform: translateZ(0) !important;
+}
+
+/* iOS Safari专用按钮状态修复 */
+.ios-control-btn:active {
+  transform: translateZ(0) scale(0.95) !important;
+  -webkit-transform: translateZ(0) scale(0.95) !important;
+}
+
+/* 确保锁屏按钮在iOS中的激活状态正确显示 */
+.ios-control-btn.lock-active {
+  background-color: #48bb78 !important;
+  border-color: #68d391 !important;
+}
+
+.ios-control-btn.lock-active .control-icon {
+  stroke: #ffffff !important;
+  opacity: 1 !important;
 }
 
 /* 日间模式下的文字颜色调整 */

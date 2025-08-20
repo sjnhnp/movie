@@ -29,6 +29,23 @@ let adFilteringEnabled = false;
 let universalId = '';
 let isWebFullscreen = false;
 
+// iOS设备检测
+const isIOSDevice = () => {
+    const result = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ||
+           /Safari/.test(navigator.userAgent) && /Mobile/.test(navigator.userAgent);
+    console.log('iOS设备检测结果:', result, 'UserAgent:', navigator.userAgent);
+    return result;
+};
+
+// iOS Safari检测
+const isIOSSafari = () => {
+    const ua = navigator.userAgent;
+    const result = /iPad|iPhone|iPod/.test(ua) && /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
+    console.log('iOS Safari检测结果:', result);
+    return result;
+};
+
 // 网页全屏功能
 function toggleWebFullscreen() {
     const playerContainer = document.querySelector('.player-container');
@@ -587,6 +604,8 @@ async function initPlayer(videoUrl, title) {
     // 等待播放器完全初始化后再初始化右侧控制条
     setTimeout(() => {
         initCustomRightControls();
+        // 应用iOS设备兼容性修复
+        applyIOSButtonFixes();
     }, 100);
 }
 
@@ -875,6 +894,11 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
 
         if (episodeUrlForPlayer) {
             await initPlayer(episodeUrlForPlayer, currentVideoTitle);
+            
+            // 延迟应用iOS修复，确保所有元素都已渲染
+            setTimeout(() => {
+                applyIOSButtonFixes();
+            }, 500);
         } else {
             showError('没有可播放的视频链接。');
         }
@@ -1299,6 +1323,95 @@ function copyLinks() {
     });
 }
 
+// iOS设备按钮样式修复
+function applyIOSButtonFixes() {
+    if (!isIOSDevice()) return;
+    
+    console.log('应用iOS设备按钮样式修复');
+    
+    // 为所有控制按钮添加iOS兼容性样式
+    const controlButtons = document.querySelectorAll('.control-btn');
+    controlButtons.forEach(button => {
+        // 添加iOS专用类
+        button.classList.add('ios-control-btn');
+        
+        // 确保触摸事件正常工作
+        button.style.webkitTapHighlightColor = 'transparent';
+        button.style.touchAction = 'manipulation';
+        
+        // 修复背景显示问题
+        if (isIOSSafari()) {
+            button.style.backgroundColor = 'rgba(40, 40, 40, 0.8)';
+            button.style.backdropFilter = 'none';
+            button.style.webkitBackdropFilter = 'none';
+        }
+        
+        // 增强触摸事件处理
+        addIOSTouchEnhancement(button);
+    });
+    
+    // 修复SVG图标显示
+    const svgIcons = document.querySelectorAll('.control-icon');
+    svgIcons.forEach(svg => {
+        svg.style.stroke = '#ffffff';
+        svg.style.fill = 'none';
+        svg.style.opacity = '0.9';
+        svg.style.pointerEvents = 'none'; // 防止图标阻挡点击事件
+    });
+    
+    // 特别处理锁屏按钮图标溢出问题
+    const lockButton = document.getElementById('lock-button');
+    const lockIcon = document.getElementById('lock-icon');
+    if (lockButton && lockIcon) {
+        const iconSvg = lockIcon.querySelector('svg') || lockIcon;
+        iconSvg.style.width = '18px';
+        iconSvg.style.height = '18px';
+        iconSvg.style.maxWidth = '18px';
+        iconSvg.style.maxHeight = '18px';
+        iconSvg.style.overflow = 'hidden';
+    }
+}
+
+// iOS触摸事件增强
+function addIOSTouchEnhancement(button) {
+    if (!isIOSDevice()) return;
+    
+    let touchStartTime = 0;
+    
+    // 触摸开始
+    button.addEventListener('touchstart', (e) => {
+        touchStartTime = Date.now();
+        button.style.transform = 'translateZ(0) scale(0.95)';
+        button.style.webkitTransform = 'translateZ(0) scale(0.95)';
+    }, { passive: true });
+    
+    // 触摸结束
+    button.addEventListener('touchend', (e) => {
+        const touchDuration = Date.now() - touchStartTime;
+        
+        // 恢复按钮状态
+        setTimeout(() => {
+            button.style.transform = 'translateZ(0) scale(1)';
+            button.style.webkitTransform = 'translateZ(0) scale(1)';
+        }, 100);
+        
+        // 如果是快速点击（小于300ms），确保点击事件被触发
+        if (touchDuration < 300) {
+            e.preventDefault();
+            // 手动触发点击事件
+            setTimeout(() => {
+                button.click();
+            }, 50);
+        }
+    }, { passive: false });
+    
+    // 触摸取消
+    button.addEventListener('touchcancel', () => {
+        button.style.transform = 'translateZ(0) scale(1)';
+        button.style.webkitTransform = 'translateZ(0) scale(1)';
+    }, { passive: true });
+}
+
 function toggleLockScreen() {
     if (!player) {
         console.warn("播放器未初始化，无法锁定屏幕。");
@@ -1316,6 +1429,25 @@ function toggleLockScreen() {
     // 2. 切换主容器和锁屏按钮的激活 Class
     playerContainer?.classList.toggle('player-locked', isScreenLocked);
     lockButton?.classList.toggle('lock-active', isScreenLocked);
+    
+    // iOS设备特殊处理
+    if (isIOSDevice() && lockButton) {
+        if (isScreenLocked) {
+            lockButton.style.backgroundColor = '#48bb78';
+            lockButton.style.borderColor = '#68d391';
+            if (lockIcon) {
+                lockIcon.style.stroke = '#ffffff';
+                lockIcon.style.opacity = '1';
+            }
+        } else {
+            lockButton.style.backgroundColor = isIOSSafari() ? 'rgba(40, 40, 40, 0.8)' : '';
+            lockButton.style.borderColor = '';
+            if (lockIcon) {
+                lockIcon.style.stroke = '#ffffff';
+                lockIcon.style.opacity = '0.9';
+            }
+        }
+    }
 
     // 3. 【核心修复】精准禁用/启用其他所有控件及其容器
     const controlBar = document.querySelector('.player-control-bar');
@@ -1347,11 +1479,27 @@ function toggleLockScreen() {
     // 4. 更新锁屏按钮的图标和提示信息
     if (lockIcon) {
         if (isScreenLocked) {
-            lockIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="control-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
+            // 锁定状态 - 显示已锁定图标
+            lockIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="control-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`;
             showMessage('屏幕已锁定', 'info', 2000);
         } else {
-            lockIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="control-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
+            // 解锁状态 - 显示未锁定图标
+            lockIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="control-icon" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
             showMessage('屏幕已解锁', 'info', 1500);
+        }
+        
+        // iOS设备图标尺寸修复
+        if (isIOSDevice()) {
+            const newIcon = lockIcon.querySelector('svg');
+            if (newIcon) {
+                newIcon.style.width = '18px';
+                newIcon.style.height = '18px';
+                newIcon.style.maxWidth = '18px';
+                newIcon.style.maxHeight = '18px';
+                newIcon.style.overflow = 'hidden';
+                newIcon.style.stroke = '#ffffff';
+                newIcon.style.fill = 'none';
+            }
         }
     }
 

@@ -92,9 +92,9 @@
 
                 <!-- 顶部区域：搜索框和关闭按钮 -->
                 <div class="flex-none mb-4">
-                    <div class="flex items-center gap-4">
+                    <div class="flex items-center gap-4 relative">
                         <!-- 搜索框 -->
-                        <div class="flex-1">
+                        <div class="flex-1 pr-12"> <!-- 为关闭按钮预留空间 -->
                             <form id="searchForm">
                                 <div class="relative group">
                                     <div class="absolute -inset-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full blur-xl opacity-30 group-hover:opacity-60 transition-all duration-500"
@@ -123,12 +123,11 @@
 
                         <!-- 关闭按钮 -->
                         <button id="closeSearchPanelButton"
-                            class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300 flex-shrink-0"
+                            class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300 flex-shrink-0 absolute right-0"
                             aria-label="关闭搜索" type="button">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M6 18L18 6M6 6l12 12">
-                                </path>
+                                    d="M6 18L18 6M6 6l12 12"></path>
                             </svg>
                         </button>
                     </div>

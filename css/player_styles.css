@@ -738,48 +738,66 @@ media-player:focus-within #custom-right-controls {
     flex: 1;
     display: flex;
     justify-content: center;
+    min-width: 0;
+    /* 防止flex子项溢出 */
+    /* 移除 overflow: hidden，允许下拉菜单显示 */
   }
 
   .player-control-bar {
-    gap: 0;
-    /* 移除间距 */
+    gap: 4px;
+    /* 添加按钮间距 */
     justify-content: space-between;
-    /* 均匀分布 */
     flex-wrap: nowrap;
-    /* 防止换行 */
     width: 100%;
-    /* 确保占满宽度 */
+    min-width: 0;
+    /* 防止flex容器溢出 */
+    position: relative;
+    /* 为下拉菜单提供定位上下文 */
   }
 
   .control-btn {
     width: 100%;
-    /* 占满容器宽度 */
-    height: 40px;
-    /* 固定高度 */
+    height: 36px;
+    /* 减小按钮高度 */
     min-width: unset;
-    /* 移除最小宽度限制 */
-    min-height: 40px;
-    /* 确保最小高度 */
+    min-height: 36px;
     padding: 0;
-    /* 移除内边距 */
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0;
-    border-radius: 8px;
-    /* 稍微减小圆角，更统一 */
+    border-radius: 6px;
+    /* 减小圆角 */
+    box-sizing: border-box;
+    /* 确保边框和内边距包含在宽度内 */
+    overflow: hidden;
+    /* 只在按钮级别防止内容溢出 */
   }
 
-  /* 移动端隐藏文字 */
   .control-text {
     display: none !important;
   }
 
-  /* 统一所有按钮内的图标大小 */
   .control-icon {
-    width: 18px !important;
-    /* 统一所有图标大小 */
-    height: 18px !important;
+    width: 16px !important;
+    /* 减小图标尺寸 */
+    height: 16px !important;
+    flex-shrink: 0;
+    /* 防止图标被压缩 */
+  }
+
+  /* 确保下拉菜单不被裁剪 */
+  #play-settings-dropdown,
+  #line-switch-dropdown,
+  #skip-control-dropdown {
+    z-index: 1000;
+    /* 确保菜单在顶层 */
+    position: absolute;
+    /* 相对于最近的定位父元素 */
+    bottom: 100%;
+    /* 在按钮上方显示 */
+    right: 0;
+    /* 右对齐 */
   }
 }
 
@@ -1486,6 +1504,10 @@ header {
   transition: opacity .3s ease-in-out;
 }
 
+
+
+/* 最终综艺按钮专用样式 (播放页)  */
+
 /* 综艺节目容器的自适应网格布局 */
 .variety-grid-layout {
   max-height: 30vh;
@@ -1996,5 +2018,75 @@ media-fullscreen-button {
 
   .card-hover h3 {
     font-size: 0.9rem;
+  }
+}
+
+/* 播放页搜索弹窗移动端修复 */
+@media (max-width: 768px) {
+  #searchPanel .flex.items-center.gap-4 {
+    flex-wrap: wrap;
+    /* 允许换行 */
+    gap: 1rem;
+    /* 调整间距 */
+    position: relative;
+    /* 为绝对定位的关闭按钮提供定位上下文 */
+    padding-top: 0.5rem;
+    /* 为关闭按钮留出空间 */
+    padding-bottom: 0.5rem;
+  }
+
+  #searchPanel .flex-1 {
+    min-width: 0;
+    /* 防止flex子项溢出 */
+    width: 100%;
+    /* 在移动端占满宽度 */
+  }
+
+  #searchPanel #closeSearchPanelButton {
+    position: absolute;
+    /* 绝对定位，避免影响布局 */
+    top: 50%;
+    /* 垂直居中 */
+    right: 0.75rem;
+    /* 距离右边框的距离 */
+    transform: translateY(-50%);
+    /* 精确垂直居中 */
+    width: 36px;
+    height: 36px;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    /* 确保在顶层 */
+  }
+
+  #searchPanel .relative.group {
+    width: 100%;
+    padding-right: 3rem;
+    /* 为关闭按钮预留空间 */
+  }
+
+  #searchPanel .relative.group .relative {
+    width: 100%;
+  }
+
+  /* 调整搜索框高度以适应移动端 */
+  #searchPanel .relative.group .relative {
+    height: 48px;
+    /* 减小高度 */
+  }
+
+  #searchPanel .relative.group .relative input {
+    padding-left: 1rem;
+    /* 调整内边距 */
+    padding-right: 1rem;
+    font-size: 1rem;
+    /* 调整字体大小 */
+  }
+
+  #searchPanel .relative.group .relative button[type="submit"] {
+    width: 48px;
+    /* 调整搜索按钮宽度 */
   }
 }

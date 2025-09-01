@@ -729,7 +729,7 @@ function rebuildVideoCaches(results) {
             videoSourceMap.get(key).push(item);
         }
     });
-    sessionStorage.setItem(
+    localStorage.setItem(
         'videoSourceMap',
         JSON.stringify(Array.from(videoSourceMap.entries()))
     );

@@ -745,7 +745,6 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
     }
 }
 
-
 (async function initializePage() {
     // 从localStorage加载最新的custom API配置
     const customAPIs = JSON.parse(localStorage.getItem('customAPIs') || '[]');
@@ -771,7 +770,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
         currentVideoYear = urlParams.get('year') || '';
         currentVideoTypeName = urlParams.get('typeName') || '';
 
-        const sourceMapJSON = sessionStorage.getItem('videoSourceMap');
+        const sourceMapJSON = localStorage.getItem('videoSourceMap');
         if (sourceMapJSON) {
             try {
                 // 从JSON重建Map
@@ -797,7 +796,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
                 }
                 availableAlternativeSources = relevantSources;
             } catch (e) {
-                console.error("从 sessionStorage 构建聚合线路列表失败:", e);
+                console.error("从 localStorage 构建聚合线路列表失败:", e);
                 availableAlternativeSources = [];
             }
         }

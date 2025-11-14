@@ -30,6 +30,7 @@ window.SITE_CONFIG = SITE_CONFIG;
 
 // API站点配置
 const API_SITES = {
+    yjzy: { api: 'https://caiji.maotaizy.cc/api.php/provide/vod', name: '影剧资源' },
     bfzy: { api: 'https://bfzyapi.com/api.php/provide/vod', name: '暴风资源' },
     mozhua: { api: 'https://mozhuazy.com/api.php/provide/vod', name: '魔爪资源' },
     dyttzy: { api: 'https://caiji.dyttzyapi.com/api.php/provide/vod', name: '电影天堂', detail: 'https://caiji.dyttzyapi.com' },

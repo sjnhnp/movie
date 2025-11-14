@@ -54,7 +54,7 @@ const API_SITES = {
 };
 
 window.API_SITES = API_SITES;
-const DEFAULT_SELECTED_APIS = ["mozhua", "bfzy", "dyttzy", "maotai", "tyyszy", "mdzy"];
+const DEFAULT_SELECTED_APIS = ["yjzy", "mdzy", "mozhua", "bfzy", "dyttzy", "tyyszy"];
 window.DEFAULT_SELECTED_APIS = DEFAULT_SELECTED_APIS;
 
 // 聚合搜索配置

@@ -34,21 +34,14 @@ function toggleWebFullscreen() {
     const playerContainer = document.querySelector('.player-container');
     const playerRegion = document.getElementById('player-region');
 
+    if (!playerContainer) return;
+
     // 切换状态
     isWebFullscreen = !isWebFullscreen;
     console.log(`Toggling web fullscreen. New state: ${isWebFullscreen}`);
 
     if (isWebFullscreen) {
-        // 进入网页全屏
-        playerContainer.style.position = 'fixed';
-        playerContainer.style.top = '0';
-        playerContainer.style.left = '0';
-        playerContainer.style.width = '100vw';
-        playerContainer.style.height = '100vh';
-        playerContainer.style.zIndex = '9999';
-        playerContainer.style.background = '#000';
-
-        playerRegion.style.height = '100vh';
+        // 进入网页全屏 - 大部分样式现在由 CSS 类 .web-fullscreen-active 控制
 
         // 隐藏其他元素，包括顶部导航栏
         const elementsToHide = [
@@ -73,15 +66,6 @@ function toggleWebFullscreen() {
         showToast('已进入网页全屏，按W或ESC键退出', 'info', 3000);
     } else {
         // 退出网页全屏
-        playerContainer.style.position = '';
-        playerContainer.style.top = '';
-        playerContainer.style.left = '';
-        playerContainer.style.width = '';
-        playerContainer.style.height = '';
-        playerContainer.style.zIndex = '';
-        playerContainer.style.background = '';
-
-        playerRegion.style.height = '60vh';
 
         // 显示其他元素
         const elementsToShow = [
@@ -100,9 +84,7 @@ function toggleWebFullscreen() {
 
         // 移除网页全屏状态CSS类
         document.body.classList.remove('web-fullscreen-active');
-        if (playerContainer) {
-            playerContainer.classList.remove('web-fullscreen-active');
-        }
+        playerContainer.classList.remove('web-fullscreen-active');
 
         removeWebFullscreenExitHint();
         showToast('已退出网页全屏', 'info', 1500);

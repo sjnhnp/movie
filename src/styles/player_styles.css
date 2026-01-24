@@ -2110,3 +2110,8 @@ media-fullscreen-button {
     /* 调整搜索按钮宽度 */
   }
 }
+
+/* 确保历史面板显示时覆盖 Tailwind 的隐藏样式 */
+#historyPanel.show {
+  transform: translateX(0) !important;
+}

@@ -773,7 +773,7 @@ function attachEventListeners() {
     // 设置按钮事件
     const settingsButton = getElement('settingsButton');
     if (settingsButton) {
-        settingsButton.addEventListener('click', toggleSettings);
+        settingsButton.addEventListener('click', (e) => (window.toggleSettings || toggleSettings)(e));
     }
 
     // 监听设置密码验证成功的事件
@@ -782,7 +782,7 @@ function attachEventListeners() {
     // 观看历史按钮
     const historyButton = getElement('historyButton');
     if (historyButton) {
-        historyButton.addEventListener('click', toggleHistory);
+        historyButton.addEventListener('click', (e) => (window.toggleHistory || toggleHistory)(e));
     }
 
     // 关闭设置面板按钮

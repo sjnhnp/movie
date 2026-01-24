@@ -102,8 +102,24 @@
 
                 /* ===== 拉 m3u8 → 抓 3 个 ts” 的逻辑 ===== */
                 try {
-                    const m3u8Response = await fetch(nextEpisodeUrl, { method: "GET", mode: 'cors' });
-                    if (!m3u8Response.ok) continue;
+                    let m3u8Response;
+                    try {
+                        m3u8Response = await fetch(nextEpisodeUrl, { method: "GET", mode: 'cors' });
+                    } catch (e) {
+                        if (PLAYER_CONFIG.debugMode) console.log(`[Preload] Direct fetch failed for ${nextEpisodeUrl}, trying proxy...`);
+                        // 如果直接抓取失败（可能是CORS），尝试通过代理抓取
+                        const proxyUrl = typeof PROXY_URL !== 'undefined' ? PROXY_URL + encodeURIComponent(nextEpisodeUrl) : null;
+                        if (proxyUrl) {
+                            m3u8Response = await fetch(proxyUrl);
+                        } else {
+                            throw e;
+                        }
+                    }
+
+                    if (!m3u8Response || !m3u8Response.ok) {
+                        if (PLAYER_CONFIG.debugMode) console.log(`[Preload] Failed to fetch m3u8 for ep ${episodeIdxToPreload + 1}`);
+                        continue;
+                    }
 
                     const m3u8Text = await m3u8Response.text();
                     const tsUrls = [];
@@ -123,21 +139,26 @@
                     let tsCached = 0;                                 // ☆ 统计成功缓存数
 
                     for (const tsUrl of tsUrls) {
-                        if (supportsCacheStorage()) {
-                            const cache = await caches.open('video-preload-cache');
-                            const cachedResponse = await cache.match(tsUrl);
-                            if (!cachedResponse) {
-                                const segmentResponse = await fetch(tsUrl, { method: "GET", mode: 'cors' });
-                                if (segmentResponse.ok) {
-                                    await cache.put(tsUrl, segmentResponse.clone());
-                                    tsCached++;                       // ☆ 成功 +1
+                        if (preloadCancelled) break;
+                        try {
+                            if (supportsCacheStorage()) {
+                                const cache = await caches.open('video-preload-cache');
+                                const cachedResponse = await cache.match(tsUrl);
+                                if (!cachedResponse) {
+                                    const segmentResponse = await fetch(tsUrl, { method: "GET", mode: 'cors' });
+                                    if (segmentResponse.ok) {
+                                        await cache.put(tsUrl, segmentResponse.clone());
+                                        tsCached++;                       // ☆ 成功 +1
+                                    }
+                                } else {
+                                    tsCached++;                           // ☆ 已在缓存里也算成功
                                 }
                             } else {
-                                tsCached++;                           // ☆ 已在缓存里也算成功
+                                const segmentResponse = await fetch(tsUrl, { method: "GET", mode: 'cors' });
+                                segmentResponse.ok && tsCached++;
                             }
-                        } else {
-                            const segmentResponse = await fetch(tsUrl, { method: "GET", mode: 'cors' });
-                            segmentResponse.ok && tsCached++;
+                        } catch (tsErr) {
+                            if (PLAYER_CONFIG.debugMode) console.warn(`[Preload] TS fetch failed: ${tsUrl}`, tsErr);
                         }
                     }
 
@@ -149,10 +170,10 @@
                             console.log(`[Preload] ✔ ep ${episodeIdxToPreload + 1} cached (${tsCached} ts)`);
                     } else {
                         if (PLAYER_CONFIG.debugMode)
-                            console.log(`[Preload] ✖ ep ${episodeIdxToPreload + 1} had no ts, ignore`);
+                            console.log(`[Preload] ✖ ep ${episodeIdxToPreload + 1} had no ts cached, ignore`);
                     }
                 } catch (e) {
-                    if (PLAYER_CONFIG.debugMode) console.error('[Preload] error:', e);
+                    if (PLAYER_CONFIG.debugMode) console.error('[Preload] error during episode fetch:', e);
                 } finally {
                     inFlightEpisodeUrls.delete(nextEpisodeUrl);
                 }

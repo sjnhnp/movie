@@ -143,6 +143,22 @@ const CUSTOM_API_CONFIG = {
 // 隐藏内置黄色采集站API的变量
 const HIDE_BUILTIN_ADULT_APIS = true;
 
+// 内部配置迁移逻辑
+(function migrateOldConfig() {
+    // 迁移：preloadEnabled -> preloadingEnabled
+    const oldPreloadEnabled = localStorage.getItem('preloadEnabled');
+    if (oldPreloadEnabled !== null && localStorage.getItem('preloadingEnabled') === null) {
+        localStorage.setItem('preloadingEnabled', oldPreloadEnabled);
+        localStorage.removeItem('preloadEnabled');
+    }
+    // 迁移：preloadEpisodeCount -> preloadCount
+    const oldPreloadCount = localStorage.getItem('preloadEpisodeCount');
+    if (oldPreloadCount !== null && localStorage.getItem('preloadCount') === null) {
+        localStorage.setItem('preloadCount', oldPreloadCount);
+        localStorage.removeItem('preloadEpisodeCount');
+    }
+})();
+
 function getBoolConfig(key, def) {
     try {
         const v = localStorage.getItem(key);

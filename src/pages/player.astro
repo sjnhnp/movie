@@ -28,6 +28,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
     
     <script is:inline src="/libs/sha256.min.js" defer></script>
     <script is:inline src="/js/config.js" defer></script>
+    <script is:inline src="/js/utils.js" defer></script>
     <!-- 注入服务端环境变量到客户端 -->
     <script is:inline define:vars={{ passwordHash, settingsPasswordHash }}>
         window.__ENV__ = window.__ENV__ || {};
@@ -620,7 +621,6 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
         </div>
     </template>
 
-    <script is:inline src="/js/utils.js" defer></script>
     <script is:inline src="/js/player_search_history.js" defer></script>
     <script type="module" src="/js/player_app.js"></script>
 </body>

@@ -504,12 +504,12 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
     
     <!-- 延迟加载主应用脚本（defer避免阻塞） -->
     <script is:inline src="/js/config.js" defer></script>
+    <script is:inline src="/js/utils.js" defer></script>
     <script is:inline src="/js/simple_quality_detector.js" defer></script>
     <script is:inline src="/js/speed_tester.js" defer></script>
     <script is:inline src="/js/ui.js" defer></script>
     <script is:inline src="/js/api.js" defer></script>
     <script is:inline src="/js/api_source_manager.js" defer></script>
-    <script is:inline src="/js/utils.js" defer></script>
     <script is:inline src="/js/app.js" defer></script>
     <script is:inline src="/js/douban.js" defer></script>
     <script is:inline src="/js/password.js" defer></script>

@@ -39,43 +39,7 @@ function refreshSpeedBadges(results) {
     });
 }
 
-// 主应用程序逻辑 使用AppState进行状态管理，DOMCache进行DOM元素缓存
-const AppState = (function () {
-    const state = new Map();
-    return {
-        set: function (key, value) { state.set(key, value); },
-        get: function (key) { return state.get(key); },
-        initialize: function (initialData = {}) {
-            for (const key in initialData) {
-                if (initialData.hasOwnProperty(key)) {
-                    state.set(key, initialData[key]);
-                }
-            }
-        }
-    };
-})();
-
-const DOMCache = (function () {
-    const cache = new Map();
-    return {
-        set: function (key, element) { if (element) cache.set(key, element); },
-        get: function (key) { return cache.get(key); },
-        init: function (elementsToCache) {
-            for (const key in elementsToCache) {
-                if (elementsToCache.hasOwnProperty(key)) {
-                    const element = document.getElementById(elementsToCache[key]);
-                    if (element) cache.set(key, element);
-                }
-            }
-        }
-    };
-})();
-
-//文本净化函数
-function sanitizeText(text) {
-    if (typeof text !== 'string') return '';
-    return text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
+// AppState 和 DOMCache 已移动到 utils.js 以供所有页面共享
 
 async function playVideo(episodeString, title, episodeIndex, sourceName = '', sourceCode = '', vodId = '', year = '', typeName = '', videoKey = '') {
     if (!episodeString) {

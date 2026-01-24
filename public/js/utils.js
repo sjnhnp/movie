@@ -1,3 +1,45 @@
+/**
+ * 共有状态和缓存系统
+ */
+const AppState = (function () {
+    const state = new Map();
+    return {
+        set: function (key, value) { state.set(key, value); },
+        get: function (key) { return state.get(key); },
+        initialize: function (initialData = {}) {
+            for (const key in initialData) {
+                if (initialData.hasOwnProperty(key)) {
+                    state.set(key, initialData[key]);
+                }
+            }
+        }
+    };
+})();
+
+const DOMCache = (function () {
+    const cache = new Map();
+    return {
+        set: function (key, element) { if (element) cache.set(key, element); },
+        get: function (key) { return cache.get(key); },
+        init: function (elementsToCache) {
+            for (const key in elementsToCache) {
+                if (elementsToCache.hasOwnProperty(key)) {
+                    const element = document.getElementById(elementsToCache[key]);
+                    if (element) cache.set(key, element);
+                }
+            }
+        }
+    };
+})();
+
+/**
+ * 文本净化函数
+ */
+function sanitizeText(text) {
+    if (typeof text !== 'string') return '';
+    return text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // 提取核心标题，用于匹配同一作品的不同版本，移除多余的标签和集数信息
 function getCoreTitle(title, typeName = '') {
     if (typeof title !== 'string') {

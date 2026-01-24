@@ -1,26 +1,20 @@
-# 使用一个轻量级的 Node.js 镜像作为基础
-FROM node:20-alpine
-
-# 设置工作目录
+FROM node:20-alpine AS base
 WORKDIR /app
 
-# 复制 package.json 和 package-lock.json (如果存在)
-COPY package.json ./
+COPY package.json package-lock.json ./
 
-# 安装依赖
-# 在复制全部代码之前安装依赖，可以利用 Docker 的层缓存机制
+FROM base AS build
 RUN npm install
-
-# 复制所有项目文件到工作目录
 COPY . .
+RUN npm run build
 
-# 暴露应用程序运行的端口
+FROM base AS runtime
+COPY --from=build /app/dist ./dist
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/package.json ./package.json
+
+ENV PORT=8080
+ENV HOST=0.0.0.0
 EXPOSE 8080
 
-# 设置环境变量的默认值 (可以在 docker run 或 docker-compose 中覆盖)
-ENV PORT=8080
-ENV PASSWORD=""
-ENV SETTINGS_PASSWORD=""
-
-# 容器启动时运行的命令
-CMD ["node", "server.js"]
+CMD ["node", "dist/server/entry.mjs"]

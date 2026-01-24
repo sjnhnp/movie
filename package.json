@@ -1,10 +1,23 @@
 {
-  "name": "movie",
+  "name": "green-gravity",
   "type": "module",
-  "version": "1.1.0",
-  "private": true,
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "build:vercel": "astro build --config astro.config.vercel.mjs",
+    "build:netlify": "astro build --config astro.config.netlify.mjs",
+    "build:cf": "astro build --config astro.config.cloudflare.mjs",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
   "dependencies": {
-    "node-fetch": "^3.3.2",
-    "express": "^4.19.2"
+    "@astrojs/cloudflare": "^12.6.12",
+    "@astrojs/netlify": "^6.6.4",
+    "@astrojs/node": "^9.5.2",
+    "@astrojs/vercel": "^9.0.4",
+    "@tailwindcss/vite": "^4.1.18",
+    "astro": "^5.16.15",
+    "tailwindcss": "^4.1.18"
   }
 }

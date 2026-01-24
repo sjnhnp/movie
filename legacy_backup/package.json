@@ -1,0 +1,10 @@
+{
+  "name": "movie",
+  "type": "module",
+  "version": "1.1.0",
+  "private": true,
+  "dependencies": {
+    "node-fetch": "^3.3.2",
+    "express": "^4.19.2"
+  }
+}

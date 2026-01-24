@@ -1,0 +1,37 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>{title}</title>
+        <meta property="og:title" content="X" />
+        <meta property="og:description" content="TV Aggregation" />
+        <meta property="og:image" content="https://yourwebsite.com/images/tv1.png" />
+        <meta property="og:url" content="https://yourwebsite.com" />
+        <meta property="og:type" content="website" />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="preconnect" href="https://images.icon-icons.com">
+        <link rel="dns-prefetch" href="https://images.icon-icons.com">
+		
+        <slot name="head" />
+	</head>
+	<body class="page-bg text-white">
+		<slot />
+        
+        <!-- Global Scripts that are used in both pages? or just put in specific page. 
+             Ideally imported in component, but for migration keeping them as script tags. -->
+        <script is:inline src="/libs/sha256.min.js" defer></script>
+	</body>
+</html>

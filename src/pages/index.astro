@@ -429,22 +429,21 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
 
     <!-- 详情模态框 -->
     <div id="modal"
-        class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center transition-opacity duration-300 z-40"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md hidden flex items-center justify-center transition-all duration-300 z-50 p-4"
         role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true" tabindex="-1">
         <div
-            class="bg-black/20 backdrop-blur-xl border border-white/10 p-8 rounded-2xl w-11/12 max-w-4xl max-h-[90vh] flex flex-col shadow-2xl">
-            <div class="flex justify-between items-center mb-8 flex-none">
-                <h2 id="modalTitle" class="text-3xl font-bold gradient-text break-words pr-4 max-w-[80%]"></h2>
+            class="bg-[#1a1a2e]/90 backdrop-blur-2xl border border-white/10 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
+            <div class="flex justify-between items-center p-6 border-b border-white/10 flex-none">
+                <h2 id="modalTitle" class="text-2xl md:text-3xl font-bold gradient-text truncate pr-4"></h2>
                 <button id="closeModalButton"
-                    class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300 flex-shrink-0"
+                    class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-2xl p-2.5 transition-all duration-300 flex-shrink-0"
                     aria-label="关闭详情" type="button">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-                        </path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </button>
             </div>
-            <div id="modalContent" class="overflow-auto flex-1 min-h-0 bg-white/5 rounded-xl p-6">
+            <div id="modalContent" class="overflow-y-auto flex-1 p-6 md:p-8 custom-scrollbar">
             </div>
         </div>
     </div>
@@ -517,30 +516,28 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
 
     <!-- Templates -->
     <template id="search-result-template">
-        <div class="card-hover bg-[#111] rounded-lg overflow-hidden cursor-pointer transition-all hover:scale-[1.02] h-full shadow-sm hover:shadow-md"
+        <div class="card-hover group bg-white/5 backdrop-blur-md rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] h-full shadow-lg hover:shadow-indigo-500/20 border border-white/10 hover:border-indigo-500/50"
             data-id="" data-source-code="">
             <div class="flex h-full">
-                <div class="search-card-img-container relative flex-shrink-0">
+                <div class="w-24 md:w-32 relative flex-shrink-0 overflow-hidden">
                     <img src="https://via.placeholder.com/100x150/191919/555555?text=No+Image" alt="视频封面"
-                        class="result-img h-full w-full object-cover transition-transform hover:scale-110"
+                        class="result-img h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                         loading="lazy"
-                        onerror="this.onerror=null; this.src='https://via.placeholder.com/100x150/191919/555555?text=Error'; this.classList.add('object-contain');">
-                    <div class="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent"></div>
+                        onerror="this.onerror=null; this.src='https://via.placeholder.com/100x150/191919/555555?text=Error';">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
                 </div>
-                <div class="p-2 flex flex-col flex-grow">
+                <div class="p-3 md:p-4 flex flex-col flex-grow min-w-0">
                     <div class="flex-grow">
-                        <h3 class="result-title font-semibold text-sm mb-1 break-words line-clamp-2" title="视频标题">视频标题
+                        <h3 class="result-title font-bold text-sm md:text-base mb-2 break-words line-clamp-2 text-white/90 group-hover:text-indigo-400 transition-colors" title="视频标题">视频标题
                         </h3>
-                        <div class="result-meta flex flex-wrap items-center gap-x-2 gap-y-0.5 mb-1"> <span
-                                class="result-type hidden text-xs py-0.5 px-1.5 rounded bg-opacity-20 bg-blue-500 text-blue-300">类型</span>
-                            <span
-                                class="result-year hidden text-xs py-0.5 px-1.5 rounded bg-opacity-20 bg-purple-500 text-purple-300">年份</span>
+                        <div class="result-meta flex flex-wrap items-center gap-2 mb-2">
+                            <span class="result-type hidden text-[10px] uppercase tracking-wider py-1 px-2 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/20">类型</span>
+                            <span class="result-year hidden text-[10px] uppercase tracking-wider py-1 px-2 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/20">年份</span>
                         </div>
-                        <p class="result-remarks hidden text-xs text-gray-400 mb-1 line-clamp-1">更新状态</p>
-
+                        <p class="result-remarks hidden text-xs text-white/50 mb-2 line-clamp-1 italic">更新状态</p>
                     </div>
-                    <div class="result-source flex justify-between items-center mt-auto pt-1 border-t border-gray-800">
-                        <span class="result-source-name hidden">数据源</span>
+                    <div class="result-source flex justify-between items-center mt-auto pt-2 border-t border-white/5">
+                        <span class="result-source-name text-[10px] text-white/30 uppercase tracking-widest font-bold">数据源</span>
                     </div>
                 </div>
             </div>
@@ -548,51 +545,63 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
     </template>
 
     <template id="video-details-template">
-        <div class="text-white text-sm">
-            <div class="grid grid-cols-2 gap-x-4 gap-y-2 mb-4">
-                <div><span class="text-gray-400">类型：</span><span data-field="type"></span></div>
-                <div><span class="text-gray-400">年份：</span><span data-field="year"></span></div>
-                <div><span class="text-gray-400">地区：</span><span data-field="area"></span></div>
-                <div><span class="text-gray-400">导演：</span><span data-field="director"></span></div>
-                <div class="col-span-2"><span class="text-gray-400">主演：</span><span data-field="actor"></span></div>
-                <div class="col-span-2"><span class="text-gray-400">备注：</span><span data-field="remarks"></span></div>
-            </div>
-            <div class="mb-4">
-                <h4 class="font-semibold text-gray-300 mb-1">简介：</h4>
-                <p class="text-gray-400 text-xs leading-relaxed" data-field="description"></p>
+        <div class="space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white/5 rounded-2xl p-3 border border-white/5">
+                            <span class="block text-xs text-white/40 mb-1">类型</span>
+                            <span class="font-medium text-white/90" data-field="type">-</span>
+                        </div>
+                        <div class="bg-white/5 rounded-2xl p-3 border border-white/5">
+                            <span class="block text-xs text-white/40 mb-1">年份</span>
+                            <span class="font-medium text-white/90" data-field="year">-</span>
+                        </div>
+                        <div class="bg-white/5 rounded-2xl p-3 border border-white/5">
+                            <span class="block text-xs text-white/40 mb-1">地区</span>
+                            <span class="font-medium text-white/90" data-field="area">-</span>
+                        </div>
+                        <div class="bg-white/5 rounded-2xl p-3 border border-white/5">
+                            <span class="block text-xs text-white/40 mb-1">备注</span>
+                            <span class="font-medium text-purple-400" data-field="remarks">-</span>
+                        </div>
+                    </div>
+                    <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+                        <span class="block text-xs text-white/40 mb-2">导演</span>
+                        <span class="text-white/90" data-field="director">-</span>
+                    </div>
+                </div>
+                <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+                    <span class="block text-xs text-white/40 mb-2">主演</span>
+                    <p class="text-white/80 text-sm leading-relaxed line-clamp-4" data-field="actor">-</p>
+                </div>
             </div>
 
-            <div data-field="episodesContainer">
-                <div class="mb-4 flex justify-between items-center">
-                    <div class="flex items-center space-x-2">
-                        <div class="text-sm text-gray-400">共 <span data-field="episode-count">0</span> 集</div>
-                        <span class="px-2 py-0.5 bg-gray-700 text-white text-xs rounded"
-                            data-field="quality-tag">检测中...</span>
-                        <!-- 加载速度显示位置 -->
-                        <span class="px-2 py-0.5 bg-gray-700 text-white text-xs rounded hidden"
-                            data-field="speed-tag"></span>
+            <div class="bg-white/5 rounded-2xl p-6 border border-white/5">
+                <h4 class="text-lg font-bold text-white/90 mb-3 flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-indigo-500 rounded-full"></span>
+                    内容简介
+                </h4>
+                <p class="text-white/60 text-sm leading-relaxed" data-field="description">-</p>
+            </div>
+
+            <div data-field="episodesContainer" class="space-y-4">
+                <div class="flex justify-between items-center bg-white/5 rounded-2xl p-4 border border-white/5">
+                    <div class="flex items-center gap-3">
+                        <span class="text-sm font-medium text-white/60">共 <span data-field="episode-count" class="text-white/90">0</span> 集</span>
+                        <span class="px-2.5 py-1 bg-indigo-500/20 text-indigo-300 text-xs font-bold rounded-lg border border-indigo-500/30" data-field="quality-tag">检测中...</span>
+                        <span class="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-bold rounded-lg border border-emerald-500/30 hidden" data-field="speed-tag"></span>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <button data-action="copy-links" title="复制所有剧集链接"
-                            class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                            </svg>
+                    <div class="flex items-center gap-2">
+                        <button data-action="copy-links" class="p-2.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-xl transition-all duration-300 border border-white/10" title="复制链接">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
                         </button>
-                        <button data-action="toggle-order" title="切换为倒序排列"
-                            class="p-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors flex items-center justify-center">
-                            <svg data-field="order-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" style="transition: transform 0.3s ease;">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
-                            </svg>
+                        <button data-action="toggle-order" class="p-2.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-xl transition-all duration-300 border border-white/10" title="切换排序">
+                            <svg data-field="order-icon" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
                         </button>
                     </div>
                 </div>
-                <div data-field="episode-buttons-grid"
-                    class="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                <div data-field="episode-buttons-grid" class="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 mt-4">
                 </div>
             </div>
         </div>

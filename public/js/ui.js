@@ -776,7 +776,7 @@ function attachEventListeners() {
         settingsButton.addEventListener('click', toggleSettings);
     }
 
-    // 新增：监听设置密码验证成功的事件
+    // 监听设置密码验证成功的事件
     document.addEventListener('settingsPasswordVerified', actuallyToggleSettingsPanel);
 
     // 观看历史按钮
@@ -791,16 +791,16 @@ function attachEventListeners() {
         closeSettingsPanelButton.addEventListener('click', toggleSettings);
     }
 
-    // 关闭历史面板按钮  ← 新增这一段
+    // 关闭历史面板按钮
     const closeHistoryPanelButton = getElement('closeHistoryPanelButton');
     if (closeHistoryPanelButton) {
         closeHistoryPanelButton.addEventListener('click', toggleHistory);
     }
 
     // 清空观看历史按钮
-    const clearViewingHistoryButton = getElement('clearViewingHistoryButton');
-    if (clearViewingHistoryButton) {
-        clearViewingHistoryButton.addEventListener('click', clearViewingHistory);
+    const clearViewingHistoryBtn = getElement('clearViewingHistoryBtn') || getElement('clearViewingHistoryButton');
+    if (clearViewingHistoryBtn) {
+        clearViewingHistoryBtn.addEventListener('click', clearViewingHistory);
     }
 
     // 关闭模态框按钮
@@ -850,57 +850,26 @@ function initializeAdditionalListeners() {
     }
 }
 
-// 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', function () {
-    // 初始化事件监听器
-    attachEventListeners();
-
-    // 初始化搜索历史
-    renderSearchHistory();
-    setupPanelAutoClose();
-});
-
-// 导出公共函数
-window.showToast = showToast;
-window.showLoading = showLoading;
-window.hideLoading = hideLoading;
-window.closeModal = closeModal;
-window.toggleSettings = toggleSettings;
-window.toggleHistory = toggleHistory;
-window.addToViewingHistory = addToViewingHistory;
-window.clearViewingHistory = clearViewingHistory;
-window.saveSearchHistory = saveSearchHistory;
-window.clearSearchHistory = clearSearchHistory;
-window.renderSearchHistory = renderSearchHistory;
-window.deleteSingleSearchHistory = deleteSingleSearchHistory;
-
 /**
  * 设置面板自动关闭功能
- * 当用户点击面板外区域时自动关闭面板
  */
 function setupPanelAutoClose() {
     document.addEventListener('click', function (event) {
-        // 检查是否点击了设置按钮或历史按钮
         const settingsButton = document.getElementById('settingsButton');
         const historyButton = document.getElementById('historyButton');
         const settingsPanel = document.getElementById('settingsPanel');
         const historyPanel = document.getElementById('historyPanel');
 
-        // 如果点击的是设置按钮或设置面板内部，不做处理
         if (settingsButton && settingsButton.contains(event.target)) return;
         if (settingsPanel && settingsPanel.contains(event.target)) return;
-
-        // 如果点击的是历史按钮或历史面板内部，不做处理
         if (historyButton && historyButton.contains(event.target)) return;
         if (historyPanel && historyPanel.contains(event.target)) return;
 
-        // 关闭设置面板
         if (settingsPanel && settingsPanel.classList.contains('show')) {
             settingsPanel.classList.remove('show');
             settingsPanel.setAttribute('aria-hidden', 'true');
         }
 
-        // 关闭历史面板
         if (historyPanel && historyPanel.classList.contains('show')) {
             historyPanel.classList.remove('show');
             historyPanel.setAttribute('aria-hidden', 'true');
@@ -908,24 +877,17 @@ function setupPanelAutoClose() {
     });
 }
 
-// 在DOMContentLoaded事件中调用setupPanelAutoClose
-document.addEventListener('DOMContentLoaded', function () {
-    setupPanelAutoClose();
-});
-
 /**
  * 删除单条观看历史
- * @param {string} internalId 要删除的记录的 internalShowIdentifier
  */
 function deleteHistoryItem(internalId) {
     try {
         let history = getViewingHistory();
-        // 使用 internalShowIdentifier 来确保删除正确的条目
         const updatedHistory = history.filter(item => item.internalShowIdentifier !== internalId);
 
         if (history.length !== updatedHistory.length) {
             localStorage.setItem('viewingHistory', JSON.stringify(updatedHistory));
-            loadViewingHistory(); // 重新渲染历史记录列表
+            if (typeof renderViewingHistory === 'function') renderViewingHistory();
             showToast('已删除该条记录', 'success');
         } else {
             showToast('未找到要删除的记录', 'warning');
@@ -935,3 +897,28 @@ function deleteHistoryItem(internalId) {
         showToast('删除历史记录失败', 'error');
     }
 }
+
+// 统一生命周期初始化
+document.addEventListener('DOMContentLoaded', function () {
+    attachEventListeners();
+    renderSearchHistory();
+    setupPanelAutoClose();
+});
+
+// 导出所有公共接口到全局（适应 Astro 静态脚本模式）
+window.showToast = showToast;
+window.showLoading = showLoading;
+window.hideLoading = hideLoading;
+window.showModal = showModal;
+window.closeModal = closeModal;
+window.toggleSettings = toggleSettings;
+window.toggleHistory = toggleHistory;
+window.addToViewingHistory = addToViewingHistory;
+window.clearViewingHistory = clearViewingHistory;
+window.saveSearchHistory = saveSearchHistory;
+window.clearSearchHistory = clearSearchHistory;
+window.renderSearchHistory = renderSearchHistory;
+window.deleteSingleSearchHistory = deleteSingleSearchHistory;
+window.renderViewingHistory = renderViewingHistory;
+window.deleteHistoryItem = deleteHistoryItem;
+window.getElement = getElement;

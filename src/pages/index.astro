@@ -11,6 +11,13 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
 ---
 
 <Layout title="X">
+    <!-- 注入服务端环境变量到客户端 -->
+    <script is:inline define:vars={{ passwordHash, settingsPasswordHash }}>
+        window.__ENV__ = window.__ENV__ || {};
+        window.__ENV__.PASSWORD = passwordHash;
+        window.__ENV__.SETTINGS_PASSWORD = settingsPasswordHash;
+    </script>
+
     <!-- 顶部功能按钮区：设置 -->
     <nav aria-label="设置功能" class="fixed top-6 right-6 z-10">
         <div class="flex items-center space-x-3">

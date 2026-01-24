@@ -86,7 +86,7 @@ const API_CONFIG = {
 const M3U8_PATTERN = /\$?((https?:\/\/.*?\.m3u8)|(https?:\/\/.*\/.*\.m3u8))/;
 
 // 自定义播放器URL
-const CUSTOM_PLAYER_URL = 'player.html';
+const CUSTOM_PLAYER_URL = '/player';
 
 // 预加载集数开关
 const DEFAULTS = {

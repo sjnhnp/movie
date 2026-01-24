@@ -89,30 +89,39 @@ async function fetchContentWithType(targetUrl: string, requestHeaders: Headers) 
             throw err;
         }
 
-        const content = await response.text();
         const contentType = response.headers.get('content-type') || '';
-        return { content, contentType, responseHeaders: response.headers };
+        const isM3u8 = contentType.includes('mpegurl') || contentType.includes('x-mpegurl') || targetUrl.includes('.m3u8');
+
+        // 如果是 M3U8，则处理文本；否则（如 .ts 或图片）直接返回 ArrayBuffer
+        if (isM3u8) {
+            const content = await response.text();
+            return { content, contentType, responseHeaders: response.headers, isBinary: false };
+        } else {
+            const content = await response.arrayBuffer();
+            return { content, contentType, responseHeaders: response.headers, isBinary: true };
+        }
     } catch (error) {
         throw new Error(`Fetch failed for ${targetUrl}: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 
-function isM3u8Content(content: string, contentType: string): boolean {
+function isM3u8Content(content: string | ArrayBuffer, contentType: string): boolean {
+    if (typeof content !== 'string') return false;
     if (contentType && (contentType.includes('application/vnd.apple.mpegurl') || contentType.includes('application/x-mpegurl') || contentType.includes('audio/mpegurl'))) {
         return true;
     }
-    return !!(content && typeof content === 'string' && content.trim().startsWith('#EXTM3U'));
+    return !!(content && content.trim().startsWith('#EXTM3U'));
 }
 
 function processKeyLine(line: string, baseUrl: string): string {
-    return line.replace(/URI="([^"]+)"/, (match, uri) => {
+    return line.replace(/URI\s*=\s*"([^"]+)"/, (match, uri) => {
         const absoluteUri = resolveUrl(baseUrl, uri);
         return `URI="${rewriteUrlToProxy(absoluteUri)}"`;
     });
 }
 
 function processMapLine(line: string, baseUrl: string): string {
-    return line.replace(/URI="([^"]+)"/, (match, uri) => {
+    return line.replace(/URI\s*=\s*"([^"]+)"/, (match, uri) => {
         const absoluteUri = resolveUrl(baseUrl, uri);
         return `URI="${rewriteUrlToProxy(absoluteUri)}"`;
     });
@@ -120,11 +129,10 @@ function processMapLine(line: string, baseUrl: string): string {
 
 function processMediaPlaylist(url: string, content: string): string {
     const baseUrl = getBaseUrl(url);
-    const lines = content.split('\n');
+    const lines = content.split(/\r?\n/);
     const output: string[] = [];
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
-        if (!line && i === lines.length - 1) { output.push(line); continue; }
         if (!line) continue;
         if (line.startsWith('#EXT-X-KEY')) { output.push(processKeyLine(line, baseUrl)); continue; }
         if (line.startsWith('#EXT-X-MAP')) { output.push(processMapLine(line, baseUrl)); continue; }
@@ -150,7 +158,7 @@ async function processMasterPlaylist(url: string, content: string, recursionDept
         throw new Error(`Max recursion depth reached (${MAX_RECURSION}) for: ${url}`);
     }
     const baseUrl = getBaseUrl(url);
-    const lines = content.split('\n');
+    const lines = content.split(/\r?\n/);
     let highestBandwidth = -1;
     let bestVariantUrl = '';
 
@@ -182,7 +190,9 @@ async function processMasterPlaylist(url: string, content: string, recursionDept
         return processMediaPlaylist(url, content);
     }
 
-    const { content: variantContent, contentType: variantContentType } = await fetchContentWithType(bestVariantUrl, new Headers());
+    const fetchResult = await fetchContentWithType(bestVariantUrl, new Headers());
+    const variantContent = fetchResult.content as string;
+    const variantContentType = fetchResult.contentType;
 
     if (!isM3u8Content(variantContent, variantContentType)) {
         return processMediaPlaylist(bestVariantUrl, variantContent);
@@ -199,7 +209,7 @@ export const GET: APIRoute = async ({ request, url }) => {
     }
 
     try {
-        const { content, contentType, responseHeaders } = await fetchContentWithType(targetUrl, request.headers);
+        const { content, contentType, responseHeaders, isBinary } = await fetchContentWithType(targetUrl, request.headers);
 
         const returnHeaders = new Headers();
         returnHeaders.set('Access-Control-Allow-Origin', '*');
@@ -207,8 +217,8 @@ export const GET: APIRoute = async ({ request, url }) => {
         returnHeaders.set('Access-Control-Allow-Headers', '*');
         returnHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL}`);
 
-        if (isM3u8Content(content, contentType)) {
-            const processedM3u8 = await processM3u8Content(targetUrl, content);
+        if (!isBinary && isM3u8Content(content as string, contentType)) {
+            const processedM3u8 = await processM3u8Content(targetUrl, content as string);
             returnHeaders.set('Content-Type', 'application/vnd.apple.mpegurl;charset=utf-8');
             return new Response(processedM3u8, { status: 200, headers: returnHeaders });
         } else {
@@ -220,7 +230,7 @@ export const GET: APIRoute = async ({ request, url }) => {
                     returnHeaders.set(key, value);
                 }
             });
-            returnHeaders.set('Content-Type', contentType || 'application/octet-stream');
+            returnHeaders.set('Content-Type', contentType || (isBinary ? 'application/octet-stream' : 'text/plain'));
             return new Response(content, { status: 200, headers: returnHeaders });
         }
 
@@ -251,3 +261,4 @@ export const OPTIONS: APIRoute = async () => {
         }
     });
 };
+

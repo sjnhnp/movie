@@ -122,7 +122,7 @@ async function playVideo(episodeString, title, episodeIndex, sourceName = '', so
     }
     const originalEpisodeNames = AppState.get('originalEpisodeNames') || [];
     localStorage.setItem('originalEpisodeNames', JSON.stringify(originalEpisodeNames));
-    const playerUrl = new URL('player.html', window.location.origin);
+    const playerUrl = new URL('/player', window.location.origin);
     playerUrl.searchParams.set('url', playUrl);
     playerUrl.searchParams.set('title', title);
     playerUrl.searchParams.set('index', episodeIndex.toString());
@@ -262,7 +262,7 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
     localStorage.setItem('currentEpisodeIndex', actualEpisodeIndex.toString());
     localStorage.setItem('currentVideoTitle', title);
 
-    const playerUrl = new URL('player.html', window.location.origin);
+    const playerUrl = new URL('/player', window.location.origin);
     playerUrl.searchParams.set('url', finalUrl);
     playerUrl.searchParams.set('title', title);
     playerUrl.searchParams.set('index', actualEpisodeIndex.toString());

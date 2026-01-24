@@ -5,7 +5,8 @@ import '../styles/player_styles.css';
 import { createHash } from 'crypto';
 const password = import.meta.env.PASSWORD || "";
 const sha256 = (str: string) => createHash('sha256').update(str).digest('hex');
-const passwordHash = password ? sha256(password) : "";
+const settingsPassword = import.meta.env.SETTINGS_PASSWORD || "";
+const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
 ---
 
 <!doctype html>
@@ -25,20 +26,23 @@ const passwordHash = password ? sha256(password) : "";
     
     <script is:inline src="/libs/sha256.min.js" defer></script>
     <script is:inline src="/js/config.js" defer></script>
+    <!-- 注入服务端环境变量到客户端 -->
+    <script is:inline define:vars={{ passwordHash, settingsPasswordHash }}>
+        window.__ENV__ = window.__ENV__ || {};
+        window.__ENV__.PASSWORD = passwordHash;
+        window.__ENV__.SETTINGS_PASSWORD = settingsPasswordHash;
+    </script>
     <script is:inline src="/js/password.js" defer></script>
     <script is:inline src="/js/simple_quality_detector.js" defer></script>
     <script is:inline src="/js/speed_tester.js" defer></script>
+    <script is:inline src="/js/ui.js" defer></script>
     <script is:inline src="/js/api.js" defer></script>
     <script is:inline src="/js/api_source_manager.js" defer></script>
     <script is:inline src="/js/player_preload.js" defer></script>
-    <script is:inline src="/js/ui.js" defer></script>
+    <script is:inline src="/js/utils.js" defer></script>
     <script is:inline src="/js/app.js" defer></script>
 </head>
 <body class="bg-black text-white font-sans min-h-screen">
-    <script define:vars={{passwordHash}}>
-        window.__ENV__ = window.__ENV__ || {}; 
-        window.__ENV__.PASSWORD = passwordHash;
-    </script>
 
     <div class="player-container relative">
 

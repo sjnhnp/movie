@@ -647,7 +647,7 @@ function showPlayerVideoDetail(item) {
     const episodesContainer = clone.querySelector('[data-field="episodesContainer"]');
     if (episodesContainer && item.vod_play_url) {
         const episodes = item.vod_play_url.split('#').filter(ep => ep.trim());
-        
+
         // 设置集数
         const episodeCountElement = clone.querySelector('[data-field="episode-count"]');
         if (episodeCountElement) {
@@ -660,7 +660,7 @@ function showPlayerVideoDetail(item) {
             // 判断是否为综艺节目
             const varietyShowTypes = ['综艺', '脱口秀', '真人秀', '纪录片'];
             const isVarietyShow = varietyShowTypes.some(type => item.type_name && item.type_name.includes(type));
-            
+
             // 根据类型设置容器样式
             if (isVarietyShow) {
                 episodeButtonsGrid.className = 'variety-grid-layout';
@@ -673,7 +673,7 @@ function showPlayerVideoDetail(item) {
             episodes.forEach((episode, index) => {
                 if (episode.trim()) {
                     const episodeButton = document.createElement('button');
-                    
+
                     let episodeName = `第${index + 1}集`;
                     if (episode.includes('$')) {
                         episodeName = episode.split('$')[0] || episodeName;
@@ -699,7 +699,7 @@ function showPlayerVideoDetail(item) {
                         closePlayerSearch();
 
                         // 播放选中的剧集
-                        const playerUrl = new URL('player.html', window.location.origin);
+                        const playerUrl = new URL('/player', window.location.origin);
                         let playUrl = episode;
                         if (episode.includes('$')) {
                             playUrl = episode.split('$')[1];

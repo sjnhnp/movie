@@ -69,25 +69,21 @@ const AGGREGATED_SEARCH_CONFIG = {
 // API请求配置
 const API_CONFIG = {
     search: {
-        path: '?ac=videolist&wd=', // 更新：仅含查询参数 
-        pagePath: '?ac=videolist&wd={query}&pg={page}', // 新增：分页路径模板 
-        maxPages: 50, // 新增：最大获取页数 
+        path: '?ac=list&wd=',
         headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', // 
-            'Accept': 'application/json'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
     },
     detail: {
-        path: '?ac=videolist&ids=', // 更新：仅含查询参数 
+        path: '?ac=detail&ids=',
         headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', // 
-            'Accept': 'application/json'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
     }
 };
 
 // 正则表达式模式
-const M3U8_PATTERN = /\$https?:\/\/[^"'\s]+?\.m3u8/g;
+const M3U8_PATTERN = /\$?((https?:\/\/.*?\.m3u8)|(https?:\/\/.*\/.*\.m3u8))/;
 
 // 自定义播放器URL
 const CUSTOM_PLAYER_URL = 'player.html';

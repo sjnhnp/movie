@@ -448,12 +448,44 @@ function updateModalSpeedDisplay(item) {
     }
 }
 
+// 全局历史面板控制函数
+if (typeof window.showHistoryPanel !== 'function') {
+    window.showHistoryPanel = function () {
+        const historyPanel = document.getElementById('historyPanel');
+        if (historyPanel) {
+            historyPanel.classList.remove('-translate-x-full');
+            renderViewingHistory(); // 确保渲染最新历史
+        }
+    };
+}
+
+if (typeof window.hideHistoryPanel !== 'function') {
+    window.hideHistoryPanel = function () {
+        const historyPanel = document.getElementById('historyPanel');
+        if (historyPanel) {
+            historyPanel.classList.add('-translate-x-full');
+        }
+    };
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+    // ... 原有的 DOMContentLoaded 内容 ...
     initializeAppState();
     initializeDOMCache();
     APISourceManager.init();
     initializeEventListeners();
     renderSearchHistory();
+
+    // 绑定历史按钮事件
+    const historyButton = document.getElementById('historyButton');
+    const closeHistoryPanelButton = document.getElementById('closeHistoryPanelButton');
+
+    if (historyButton) {
+        historyButton.addEventListener('click', window.showHistoryPanel);
+    }
+    if (closeHistoryPanelButton) {
+        closeHistoryPanelButton.addEventListener('click', window.hideHistoryPanel);
+    }
 
     // 检查是否需要恢复搜索状态
     const urlParams = new URLSearchParams(window.location.search);

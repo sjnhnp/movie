@@ -66,12 +66,6 @@ function setupPlayerSearchHistory() {
  * 设置播放页的事件监听器
  */
 function setupPlayerEventListeners() {
-    // 历史按钮
-    const historyButton = document.getElementById('historyButton');
-    if (historyButton) {
-        historyButton.addEventListener('click', togglePlayerHistory);
-    }
-
     // 搜索按钮
     const searchButton = document.getElementById('searchButton');
     if (searchButton) {
@@ -156,13 +150,12 @@ function openPlayerHistory() {
     closePlayerSearch();
 
     historyPanel.classList.add('show');
-    historyPanel.style.transform = 'translateX(0)';
     historyPanel.setAttribute('aria-hidden', 'false');
     PlayerPageState.isHistoryPanelOpen = true;
 
     // 加载历史记录
-    if (typeof loadViewingHistory === 'function') {
-        loadViewingHistory();
+    if (typeof renderViewingHistory === 'function') {
+        renderViewingHistory();
     }
 }
 
@@ -174,7 +167,6 @@ function closePlayerHistory() {
     if (!historyPanel) return;
 
     historyPanel.classList.remove('show');
-    historyPanel.style.transform = 'translateX(-100%)';
     historyPanel.setAttribute('aria-hidden', 'true');
     PlayerPageState.isHistoryPanelOpen = false;
 }
@@ -602,6 +594,10 @@ function createResultItemUsingTemplate(item) {
 
     // 添加卡片点击事件（打开详情）
     cardElement.addEventListener('click', (e) => {
+        // 如果点击的是画质标签，不执行卡片点击逻辑
+        if (e.target.classList.contains('quality-tag')) {
+            return;
+        }
         e.preventDefault();
         handlePlayerSearchResultClick(item);
     });
@@ -619,34 +615,33 @@ function showPlayerVideoDetail(item) {
     const clone = template.content.cloneNode(true);
 
     // 填充详情数据
-    const typeElement = clone.querySelector('[data-field="type"]');
-    if (typeElement) typeElement.textContent = item.type_name || '未知';
+    const fields = {
+        type: item.type_name || '未知',
+        year: item.vod_year || '未知',
+        area: item.vod_area || '未知',
+        remarks: item.vod_remarks || '无',
+        director: item.vod_director || '未知',
+        actor: item.vod_actor || '未知',
+        description: (item.vod_content || item.vod_blurb || '暂无简介').replace(/<[^>]+>/g, '').trim()
+    };
 
-    const yearElement = clone.querySelector('[data-field="year"]');
-    if (yearElement) yearElement.textContent = item.vod_year || '未知';
-
-    const areaElement = clone.querySelector('[data-field="area"]');
-    if (areaElement) areaElement.textContent = item.vod_area || '未知';
-
-    const langElement = clone.querySelector('[data-field="lang"]');
-    if (langElement) langElement.textContent = item.vod_lang || '未知';
-
-    const directorElement = clone.querySelector('[data-field="director"]');
-    if (directorElement) directorElement.textContent = item.vod_director || '未知';
-
-    const actorElement = clone.querySelector('[data-field="actor"]');
-    if (actorElement) actorElement.textContent = item.vod_actor || '未知';
-
-    const sourceElement = clone.querySelector('[data-field="source"]');
-    if (sourceElement) sourceElement.textContent = item.source_name || '未知';
-
-    const contentElement = clone.querySelector('[data-field="content"]');
-    if (contentElement) contentElement.textContent = item.vod_content || '暂无简介';
+    for (const [key, value] of Object.entries(fields)) {
+        const el = clone.querySelector(`[data-field="${key}"]`);
+        if (el) el.textContent = value;
+    }
 
     // 处理剧集列表
     const episodesContainer = clone.querySelector('[data-field="episodesContainer"]');
     if (episodesContainer && item.vod_play_url) {
-        const episodes = item.vod_play_url.split('#').filter(ep => ep.trim());
+        // 解析剧集
+        let episodes = [];
+        if (item.vod_play_url.includes('$$$')) {
+            const groups = item.vod_play_url.split('$$$');
+            // 优先选择包含当前播放源名字的组，或者选第一组
+            episodes = groups[0].split('#').filter(ep => ep.trim());
+        } else {
+            episodes = item.vod_play_url.split('#').filter(ep => ep.trim());
+        }
 
         // 设置集数
         const episodeCountElement = clone.querySelector('[data-field="episode-count"]');
@@ -661,70 +656,39 @@ function showPlayerVideoDetail(item) {
             const varietyShowTypes = ['综艺', '脱口秀', '真人秀', '纪录片'];
             const isVarietyShow = varietyShowTypes.some(type => item.type_name && item.type_name.includes(type));
 
-            // 根据类型设置容器样式
             if (isVarietyShow) {
                 episodeButtonsGrid.className = 'variety-grid-layout';
-            } else {
-                episodeButtonsGrid.className = 'grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2';
             }
 
             episodeButtonsGrid.innerHTML = '';
 
             episodes.forEach((episode, index) => {
-                if (episode.trim()) {
-                    const episodeButton = document.createElement('button');
+                const parts = episode.split('$');
+                const epName = parts[0] || `第${index + 1}集`;
+                const epUrl = parts[1] || parts[0];
 
-                    let episodeName = `第${index + 1}集`;
-                    if (episode.includes('$')) {
-                        episodeName = episode.split('$')[0] || episodeName;
-                    }
+                const btn = document.createElement('button');
+                btn.className = isVarietyShow ? 'episode-btn' : 'px-3 py-2 bg-white/5 hover:bg-indigo-500/80 text-white/90 rounded-xl text-sm transition-all duration-300 border border-white/10 hover:border-indigo-400 shadow-lg truncate';
+                btn.textContent = epName;
+                btn.title = epName;
 
-                    // 根据是否为综艺决定按钮样式和文本
-                    if (isVarietyShow) {
-                        // 综艺：使用原始名称，应用综艺专用样式
-                        episodeButton.className = 'episode-btn';
-                        episodeButton.textContent = episodeName;
-                        episodeButton.title = episodeName;
-                    } else {
-                        // 非综艺：使用标准样式
-                        episodeButton.className = 'episode-btn px-2 py-2 bg-gray-800 hover:bg-gray-700 text-white rounded text-xs sm:text-sm transition-colors truncate';
-                        episodeButton.textContent = episodeName;
-                        episodeButton.title = episodeName;
-                    }
+                btn.addEventListener('click', () => {
+                    closePlayerModal();
+                    closePlayerSearch();
 
-                    episodeButton.addEventListener('click', () => {
-                        // 重置搜索状态
-                        PlayerSearchState.isFromSearch = false;
-                        closePlayerModal();
-                        closePlayerSearch();
+                    const playerUrl = new URL('/player', window.location.origin);
+                    playerUrl.searchParams.set('url', epUrl);
+                    playerUrl.searchParams.set('title', item.vod_name);
+                    playerUrl.searchParams.set('index', index.toString());
+                    if (item.vod_id) playerUrl.searchParams.set('id', item.vod_id);
+                    if (item.source_code) playerUrl.searchParams.set('source_code', item.source_code);
+                    if (item.vod_year) playerUrl.searchParams.set('year', item.vod_year);
+                    if (item.type_name) playerUrl.searchParams.set('typeName', item.type_name);
 
-                        // 播放选中的剧集
-                        const playerUrl = new URL('/player', window.location.origin);
-                        let playUrl = episode;
-                        if (episode.includes('$')) {
-                            playUrl = episode.split('$')[1];
-                        }
+                    window.location.href = playerUrl.toString();
+                });
 
-                        playerUrl.searchParams.set('url', playUrl);
-                        playerUrl.searchParams.set('title', item.vod_name);
-                        playerUrl.searchParams.set('index', index.toString());
-                        if (item.vod_id) playerUrl.searchParams.set('id', item.vod_id);
-                        if (item.source_name) playerUrl.searchParams.set('source', item.source_name);
-                        if (item.source_code) playerUrl.searchParams.set('source_code', item.source_code);
-                        if (item.vod_year) playerUrl.searchParams.set('year', item.vod_year);
-                        if (item.type_name) playerUrl.searchParams.set('typeName', item.type_name);
-
-                        const universalId = generateUniversalId(item.vod_name, item.vod_year, index);
-                        playerUrl.searchParams.set('universalId', universalId);
-
-                        const adOn = getBoolConfig('adFilteringEnabled', false);
-                        playerUrl.searchParams.set('af', adOn ? '1' : '0');
-
-                        window.location.href = playerUrl.toString();
-                    });
-
-                    episodeButtonsGrid.appendChild(episodeButton);
-                }
+                episodeButtonsGrid.appendChild(btn);
             });
         }
     }
@@ -734,6 +698,8 @@ function showPlayerVideoDetail(item) {
         showModal(clone, item.vod_name || '视频详情');
     }
 }
+
+
 
 /**
  * 检查速度值是否有效

@@ -517,10 +517,10 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
     </div>
 
     <template id="search-result-template">
-        <div class="card-hover group bg-white/5 backdrop-blur-md rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] h-full shadow-lg hover:shadow-indigo-500/20 border border-white/10 hover:border-indigo-500/50"
+        <div class="card-hover group bg-white/5 backdrop-blur-md rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] shadow-lg hover:shadow-indigo-500/20 border border-white/10 hover:border-indigo-500/50"
             data-id="" data-source-code="">
-            <div class="flex h-full">
-                <div class="w-24 md:w-32 relative flex-shrink-0 overflow-hidden">
+            <div class="flex">
+                <div class="w-24 md:w-32 aspect-[2/3] relative flex-shrink-0 overflow-hidden bg-[#191919]">
                     <img src="https://via.placeholder.com/100x150/191919/555555?text=No+Image" alt="视频封面"
                         class="result-img h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                         loading="lazy" data-field="pic"
@@ -545,10 +545,10 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
                         <p class="result-remarks hidden text-xs text-white/50 mb-2 line-clamp-1 italic" data-field="remarks">
                             更新状态</p>
                     </div>
-                    <div class="result-source flex justify-between items-center mt-auto pt-2 border-t border-white/5">
-                        <span class="result-source-name text-[10px] text-white/30 uppercase tracking-widest font-bold" data-field="source">数据源</span>
+                    <div class="result-source flex justify-between items-center mt-auto pt-2 border-t border-white/5 gap-2">
+                        <span class="result-source-name text-[10px] text-white/30 uppercase tracking-wider font-bold whitespace-nowrap truncate" data-field="source">数据源</span>
                         <span
-                            class="quality-tag text-[10px] font-bold py-1 px-2 rounded-lg bg-white/10 text-white/60 cursor-pointer transition-colors hover:bg-white/20"
+                            class="quality-tag text-[10px] font-bold py-1 px-2 rounded-lg bg-white/10 text-white/60 cursor-pointer transition-colors hover:bg-white/20 whitespace-nowrap flex-shrink-0"
                             data-field="quality-tag" data-action="retest-quality" title="重新检测">
                             检测中...
                         </span>

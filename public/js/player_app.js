@@ -1788,31 +1788,40 @@ function setupPlaySettingsEvents() {
     }
 
     // 设置预加载开关
-    const preloadToggle = document.getElementById('preloadToggle');
-    if (preloadToggle && !preloadToggle.hasAttribute('data-initialized')) {
-        // 修正：直接使用 PLAYER_CONFIG 中的值
-        preloadToggle.checked = PLAYER_CONFIG.enablePreloading;
+    const preloadingToggle = document.getElementById('preloadingToggle');
+    if (preloadingToggle && !preloadingToggle.hasAttribute('data-initialized')) {
+        // 修正：从 localStorage 或 PLAYER_CONFIG 读取设置
+        const savedPreloading = localStorage.getItem('preloadingEnabled');
+        if (savedPreloading !== null) {
+            PLAYER_CONFIG.enablePreloading = savedPreloading === 'true';
+        }
+        preloadingToggle.checked = PLAYER_CONFIG.enablePreloading;
 
         // 添加事件监听器以响应变化
-        preloadToggle.addEventListener('change', function () {
+        preloadingToggle.addEventListener('change', function () {
             localStorage.setItem('preloadingEnabled', this.checked.toString());
             // 更新 PLAYER_CONFIG 中的值
             PLAYER_CONFIG.enablePreloading = this.checked;
             showToast(this.checked ? '预加载已开启' : '预加载已关闭', 'info');
             // 触发预加载逻辑（新增：开关变化时立即生效）
             if (this.checked) {
-                startPreloading();
+                if (typeof startPreloading === 'function') startPreloading();
             } else {
-                stopPreloading();
+                if (typeof stopPreloading === 'function') stopPreloading();
             }
         });
-        preloadToggle.setAttribute('data-initialized', 'true');
+        preloadingToggle.setAttribute('data-initialized', 'true');
     }
 
     // 设置自定义预加载集数
     const preloadCountInput = document.getElementById('preloadCountInput');
     if (preloadCountInput && !preloadCountInput.hasAttribute('data-initialized')) {
-        // 修正：直接使用 PLAYER_CONFIG 中的值
+        // 修正：优先从 localStorage 加载最新值，兜底使用 PLAYER_CONFIG
+        const savedCount = localStorage.getItem('preloadCount');
+        if (savedCount !== null) {
+            const count = parseInt(savedCount, 10);
+            if (!isNaN(count)) PLAYER_CONFIG.preloadCount = count;
+        }
         preloadCountInput.value = PLAYER_CONFIG.preloadCount;
 
         // 添加事件监听器以响应变化

@@ -79,7 +79,8 @@
             }
 
             /* ---------- 跳过已缓存集数 ---------- */
-            for (let offset = 1, loaded = 0; loaded < preloadCount; offset++) {
+            const maxTryLimit = Math.min(preloadCount * 3, 15); // 限制最多尝试多少集，防止无限循环
+            for (let offset = 1, loaded = 0, tried = 0; loaded < preloadCount && tried < maxTryLimit; offset++, tried++) {
 
                 // ① 计算要尝试的剧集索引
                 const episodeIdxToPreload = startIndex + offset;
@@ -125,16 +126,34 @@
                     const tsUrls = [];
                     const baseUrlForSegments = nextEpisodeUrl.substring(0, nextEpisodeUrl.lastIndexOf('/') + 1);
 
-                    m3u8Text.split('\n').forEach(line => {
-                        const trimmedLine = line.trim();
-                        if (trimmedLine && !trimmedLine.startsWith("#") &&
-                            (trimmedLine.endsWith(".ts") || trimmedLine.includes(".ts?")) &&
-                            tsUrls.length < 3) {
-                            tsUrls.push(trimmedLine.startsWith("http") ?
-                                trimmedLine :
-                                new URL(trimmedLine, baseUrlForSegments).href);
+                    const lines = m3u8Text.split('\n');
+                    for (let i = 0; i < lines.length && tsUrls.length < 3; i++) {
+                        const line = lines[i].trim();
+                        if (line && !line.startsWith("#")) {
+                            // 修正：更通用的 URI 提取逻辑
+                            let fullTsUrl = line.startsWith("http") ? line : new URL(line, baseUrlForSegments).href;
+
+                            // 检查是否是子播放列表（嵌套 m3u8）
+                            if (fullTsUrl.includes('.m3u8')) {
+                                try {
+                                    const subM3u8Resp = await fetch(fullTsUrl);
+                                    if (subM3u8Resp.ok) {
+                                        const subText = await subM3u8Resp.text();
+                                        const subLines = subText.split('\n');
+                                        const subBaseUrl = fullTsUrl.substring(0, fullTsUrl.lastIndexOf('/') + 1);
+                                        for (const subLine of subLines) {
+                                            const tl = subLine.trim();
+                                            if (tl && !tl.startsWith("#") && tsUrls.length < 3) {
+                                                tsUrls.push(tl.startsWith("http") ? tl : new URL(tl, subBaseUrl).href);
+                                            }
+                                        }
+                                    }
+                                } catch (e) { /* ignore sub m3u8 failure */ }
+                            } else {
+                                tsUrls.push(fullTsUrl);
+                            }
                         }
-                    });
+                    }
 
                     let tsCached = 0;                                 // ☆ 统计成功缓存数
 

@@ -103,9 +103,9 @@ const PLAYER_CONFIG = {
     height: '600',
     timeout: 15000, // 播放器加载超时时间 
     autoPlayNext: true, // 默认启用自动连播功能 
-    adFilteringEnabled: getBoolConfig('adFilteringEnabled', true), // 默认关闭分片广告过滤，开启会导致某些资源卡住 
+    adFilteringEnabled: getBoolConfig('adFilteringEnabled', false), // 默认关闭分片广告过滤，开启会导致某些资源卡住 
     adFilteringStorage: 'adFilteringEnabled', // 存储广告过滤设置的键名 
-    speedDetectionEnabled: getBoolConfig('speedDetectionEnabled', true), // 默认启用画质速度检测
+    speedDetectionEnabled: getBoolConfig('speedDetectionEnabled', false), // 默认启用画质速度检测
     speedDetectionStorage: 'speedDetectionEnabled', // 存储画质速度检测设置的键名
     enablePreloading: getBoolConfig('preloadingEnabled', DEFAULTS.enablePreloading),
     preloadCount: getIntConfig('preloadCount', DEFAULTS.preloadCount, 1, 10),

@@ -8,13 +8,20 @@ const PlayerPageState = {
     isSearchPanelOpen: false,
     isHistoryPanelOpen: false,
     searchResults: [],
-    currentSearchQuery: ''
+    currentSearchQuery: '',
+    isInitialized: false
 };
+
+// 重定义 window.toggleHistory 供 ui.js 的监听器调用
+window.toggleHistory = togglePlayerHistory;
 
 /**
  * 初始化播放页的搜索和历史功能
  */
 function initPlayerSearchHistory() {
+    if (PlayerPageState.isInitialized) return;
+    PlayerPageState.isInitialized = true;
+
     // 确保在DOM加载完成后初始化
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', setupPlayerSearchHistory);

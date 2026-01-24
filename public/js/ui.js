@@ -143,7 +143,7 @@ function togglePanel(panelIdToShow, panelIdToHide, onShowCallback) {
  */
 function toggleHistory(e) {
     if (e) e.stopPropagation();
-    togglePanel('historyPanel', 'settingsPanel', loadViewingHistory);
+    togglePanel('historyPanel', 'settingsPanel', renderViewingHistory);
 }
 
 // ------------- Toast功能（支持队列） -------------
@@ -635,7 +635,7 @@ function clearViewingHistory() {
 
     try {
         localStorage.removeItem('viewingHistory');
-        loadViewingHistory();
+        renderViewingHistory();
         showToast('观看历史已清除', 'success');
     } catch (e) {
         console.error('清除观看历史失败:', e);
@@ -646,7 +646,7 @@ function clearViewingHistory() {
 /**
  * 渲染历史面板
  */
-function loadViewingHistory() {
+function renderViewingHistory() {
     const historyList = getElement('historyList');
     if (!historyList) return;
     const history = getViewingHistory();

@@ -4,8 +4,10 @@ import '../styles/player_styles.css';
 
 import { createHash } from 'crypto';
 const password = import.meta.env.PASSWORD || "";
-const sha256 = (str: string) => createHash('sha256').update(str).digest('hex');
 const settingsPassword = import.meta.env.SETTINGS_PASSWORD || "";
+
+const sha256 = (str: string) => createHash('sha256').update(str).digest('hex');
+const passwordHash = password ? sha256(password) : "";
 const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
 ---
 

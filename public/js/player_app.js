@@ -940,9 +940,9 @@ function setupPlayerControls() {
                 sessionStorage.removeItem('playerSearchQuery');
 
                 // 回到首页并尝试恢复搜索状态
-                window.location.href = 'index.html?restore_search=true';
+                window.location.href = '/?restore_search=true';
             } else {
-                window.location.href = 'index.html';
+                window.location.href = '/';
             }
         });
     }

@@ -1,5 +1,5 @@
 // 全局常量配置
-const PROXY_URL = '/proxy/';
+const PROXY_URL = '/api/proxy?url=';
 const SEARCH_HISTORY_KEY = 'videoSearchHistory';
 const MAX_HISTORY_ITEMS = 5;
 
@@ -69,7 +69,7 @@ const AGGREGATED_SEARCH_CONFIG = {
 // API请求配置
 const API_CONFIG = {
     search: {
-        path: '?ac=list&wd=',
+        path: '?ac=videolist&wd=',
         headers: {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }

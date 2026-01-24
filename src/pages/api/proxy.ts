@@ -4,47 +4,14 @@ const DEBUG_ENABLED = import.meta.env.DEBUG === 'true';
 const CACHE_TTL = parseInt(import.meta.env.CACHE_TTL || '86400', 10);
 const MAX_RECURSION = parseInt(import.meta.env.MAX_RECURSION || '5', 10);
 
-// Default User Agents
 let USER_AGENTS = [
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15'
 ];
 
-try {
-    const agentsJsonString = import.meta.env.USER_AGENTS_JSON;
-    if (agentsJsonString) {
-        const parsedAgents = JSON.parse(agentsJsonString);
-        if (Array.isArray(parsedAgents) && parsedAgents.length > 0) {
-            USER_AGENTS = parsedAgents;
-            console.log(`[Proxy Log] Loaded ${USER_AGENTS.length} User Agents from env.`);
-        }
-    }
-} catch (e) {
-    console.error(`[Proxy Log] Error parsing USER_AGENTS_JSON: ${e instanceof Error ? e.message : String(e)}`);
-}
-
 function logDebug(message: string) {
     if (DEBUG_ENABLED) {
         console.log(`[Proxy Log] ${message}`);
-    }
-}
-
-function getTargetUrlFromPath(encodedPath: string): string | null {
-    if (!encodedPath) return null;
-    try {
-        const decodedUrl = decodeURIComponent(encodedPath);
-        if (decodedUrl.match(/^https?:\/\/.+/i)) {
-            return decodedUrl;
-        } else {
-            // Fallback check
-            if (encodedPath.match(/^https?:\/\/.+/i)) {
-                return encodedPath;
-            }
-            return null;
-        }
-    } catch (e) {
-        logDebug(`Decoded URL error: ${encodedPath} - ${e instanceof Error ? e.message : String(e)}`);
-        return null;
     }
 }
 
@@ -88,7 +55,7 @@ function resolveUrl(baseUrl: string, relativeUrl: string): string {
 
 function rewriteUrlToProxy(targetUrl: string): string {
     if (!targetUrl || typeof targetUrl !== 'string') return '';
-    return `/proxy/${encodeURIComponent(targetUrl)}`;
+    return `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
 }
 
 function getRandomUserAgent(): string {
@@ -102,7 +69,6 @@ async function fetchContentWithType(targetUrl: string, requestHeaders: Headers) 
         'Accept-Language': requestHeaders.get('accept-language') || 'zh-CN,zh;q=0.9,en;q=0.8',
     };
 
-    // Add Referer safely
     const referer = requestHeaders.get('referer');
     if (referer) {
         headers['Referer'] = referer;
@@ -135,7 +101,7 @@ function isM3u8Content(content: string, contentType: string): boolean {
     if (contentType && (contentType.includes('application/vnd.apple.mpegurl') || contentType.includes('application/x-mpegurl') || contentType.includes('audio/mpegurl'))) {
         return true;
     }
-    return content && typeof content === 'string' && content.trim().startsWith('#EXTM3U');
+    return !!(content && typeof content === 'string' && content.trim().startsWith('#EXTM3U'));
 }
 
 function processKeyLine(line: string, baseUrl: string): string {
@@ -216,7 +182,7 @@ async function processMasterPlaylist(url: string, content: string, recursionDept
         return processMediaPlaylist(url, content);
     }
 
-    const { content: variantContent, contentType: variantContentType } = await fetchContentWithType(bestVariantUrl, new Headers()); // empty headers for internal fetch
+    const { content: variantContent, contentType: variantContentType } = await fetchContentWithType(bestVariantUrl, new Headers());
 
     if (!isM3u8Content(variantContent, variantContentType)) {
         return processMediaPlaylist(bestVariantUrl, variantContent);
@@ -225,34 +191,11 @@ async function processMasterPlaylist(url: string, content: string, recursionDept
     return await processM3u8Content(bestVariantUrl, variantContent, recursionDepth + 1);
 }
 
-export const GET: APIRoute = async ({ request }) => {
-    // Check if it's an OPTIONS request
-    if (request.method === 'OPTIONS') {
-        return new Response(null, {
-            status: 204,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
-                'Access-Control-Allow-Headers': '*',
-                'Access-Control-Max-Age': '86400'
-            }
-        });
-    }
+export const GET: APIRoute = async ({ request, url }) => {
+    const targetUrl = url.searchParams.get('url');
 
-    const pattern = '/proxy/';
-    const index = request.url.indexOf(pattern);
-    if (index === -1) {
-        return new Response('Invalid proxy URL', { status: 400 });
-    }
-
-    const encodedTargetUrl = request.url.slice(index + pattern.length);
-    if (!encodedTargetUrl) {
-        return new Response('Target URL is required.', { status: 400 });
-    }
-
-    let targetUrl = getTargetUrlFromPath(encodedTargetUrl);
     if (!targetUrl) {
-        return new Response('Invalid target URL', { status: 400 });
+        return new Response('Target URL is required.', { status: 400 });
     }
 
     try {
@@ -269,7 +212,6 @@ export const GET: APIRoute = async ({ request }) => {
             returnHeaders.set('Content-Type', 'application/vnd.apple.mpegurl;charset=utf-8');
             return new Response(processedM3u8, { status: 200, headers: returnHeaders });
         } else {
-            // Copy valid headers from upstream
             responseHeaders.forEach((value, key) => {
                 const lowerKey = key.toLowerCase();
                 if (!lowerKey.startsWith('access-control-') &&
@@ -278,7 +220,7 @@ export const GET: APIRoute = async ({ request }) => {
                     returnHeaders.set(key, value);
                 }
             });
-            returnHeaders.set('Content-Type', contentType || 'application/octet-stream'); // Ensure content type
+            returnHeaders.set('Content-Type', contentType || 'application/octet-stream');
             return new Response(content, { status: 200, headers: returnHeaders });
         }
 
@@ -298,7 +240,6 @@ export const GET: APIRoute = async ({ request }) => {
     }
 };
 
-// Also handle OPTIONS explicitly if needed by some platforms, though GET handles it above inside if
 export const OPTIONS: APIRoute = async () => {
     return new Response(null, {
         status: 204,

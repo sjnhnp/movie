@@ -279,7 +279,7 @@ window.fetch = async function (input, init) {
     } else if (input && input.url) {
         requestUrl = new URL(input.url, window.location.origin);
     }
-    if (requestUrl && requestUrl.pathname.startsWith('/api/')) {
+    if (requestUrl && requestUrl.pathname.startsWith('/api/') && !requestUrl.pathname.startsWith('/api/proxy')) {
         if (window.isPasswordProtected && window.isPasswordVerified) {
             if (window.isPasswordProtected() && !window.isPasswordVerified()) {
                 return new Response(JSON.stringify({

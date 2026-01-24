@@ -4,7 +4,7 @@
 
 const SpeedTester = (() => {
 
-    const PROXY_URL = '/proxy/'; // 使用代理避免跨域问题
+    const PROXY_URL = '/api/proxy?url='; // 使用代理避免跨域问题
     const TEST_TIMEOUT = 8000; // 每个网络请求的超时时间为8秒
 
     // 带超时的fetch请求，支持降级机制

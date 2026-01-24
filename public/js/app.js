@@ -1045,7 +1045,7 @@ function renderSearchResults(allResults, doubanSearchedTitle = null) {
     searchResultsContainer.appendChild(gridContainer);
     // 在渲染结果后同步预加载状态
     if (typeof window.startPreloading !== 'undefined' && typeof window.stopPreloading !== 'undefined') {
-        const preloadEnabled = localStorage.getItem('preloadEnabled') !== 'false';
+        const preloadEnabled = localStorage.getItem('preloadingEnabled') !== 'false';
         if (preloadEnabled) {
             // 确保预加载在搜索结果页面正确初始化
             setTimeout(() => {

@@ -715,7 +715,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
             }
             // 延迟触发预加载，确保状态同步
             setTimeout(() => {
-                const preloadEnabled = localStorage.getItem('preloadEnabled') !== 'false';
+                const preloadEnabled = localStorage.getItem('preloadingEnabled') !== 'false';
                 if (preloadEnabled && typeof preloadNextEpisodeParts === 'function') {
                     preloadNextEpisodeParts(index).catch(e => {
                         console.error('Preload error:', e);
@@ -1577,7 +1577,7 @@ async function switchLine(newSourceCode, newVodId) {
             window.cancelCurrentPreload();
         }
         // 重新初始化预加载（如果启用）
-        const preloadEnabled = localStorage.getItem('preloadEnabled') !== 'false';
+        const preloadEnabled = localStorage.getItem('preloadingEnabled') !== 'false';
         if (preloadEnabled && typeof startPreloading === 'function') {
             setTimeout(() => {
                 startPreloading();
@@ -1810,23 +1810,23 @@ function setupPlaySettingsEvents() {
     }
 
     // 设置自定义预加载集数
-    const preloadEpisodeCountInput = document.getElementById('preloadEpisodeCount');
-    if (preloadEpisodeCountInput && !preloadEpisodeCountInput.hasAttribute('data-initialized')) {
+    const preloadCountInput = document.getElementById('preloadCountInput');
+    if (preloadCountInput && !preloadCountInput.hasAttribute('data-initialized')) {
         // 修正：直接使用 PLAYER_CONFIG 中的值
-        preloadEpisodeCountInput.value = PLAYER_CONFIG.preloadCount;
+        preloadCountInput.value = PLAYER_CONFIG.preloadCount;
 
         // 添加事件监听器以响应变化
-        preloadEpisodeCountInput.addEventListener('change', function () {
+        preloadCountInput.addEventListener('change', function () {
             const count = parseInt(this.value, 10);
             // 验证输入值是否为有效的正数（限制1-10集，与首页逻辑一致）
             if (count >= 1 && count <= 10) {
-                localStorage.setItem('preloadEpisodeCount', count.toString());
+                localStorage.setItem('preloadCount', count.toString());
                 // 更新 PLAYER_CONFIG 中的值
                 PLAYER_CONFIG.preloadCount = count;
                 showToast(`预加载集数已设置为 ${count}`, 'info');
                 // 触发预加载逻辑（新增：集数变化时立即生效）
                 if (localStorage.getItem('preloadingEnabled') !== 'false') {
-                    startPreloading();
+                    if (typeof startPreloading === 'function') startPreloading();
                 }
             } else {
                 // 如果输入无效，则恢复之前的值
@@ -1834,7 +1834,7 @@ function setupPlaySettingsEvents() {
                 showToast('请输入1-10之间的有效数字', 'error');
             }
         });
-        preloadEpisodeCountInput.setAttribute('data-initialized', 'true');
+        preloadCountInput.setAttribute('data-initialized', 'true');
     }
 }
 

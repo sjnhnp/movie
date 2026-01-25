@@ -1942,3 +1942,116 @@ window.playPreviousEpisode = playPreviousEpisode;
 window.copyLinks = copyLinks;
 window.toggleEpisodeOrder = toggleEpisodeOrder;
 window.toggleLockScreen = toggleLockScreen;
+
+// 历史记录播放功能 (用于修复播放页历史面板点击无反应的问题)
+async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, typeName = '') {
+    let historyItem = null;
+    let episodesList = [];
+    let vodId = '',
+        actualSourceName = '',
+        actualSourceCode = '',
+        videoYear = '',
+        currentVideoTypeName = '';
+    try {
+        const history = JSON.parse(localStorage.getItem('viewingHistory') || '[]');
+        historyItem = history.find(item => item.url === url && item.title === title && item.episodeIndex === episodeIndex);
+        if (historyItem) {
+            vodId = historyItem.vod_id || '';
+            actualSourceName = historyItem.sourceName || '';
+            actualSourceCode = historyItem.sourceCode || '';
+            videoYear = historyItem.year || '';
+            currentVideoTypeName = historyItem.typeName || '';
+        }
+    } catch (e) {
+        console.error("读取历史记录失败:", e);
+    }
+    if (historyItem && Array.isArray(historyItem.episodes) && historyItem.episodes.length > 0 && historyItem.episodes[0].includes('$')) {
+        episodesList = historyItem.episodes;
+    } else if (vodId && actualSourceCode) {
+        try {
+            let apiUrl = `/api/detail?id=${encodeURIComponent(vodId)}&source=${encodeURIComponent(actualSourceCode)}`;
+            const apiInfo = typeof APISourceManager !== 'undefined' ? APISourceManager.getSelectedApi(actualSourceCode) : null;
+            if (apiInfo && apiInfo.isCustom && apiInfo.url) {
+                apiUrl += `&customApi=${encodeURIComponent(apiInfo.url)}`;
+            }
+            const detailResp = await fetch(apiUrl);
+            if (!detailResp.ok) throw new Error(`API请求失败: ${detailResp.status}`);
+            const detailData = await detailResp.json();
+            if (detailData.code === 200 && Array.isArray(detailData.episodes) && detailData.episodes.length > 0) {
+                episodesList = detailData.episodes;
+            } else {
+                if (historyItem && Array.isArray(historyItem.episodes) && historyItem.episodes.length > 0) {
+                    episodesList = historyItem.episodes;
+                } else {
+                    console.warn('API返回数据无效, 尝试使用本地缓存');
+                }
+            }
+        } catch (e) {
+            console.error("获取详情失败，使用本地缓存:", e);
+            episodesList = AppState.get('currentEpisodes') || JSON.parse(localStorage.getItem('currentEpisodes') || '[]');
+        }
+    } else {
+        episodesList = AppState.get('currentEpisodes') || JSON.parse(localStorage.getItem('currentEpisodes') || '[]');
+    }
+
+    // 统一处理原始剧集名称
+    let namesToStore = [];
+    if (episodesList.length > 0 && typeof episodesList[0] === 'string' && episodesList[0].includes('$')) {
+        namesToStore = episodesList.map(ep => ep.split('$')[0].trim());
+    }
+    else if (historyItem && Array.isArray(historyItem.originalEpisodeNames) && historyItem.originalEpisodeNames.length > 0) {
+        namesToStore = historyItem.originalEpisodeNames;
+    }
+
+    if (namesToStore.length > 0) {
+        localStorage.setItem('originalEpisodeNames', JSON.stringify(namesToStore));
+    } else {
+        localStorage.removeItem('originalEpisodeNames');
+    }
+
+    if (episodesList.length > 0) {
+        AppState.set('currentEpisodes', episodesList);
+        localStorage.setItem('currentEpisodes', JSON.stringify(episodesList));
+    }
+    let actualEpisodeIndex = episodeIndex;
+    if (actualEpisodeIndex >= episodesList.length) {
+        actualEpisodeIndex = episodesList.length > 0 ? episodesList.length - 1 : 0;
+    }
+    let finalUrl = (episodesList.length > 0 && episodesList[actualEpisodeIndex]) ?
+        episodesList[actualEpisodeIndex] : url;
+
+    if (typeof finalUrl === 'string' && finalUrl.includes('$')) {
+        finalUrl = finalUrl.split('$')[1];
+    }
+
+    // 更新状态
+    AppState.set('currentEpisodeIndex', actualEpisodeIndex);
+    AppState.set('currentVideoTitle', title);
+    localStorage.setItem('currentEpisodeIndex', actualEpisodeIndex.toString());
+    localStorage.setItem('currentVideoTitle', title);
+
+    // 构建URL并跳转
+    const playerUrl = new URL('/player', window.location.origin);
+    playerUrl.searchParams.set('url', finalUrl);
+    playerUrl.searchParams.set('title', title);
+    playerUrl.searchParams.set('index', actualEpisodeIndex.toString());
+    if (vodId) playerUrl.searchParams.set('id', vodId);
+    if (actualSourceName) playerUrl.searchParams.set('source', actualSourceName);
+    if (actualSourceCode) playerUrl.searchParams.set('source_code', actualSourceCode);
+    if (videoYear) playerUrl.searchParams.set('year', videoYear);
+
+    const finalTypeName = typeName || currentVideoTypeName;
+    if (finalTypeName) playerUrl.searchParams.set('typeName', finalTypeName);
+    if (playbackPosition > 0) playerUrl.searchParams.set('position', playbackPosition.toString());
+
+    const uid = generateUniversalId(title, videoYear, actualEpisodeIndex);
+    playerUrl.searchParams.set('universalId', uid);
+
+    const adOn = typeof getBoolConfig !== 'undefined' && typeof PLAYER_CONFIG !== 'undefined' ? getBoolConfig(PLAYER_CONFIG.adFilteringStorage, PLAYER_CONFIG.adFilteringEnabled) : (localStorage.getItem('adFilteringEnabled') === 'true');
+    playerUrl.searchParams.set('af', adOn ? '1' : '0');
+
+    window.location.href = playerUrl.toString();
+}
+
+// 导出 playFromHistory 到全局
+window.playFromHistory = playFromHistory;

@@ -79,6 +79,13 @@ function setupPlayerEventListeners() {
         searchButton.addEventListener('click', togglePlayerSearch);
     }
 
+    // 历史按钮 (Explicit binding for reliability)
+    const historyButton = document.getElementById('historyButton');
+    if (historyButton) {
+        historyButton.removeEventListener('click', togglePlayerHistory); // Prevent duplicates
+        historyButton.addEventListener('click', togglePlayerHistory);
+    }
+
     // 关闭历史面板按钮
     const closeHistoryButton = document.getElementById('closeHistoryPanelButton');
     if (closeHistoryButton) {

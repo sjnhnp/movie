@@ -240,7 +240,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
             </div>
 
             <!-- 加载和错误覆盖层 (保持不变) -->
-            <div id="loading" class="loading-container hidden" aria-live="polite">
+            <div id="player-loading" class="loading-container hidden" aria-live="polite">
                 <div class="loading-spinner" aria-hidden="true"></div>
                 <div class="mt-4">加载中...</div>
             </div>
@@ -252,9 +252,9 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
                     class="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded transition-colors">重试</button>
             </div>
 
-            <div id="toast"
+            <div id="player-toast"
                 class="fixed top-4 left-1/2 -translate-x-1/2 opacity-0 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 text-white z-[10001] pointer-events-none">
-                <span id="toastMessage"></span>
+                <span id="player-toastMessage"></span>
             </div>
         </div>
 

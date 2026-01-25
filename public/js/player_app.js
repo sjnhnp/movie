@@ -343,7 +343,7 @@ function hidePlayerOverlays() {
     if (errorElement) {
         errorElement.style.display = 'none';
     }
-    const loadingElement = document.getElementById('loading');
+    const loadingElement = document.getElementById('player-loading');
     if (loadingElement) {
         loadingElement.style.display = 'none';
     }
@@ -351,8 +351,8 @@ function hidePlayerOverlays() {
 
 function showToast(message, type = 'info', duration = 3000) {
 
-    const toast = document.getElementById('toast');
-    const toastMessage = document.getElementById('toastMessage');
+    const toast = document.getElementById('player-toast');
+    const toastMessage = document.getElementById('player-toastMessage');
     if (!toast || !toastMessage) return;
 
     const bgColors = {
@@ -587,7 +587,9 @@ function addPlayerEventListeners() {
     });
 
     player.addEventListener('loaded-metadata', () => {
-        document.getElementById('loading').style.display = 'none';
+        if (document.getElementById('player-loading')) {
+            document.getElementById('player-loading').style.display = 'none';
+        }
         videoHasEnded = false;
         handleSkipIntroOutro(player);
         if (nextSeekPosition > 0 && player.duration > 0 && nextSeekPosition < player.duration) {
@@ -1540,7 +1542,7 @@ function setupLineSwitching() {
 }
 
 async function switchLine(newSourceCode, newVodId) {
-    const loadingEl = document.getElementById('loading');
+    const loadingEl = document.getElementById('player-loading');
     if (loadingEl) loadingEl.style.display = 'flex';
 
     try {

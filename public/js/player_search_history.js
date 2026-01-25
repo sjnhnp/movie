@@ -136,13 +136,20 @@ function setupPlayerEventListeners() {
 function togglePlayerHistory(e) {
     if (e) e.stopPropagation();
 
-    const historyPanel = document.getElementById('historyPanel');
-    if (!historyPanel) return;
+    // 关闭搜索面板
+    closePlayerSearch();
 
-    if (PlayerPageState.isHistoryPanelOpen) {
-        closePlayerHistory();
+    // 使用 ui.js 的统一逻辑
+    if (typeof togglePanel === 'function') {
+        togglePanel('historyPanel', null, renderViewingHistory);
     } else {
-        openPlayerHistory();
+        // 备用逻辑
+        const historyPanel = document.getElementById('historyPanel');
+        if (!historyPanel) return;
+        const isShowing = historyPanel.classList.toggle('show');
+        if (isShowing && typeof renderViewingHistory === 'function') {
+            renderViewingHistory();
+        }
     }
 }
 
@@ -158,7 +165,6 @@ function openPlayerHistory() {
 
     historyPanel.classList.add('show');
     historyPanel.setAttribute('aria-hidden', 'false');
-    PlayerPageState.isHistoryPanelOpen = true;
 
     // 加载历史记录
     if (typeof renderViewingHistory === 'function') {
@@ -175,7 +181,6 @@ function closePlayerHistory() {
 
     historyPanel.classList.remove('show');
     historyPanel.setAttribute('aria-hidden', 'true');
-    PlayerPageState.isHistoryPanelOpen = false;
 }
 
 /**
@@ -495,7 +500,6 @@ function renderSearchResultsWithTemplate(results) {
 
     const gridContainer = document.createElement('div');
     gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4';
-    gridContainer.id = 'results'; // 添加ID以匹配CSS选择器
 
     const fragment = document.createDocumentFragment();
 
@@ -817,10 +821,11 @@ function handlePlayerKeydown(e) {
 
     // ESC键关闭面板
     if (e.key === 'Escape') {
+        const historyPanel = document.getElementById('historyPanel');
         if (PlayerPageState.isSearchPanelOpen) {
             closePlayerSearch();
             e.preventDefault();
-        } else if (PlayerPageState.isHistoryPanelOpen) {
+        } else if (historyPanel && historyPanel.classList.contains('show')) {
             closePlayerHistory();
             e.preventDefault();
         }
@@ -860,7 +865,7 @@ function setupPlayerPanelAutoClose() {
         if (searchPanel && searchPanel.contains(event.target)) return;
 
         // 关闭面板
-        if (PlayerPageState.isHistoryPanelOpen) {
+        if (historyPanel && historyPanel.classList.contains('show')) {
             closePlayerHistory();
         }
         // 注意：搜索面板是模态框，不需要自动关闭

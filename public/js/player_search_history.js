@@ -915,7 +915,7 @@ function initializeQualityTag(element, item) {
 
     // 开始画质检测
     element.textContent = '检测中...';
-    element.className = 'quality-tag text-xs font-medium py-0.5 px-1.5 rounded bg-gray-500 text-white cursor-pointer transition-colors hover:opacity-80';
+    element.className = 'quality-tag text-xs font-medium py-0.5 px-1.5 rounded bg-gray-500 text-white cursor-pointer transition-colors hover:opacity-80 whitespace-nowrap flex-shrink-0';
 
     // 异步检测画质
     detectVideoQuality(item).then(quality => {
@@ -1002,7 +1002,7 @@ function updateQualityTag(element, quality) {
     };
 
     const colorClass = qualityColors[quality] || qualityColors['未知'];
-    element.className = `quality-tag text-xs font-medium py-0.5 px-1.5 rounded ${colorClass} cursor-pointer transition-colors hover:opacity-80`;
+    element.className = `quality-tag text-xs font-medium py-0.5 px-1.5 rounded ${colorClass} cursor-pointer transition-colors hover:opacity-80 whitespace-nowrap flex-shrink-0`;
 
     // 设置提示文本
     if (quality === '未知' || quality === '检测失败' || quality === '检测超时') {

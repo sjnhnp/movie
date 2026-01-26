@@ -458,7 +458,7 @@ function renderBasicSearchResults(results) {
 
     // 创建网格容器
     const gridContainer = document.createElement('div');
-    gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4';
+    gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4';
 
     results.forEach(item => {
         const card = document.createElement('div');
@@ -506,7 +506,7 @@ function renderSearchResultsWithTemplate(results) {
     if (!searchResults) return;
 
     const gridContainer = document.createElement('div');
-    gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4';
+    gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4';
 
     const fragment = document.createDocumentFragment();
 

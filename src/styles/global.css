@@ -804,27 +804,27 @@ body {
 /* 针对搜索结果卡片修改网格布局以适应横向卡片 */
 @media (max-width: 640px) {
   #results {
-    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
 }
 
 /* 响应式调整：在小屏幕上依然保持较好的视觉效果 */
 @media (min-width: 641px) and (max-width: 768px) {
   #results {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 /* 调整网格布局，减少每行卡片数量以适应更大尺寸的卡片 */
 @media (min-width: 769px) and (max-width: 1024px) {
   #results {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (min-width: 1025px) {
   #results {
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 

@@ -143,6 +143,11 @@ function togglePanel(panelIdToShow, panelIdToHide, onShowCallback) {
  */
 function toggleHistory(e) {
     if (e) e.stopPropagation();
+
+    // ✅ 添加调试日志
+    console.log('toggleHistory called');
+
+    // 使用统一的面板切换逻辑
     togglePanel('historyPanel', 'settingsPanel', renderViewingHistory);
 }
 
@@ -779,10 +784,11 @@ function attachEventListeners() {
     // 监听设置密码验证成功的事件
     document.addEventListener('settingsPasswordVerified', actuallyToggleSettingsPanel);
 
-    // 观看历史按钮
+    // ✅ 修改：简化历史按钮的事件绑定
     const historyButton = getElement('historyButton');
     if (historyButton) {
-        historyButton.addEventListener('click', (e) => (window.toggleHistory || toggleHistory)(e));
+        console.log('Binding history button'); // 调试日志
+        historyButton.addEventListener('click', toggleHistory); // 直接绑定，不使用复杂逻辑
     }
 
     // 关闭设置面板按钮
@@ -900,6 +906,7 @@ function deleteHistoryItem(internalId) {
 
 // 统一生命周期初始化
 document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOMContentLoaded - ui.js'); // 调试日志
     attachEventListeners();
     renderSearchHistory();
     setupPanelAutoClose();

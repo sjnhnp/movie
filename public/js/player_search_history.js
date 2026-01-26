@@ -12,8 +12,8 @@ const PlayerPageState = {
     isInitialized: false
 };
 
-// 重定义 window.toggleHistory 供 ui.js 的监听器调用
-window.toggleHistory = togglePlayerHistory;
+// ❌ 删除这行，不要重定义 window.toggleHistory
+// window.toggleHistory = togglePlayerHistory;
 
 /**
  * 初始化播放页的搜索和历史功能
@@ -27,7 +27,7 @@ function initPlayerSearchHistory() {
         document.addEventListener('DOMContentLoaded', setupPlayerSearchHistory);
     } else {
         // 使用setTimeout确保所有元素都已渲染
-        setTimeout(setupPlayerSearchHistory, 100);
+        setTimeout(setupPlayerSearchHistory, 200);
     }
 }
 
@@ -79,12 +79,12 @@ function setupPlayerEventListeners() {
         searchButton.addEventListener('click', togglePlayerSearch);
     }
 
-    // 历史按钮 (Explicit binding for reliability)
-    const historyButton = document.getElementById('historyButton');
-    if (historyButton) {
-        historyButton.removeEventListener('click', togglePlayerHistory); // Prevent duplicates
-        historyButton.addEventListener('click', togglePlayerHistory);
-    }
+    // ❌ 删除历史按钮的绑定，让 ui.js 处理
+    // const historyButton = document.getElementById('historyButton');
+    // if (historyButton) {
+    //     historyButton.removeEventListener('click', togglePlayerHistory);
+    //     historyButton.addEventListener('click', togglePlayerHistory);
+    // }
 
     // 关闭历史面板按钮
     const closeHistoryButton = document.getElementById('closeHistoryPanelButton');
@@ -138,27 +138,10 @@ function setupPlayerEventListeners() {
 }
 
 /**
- * 切换历史面板
+ * ✅ Modify: 不再定义 togglePlayerHistory，而是扩展 ui.js 的 toggleHistory
+ * 这个函数现在只是一个辅助函数，不会被直接调用
  */
-function togglePlayerHistory(e) {
-    if (e) e.stopPropagation();
-
-    // 关闭搜索面板
-    closePlayerSearch();
-
-    // 使用 ui.js 的统一逻辑
-    if (typeof togglePanel === 'function') {
-        togglePanel('historyPanel', null, renderViewingHistory);
-    } else {
-        // 备用逻辑
-        const historyPanel = document.getElementById('historyPanel');
-        if (!historyPanel) return;
-        const isShowing = historyPanel.classList.toggle('show');
-        if (isShowing && typeof renderViewingHistory === 'function') {
-            renderViewingHistory();
-        }
-    }
-}
+// function togglePlayerHistory(e) { ... }
 
 /**
  * 打开历史面板
@@ -1233,7 +1216,7 @@ function getBoolConfig(key, defaultValue) {
 
 // 导出函数到全局作用域
 window.initPlayerSearchHistory = initPlayerSearchHistory;
-window.togglePlayerHistory = togglePlayerHistory;
+// window.togglePlayerHistory = togglePlayerHistory;
 window.togglePlayerSearch = togglePlayerSearch;
 
 // 自动初始化

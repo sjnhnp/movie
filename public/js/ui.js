@@ -141,12 +141,17 @@ function togglePanel(panelIdToShow, panelIdToHide, onShowCallback) {
  * 历史面板开关
  * @param {Event} e 事件对象
  */
+/**
+ * 历史面板开关
+ * @param {Event} e 事件对象
+ */
 function toggleHistory(e) {
-    if (e) e.stopPropagation();
+    if (e) {
+        e.stopPropagation(); // ✅ 阻止事件冒泡，防止触发自动关闭
+    }
 
     console.log('toggleHistory called'); // 保留调试日志
 
-    // ✅ 添加详细的调试信息
     const historyPanel = getElement('historyPanel');
     console.log('historyPanel element:', historyPanel);
 
@@ -155,7 +160,7 @@ function toggleHistory(e) {
         return;
     }
 
-    // ✅ 直接操作面板，不依赖 togglePanel
+    // ✅ 检查当前状态
     const isCurrentlyShowing = historyPanel.classList.contains('show');
     console.log('Panel currently showing:', isCurrentlyShowing);
 
@@ -549,10 +554,13 @@ function getViewingHistory() {
  * @param {Event} e 事件对象
  */
 function handleHistoryListClick(e) {
+    // ✅ 阻止事件冒泡到 document，防止触发自动关闭
+    e.stopPropagation();
+
     // 处理删除按钮点击
     const deleteButton = e.target.closest('.history-item-delete-btn');
     if (deleteButton) {
-        e.stopPropagation();
+        e.stopPropagation(); // 额外确保
         const historyItem = deleteButton.closest('.history-item');
         // Use the correct dataset attribute
         if (historyItem && historyItem.dataset.internalId) {
@@ -569,6 +577,14 @@ function handleHistoryListClick(e) {
         const episodeIndex = parseInt(historyItem.dataset.episodeIndex, 10);
         const playbackPosition = parseInt(historyItem.dataset.playbackPosition, 10);
         const typeName = historyItem.dataset.typeName;
+
+        // ✅ 播放前先关闭历史面板
+        const historyPanel = getElement('historyPanel');
+        if (historyPanel) {
+            historyPanel.classList.remove('show');
+            historyPanel.setAttribute('aria-hidden', 'true');
+        }
+
         playFromHistory(url, title, episodeIndex, playbackPosition, typeName);
     }
 }
@@ -894,27 +910,45 @@ function initializeAdditionalListeners() {
  * 设置面板自动关闭功能
  */
 function setupPanelAutoClose() {
-    document.addEventListener('click', function (event) {
+    // ✅ 移除旧的监听器（如果存在）
+    if (window._panelAutoCloseHandler) {
+        document.removeEventListener('click', window._panelAutoCloseHandler);
+    }
+
+    // ✅ 创建新的处理函数
+    window._panelAutoCloseHandler = function (event) {
         const settingsButton = document.getElementById('settingsButton');
         const historyButton = document.getElementById('historyButton');
         const settingsPanel = document.getElementById('settingsPanel');
         const historyPanel = document.getElementById('historyPanel');
 
-        if (settingsButton && settingsButton.contains(event.target)) return;
-        if (settingsPanel && settingsPanel.contains(event.target)) return;
-        if (historyButton && historyButton.contains(event.target)) return;
-        if (historyPanel && historyPanel.contains(event.target)) return;
+        // ✅ 检查点击是否在按钮或面板内部
+        // 使用可选链操作符以防元素不存在
+        const clickedInsideSettings = settingsButton?.contains(event.target) || settingsPanel?.contains(event.target);
+        const clickedInsideHistory = historyButton?.contains(event.target) || historyPanel?.contains(event.target);
 
+        // ✅ 如果点击在设置或历史相关元素内，不做任何处理
+        if (clickedInsideSettings || clickedInsideHistory) {
+            return;
+        }
+
+        // ✅ 关闭设置面板
         if (settingsPanel && settingsPanel.classList.contains('show')) {
             settingsPanel.classList.remove('show');
             settingsPanel.setAttribute('aria-hidden', 'true');
+            console.log('Auto-closing settings panel'); // 调试日志
         }
 
+        // ✅ 关闭历史面板
         if (historyPanel && historyPanel.classList.contains('show')) {
             historyPanel.classList.remove('show');
             historyPanel.setAttribute('aria-hidden', 'true');
+            console.log('Auto-closing history panel'); // 调试日志
         }
-    });
+    };
+
+    // ✅ 添加新的监听器
+    document.addEventListener('click', window._panelAutoCloseHandler);
 }
 
 /**

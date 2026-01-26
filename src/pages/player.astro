@@ -57,12 +57,13 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
             <!-- 历史记录面板 -->
             <aside
                 id="historyPanel"
-                class="history-panel"
+                class="history-panel p-6"
                 aria-label="观看历史"
                 aria-hidden="true"
                 tabindex="-1"
             >
                 <div class="flex justify-between items-center mb-8">
+                    <h3 class="text-2xl font-bold gradient-text">观看历史</h3>
                     <button
                         id="closeHistoryPanelButton"
                         class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300"
@@ -84,10 +85,6 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
                             </path>
                         </svg>
                     </button>
-                    <h3 class="text-2xl font-bold gradient-text mx-auto">
-                        观看历史
-                    </h3>
-                    <div class="w-9"></div>
                 </div>
                 <div
                     id="historyList"

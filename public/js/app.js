@@ -1507,11 +1507,7 @@ function createResultItemUsingTemplate(item) {
         card.dataset.blurb = item.vod_blurb || '';
 
         // 设置点击事件
-        card.addEventListener('click', () => {
-            if (typeof window.showVideoDetail === 'function') {
-                window.showVideoDetail(item);
-            }
-        });
+        card.addEventListener('click', handleResultClick);
     } catch (error) {
         console.error('Error filling card data:', error);
     }

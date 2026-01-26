@@ -631,6 +631,23 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
                     </div>
                 </div>
             </section>
+            <!-- 搜索结果 -->
+            <section
+                id="resultsArea"
+                class="w-full hidden"
+                aria-label="搜索结果"
+            >
+                <div class="mx-auto max-w-7xl px-2">
+                    <div class="flex justify-end items-center mb-4">
+                        <div class="text-sm text-gray-400">
+                            <span id="searchResultsCount">0</span> 个结果
+                        </div>
+                    </div>
+                    <div id="searchResults" role="region" aria-live="polite">
+                    </div>
+                </div>
+            </section>
+
             <!-- 豆瓣热门区 -->
             <section
                 id="doubanArea"
@@ -703,27 +720,6 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : "";
                     >
                     </div>
                 </div>
-
-                <!-- 搜索结果 -->
-                <section
-                    id="resultsArea"
-                    class="w-full hidden"
-                    aria-label="搜索结果"
-                >
-                    <div class="mx-auto max-w-7xl px-2">
-                        <div class="flex justify-end items-center mb-4">
-                            <div class="text-sm text-gray-400">
-                                <span id="searchResultsCount">0</span> 个结果
-                            </div>
-                        </div>
-                        <div
-                            id="searchResults"
-                            role="region"
-                            aria-live="polite"
-                        >
-                        </div>
-                    </div>
-                </section>
             </section>
         </div>
 

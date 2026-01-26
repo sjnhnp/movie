@@ -144,11 +144,45 @@ function togglePanel(panelIdToShow, panelIdToHide, onShowCallback) {
 function toggleHistory(e) {
     if (e) e.stopPropagation();
 
-    // ✅ 添加调试日志
-    console.log('toggleHistory called');
+    console.log('toggleHistory called'); // 保留调试日志
 
-    // 使用统一的面板切换逻辑
-    togglePanel('historyPanel', 'settingsPanel', renderViewingHistory);
+    // ✅ 添加详细的调试信息
+    const historyPanel = getElement('historyPanel');
+    console.log('historyPanel element:', historyPanel);
+
+    if (!historyPanel) {
+        console.error('History panel not found!');
+        return;
+    }
+
+    // ✅ 直接操作面板，不依赖 togglePanel
+    const isCurrentlyShowing = historyPanel.classList.contains('show');
+    console.log('Panel currently showing:', isCurrentlyShowing);
+
+    if (isCurrentlyShowing) {
+        // 关闭面板
+        historyPanel.classList.remove('show');
+        historyPanel.setAttribute('aria-hidden', 'true');
+        console.log('Closing history panel');
+    } else {
+        // 打开面板
+        // 先关闭设置面板
+        const settingsPanel = getElement('settingsPanel');
+        if (settingsPanel && settingsPanel.classList.contains('show')) {
+            settingsPanel.classList.remove('show');
+            settingsPanel.setAttribute('aria-hidden', 'true');
+        }
+
+        // 打开历史面板
+        historyPanel.classList.add('show');
+        historyPanel.setAttribute('aria-hidden', 'false');
+        console.log('Opening history panel');
+
+        // 渲染历史记录
+        if (typeof renderViewingHistory === 'function') {
+            renderViewingHistory();
+        }
+    }
 }
 
 // ------------- Toast功能（支持队列） -------------

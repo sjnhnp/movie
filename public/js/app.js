@@ -993,18 +993,47 @@ async function performSearch(query, selectedAPIs) {
 }
 
 function renderSearchResults(allResults, doubanSearchedTitle = null) {
+    console.log('renderSearchResults called, results count:', allResults?.length || 0);
+
     const searchResultsContainer = DOMCache.get('searchResults');
     const resultsArea = getElement('resultsArea');
     const searchResultsCountElement = getElement('searchResultsCount');
-    if (!searchResultsContainer || !resultsArea || !searchResultsCountElement) return;
+
+    if (!searchResultsContainer || !resultsArea || !searchResultsCountElement) {
+        console.error('Missing DOM elements for search results');
+        return;
+    }
+
+    // 黄色内容过滤（优化版）
     const yellowFilterEnabled = getBoolConfig('yellowFilterEnabled', true);
-    if (yellowFilterEnabled) {
+    if (yellowFilterEnabled && allResults && allResults.length > 0) {
+        const beforeFilterCount = allResults.length;
+
         allResults = allResults.filter(item => {
             const title = item.vod_name || '';
             const type = item.type_name || '';
-            return !/(伦理片|福利片|写真)/.test(type) && !/(伦理|写真|福利|成人|情色|AV)/i.test(title);
+
+            // 白名单：包含这些关键词的内容不过滤
+            const whitelistKeywords = ['新闻', '女王', '电视剧', '综艺', '纪录片', '动画', '动漫'];
+            const isWhitelisted = whitelistKeywords.some(keyword =>
+                title.includes(keyword) || type.includes(keyword)
+            );
+
+            if (isWhitelisted) {
+                return true;
+            }
+
+            // 黑名单：只过滤明确的成人内容
+            const isBlacklisted = /(伦理片|福利片|写真|成人片)/.test(type) ||
+                /(伦理|写真|福利|成人|情色|AV|三级)/.test(title);
+
+            return !isBlacklisted;
         });
+
+        console.log(`Yellow filter: ${beforeFilterCount} → ${allResults.length} results`);
     }
+
+    // 缓存搜索结果
     try {
         const query = (DOMCache.get('searchInput')?.value || '').trim();
         if (query && allResults.length > 0) {
@@ -1015,18 +1044,27 @@ function renderSearchResults(allResults, doubanSearchedTitle = null) {
     } catch (e) {
         console.error("缓存搜索结果失败:", e);
     }
+
+    // 清空并显示结果区域
     searchResultsContainer.innerHTML = '';
     resultsArea.classList.remove('hidden');
     searchResultsCountElement.textContent = allResults.length.toString();
-    if (allResults.length === 0) {
-        let messageTitle = doubanSearchedTitle ? `关于 <strong class="text-pink-400">《${sanitizeText(doubanSearchedTitle)}》</strong> 未找到结果` : '没有找到匹配的结果';
-        let messageSuggestion = "请尝试其他关键词或更换数据源。";
+
+    // 无结果处理
+    if (!allResults || allResults.length === 0) {
+        let messageTitle = doubanSearchedTitle
+            ? `关于 <strong class="text-pink-400">《${sanitizeText(doubanSearchedTitle)}》</strong> 未找到结果`
+            : '没有找到匹配的结果';
+
         searchResultsContainer.innerHTML = `
             <div class="col-span-full text-center py-10 sm:py-16">
-                <svg class="mx-auto h-12 w-12 text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                <svg class="mx-auto h-12 w-12 text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
                 <h3 class="mt-2 text-lg font-medium text-gray-300">${messageTitle}</h3>
-                <p class="mt-1 text-sm text-gray-500">${messageSuggestion}</p>
+                <p class="mt-1 text-sm text-gray-500">请尝试其他关键词或更换数据源。</p>
             </div>`;
+
         const searchArea = getElement('searchArea');
         if (searchArea) {
             searchArea.classList.add('flex-1');
@@ -1035,19 +1073,38 @@ function renderSearchResults(allResults, doubanSearchedTitle = null) {
         getElement('doubanArea')?.classList.add('hidden');
         return;
     }
+
+    // 创建网格容器
     const gridContainer = document.createElement('div');
-    gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4';
+    gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4';
+
+    // 渲染结果卡片
     const fragment = document.createDocumentFragment();
-    allResults.forEach(item => {
-        fragment.appendChild(createResultItemUsingTemplate(item));
+    let successCount = 0;
+
+    allResults.forEach((item, index) => {
+        try {
+            const card = createResultItemUsingTemplate(item);
+            if (card && card.nodeType === Node.ELEMENT_NODE) {
+                fragment.appendChild(card);
+                successCount++;
+            } else {
+                console.warn(`Card ${index} is not a valid element:`, card);
+            }
+        } catch (error) {
+            console.error(`Failed to create card for item ${index}:`, error, item);
+        }
     });
+
+    console.log(`Successfully created ${successCount} cards out of ${allResults.length} results`);
+
     gridContainer.appendChild(fragment);
     searchResultsContainer.appendChild(gridContainer);
-    // 在渲染结果后同步预加载状态
+
+    // 预加载处理
     if (typeof window.startPreloading !== 'undefined' && typeof window.stopPreloading !== 'undefined') {
         const preloadEnabled = localStorage.getItem('preloadingEnabled') !== 'false';
         if (preloadEnabled) {
-            // 确保预加载在搜索结果页面正确初始化
             setTimeout(() => {
                 if (typeof window.startPreloading === 'function') {
                     window.startPreloading();
@@ -1059,6 +1116,8 @@ function renderSearchResults(allResults, doubanSearchedTitle = null) {
             }
         }
     }
+
+    // 调整搜索区域样式
     const searchArea = getElement('searchArea');
     if (searchArea) {
         searchArea.classList.remove('flex-1');
@@ -1348,111 +1407,116 @@ window.playFromHistory = playFromHistory;
 
 function createResultItemUsingTemplate(item) {
     const template = document.getElementById('search-result-template');
-    if (!template) return document.createDocumentFragment();
+    if (!template) {
+        console.error('Search result template not found');
+        const fallbackCard = document.createElement('div');
+        fallbackCard.className = 'result-card bg-white/5 rounded-lg p-4';
+        fallbackCard.innerHTML = `<p class="text-white">${item.vod_name || '未知'}</p>`;
+        return fallbackCard;
+    }
+
+    // 克隆模板
     const clone = template.content.cloneNode(true);
-    const cardElement = clone.querySelector('.card-hover');
-    cardElement.videoData = item;
-    const imgElement = clone.querySelector('.result-img');
-    if (imgElement) {
-        imgElement.src = item.vod_pic && item.vod_pic.startsWith('http') ? item.vod_pic : 'https://via.placeholder.com/100x150/191919/555555?text=No+Image';
-        imgElement.alt = item.vod_name || '未知标题';
-        imgElement.onerror = function () {
-            this.onerror = null;
-            this.src = 'https://via.placeholder.com/100x150/191919/555555?text=Error';
-            this.classList.add('object-contain');
-        };
-    }
-    const titleElement = clone.querySelector('.result-title');
-    if (titleElement) {
-        titleElement.textContent = item.vod_name || '未知标题';
-        titleElement.title = item.vod_name || '未知标题';
-    }
-    const typeElement = clone.querySelector('.result-type');
-    if (typeElement) {
-        if (item.type_name) {
-            typeElement.textContent = item.type_name;
-            typeElement.classList.remove('hidden');
-        } else {
-            typeElement.classList.add('hidden');
-        }
-    }
-    const yearElement = clone.querySelector('.result-year');
-    if (yearElement) {
-        if (item.vod_year) {
-            yearElement.textContent = item.vod_year;
-            yearElement.classList.remove('hidden');
-        } else {
-            yearElement.classList.add('hidden');
-        }
-    }
-    const remarksElement = clone.querySelector('.result-remarks');
-    if (remarksElement) {
-        if (item.vod_remarks) {
-            remarksElement.textContent = item.vod_remarks;
-            remarksElement.classList.remove('hidden');
-        } else {
-            remarksElement.classList.add('hidden');
-        }
-    }
-    const sourceNameElement = clone.querySelector('.result-source-name');
-    if (sourceNameElement) {
-        if (item.source_name) {
-            sourceNameElement.textContent = item.source_name;
-            sourceNameElement.className = 'result-source-name text-xs text-gray-400';
-        } else {
-            sourceNameElement.className = 'result-source-name hidden';
-        }
-    }
-    const sourceContainer = clone.querySelector('.result-source');
-    if (sourceContainer) {
-        // 检查是否启用画质检测
-        const speedDetectionEnabled = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
-        if (speedDetectionEnabled) {
-            const qualityBadge = document.createElement('span');
-            const qualityId = `${item.source_code}_${item.vod_id}`;
-            qualityBadge.setAttribute('data-quality-id', qualityId);
-            updateQualityBadgeUI(qualityId, item.quality || '未知', qualityBadge); // 直接调用更新函数
 
-            const quality = item.quality || '未知';
-            const isRetryable = ['未知', '检测失败', '检测超时', '编码不支持', '播放失败', '无有效链接'].includes(quality);
+    // ✅ 从文档片段中提取实际的 DOM 元素
+    // 方法1：使用临时容器
+    const tempContainer = document.createElement('div');
+    tempContainer.appendChild(clone);
+    const card = tempContainer.firstElementChild;
 
-            // 如果状态是可重试的，就给它绑定手动重测的点击事件
-            if (isRetryable) {
-                qualityBadge.style.cursor = 'pointer';
-                qualityBadge.title = '点击重新检测';
-                qualityBadge.onclick = (event) => {
-                    // 阻止事件冒泡，这样就不会触发父级卡片的弹窗事件了
-                    event.stopPropagation();
+    if (!card) {
+        console.error('Failed to extract card from template');
+        const fallbackCard = document.createElement('div');
+        fallbackCard.className = 'result-card bg-white/5 rounded-lg p-4';
+        fallbackCard.innerHTML = `<p class="text-white">${item.vod_name || '未知'}</p>`;
+        return fallbackCard;
+    }
 
-                    // 调用手动重测函数
-                    manualRetryDetection(qualityId, item);
-                };
+    // 恢复 critical properties
+    card.videoData = item;
+
+    // 填充数据
+    try {
+        const img = card.querySelector('.result-img');
+        const title = card.querySelector('.result-title');
+        const type = card.querySelector('.result-type');
+        const year = card.querySelector('.result-year');
+        const remarks = card.querySelector('.result-remarks');
+
+        if (img) {
+            img.src = item.vod_pic || '/placeholder.jpg';
+            img.alt = item.vod_name || '未知';
+            img.onerror = function () {
+                this.src = '/placeholder.jpg';
+            };
+        }
+
+        if (title) title.textContent = item.vod_name || '未知';
+        if (type) type.textContent = item.type_name || '未知';
+        if (year) year.textContent = item.vod_year || '';
+        if (remarks) remarks.textContent = item.vod_remarks || '';
+
+        // Add Source Name
+        const sourceNameElement = card.querySelector('.result-source-name');
+        if (sourceNameElement) {
+            if (item.source_name) {
+                sourceNameElement.textContent = item.source_name;
+                sourceNameElement.className = 'result-source-name text-xs text-gray-400';
+            } else {
+                sourceNameElement.className = 'result-source-name hidden';
             }
-
-            sourceContainer.appendChild(qualityBadge);
         }
-    }
-    cardElement.dataset.id = item.vod_id || '';
-    cardElement.dataset.name = item.vod_name || '';
-    cardElement.dataset.sourceCode = item.source_code || '';
-    if (item.api_url) cardElement.dataset.apiUrl = item.api_url;
-    cardElement.dataset.videoKey = `${item.vod_name}|${item.vod_year || ''}`;
-    cardElement.dataset.year = item.vod_year || '';
-    cardElement.dataset.typeName = item.type_name || '';
-    cardElement.dataset.remarks = item.vod_remarks || '';
-    cardElement.dataset.area = item.vod_area || '';
-    cardElement.dataset.actor = item.vod_actor || '';
-    cardElement.dataset.director = item.vod_director || '';
-    cardElement.dataset.blurb = item.vod_blurb || '';
-    /* 让列节点本身带上标识，便于重排 */
-    const wrapper = cardElement.closest('[data-list-col]') || cardElement.parentElement;
-    if (wrapper) {
-        wrapper.dataset.id = item.vod_id || '';
-        wrapper.dataset.sourceCode = item.source_code || '';
+
+        // Quality Badge Support
+        const sourceContainer = card.querySelector('.result-source');
+        if (sourceContainer) {
+            const speedDetectionEnabled = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
+            if (speedDetectionEnabled) {
+                const qualityBadge = document.createElement('span');
+                const qualityId = `${item.source_code}_${item.vod_id}`;
+                qualityBadge.setAttribute('data-quality-id', qualityId);
+                updateQualityBadgeUI(qualityId, item.quality || '未知', qualityBadge);
+
+                const quality = item.quality || '未知';
+                const isRetryable = ['未知', '检测失败', '检测超时', '编码不支持', '播放失败', '无有效链接'].includes(quality);
+
+                if (isRetryable) {
+                    qualityBadge.style.cursor = 'pointer';
+                    qualityBadge.title = '点击重新检测';
+                    qualityBadge.onclick = (event) => {
+                        event.stopPropagation();
+                        manualRetryDetection(qualityId, item);
+                    };
+                }
+                sourceContainer.appendChild(qualityBadge);
+            }
+        }
+
+        // Restore Datasets
+        card.dataset.id = item.vod_id || '';
+        card.dataset.name = item.vod_name || '';
+        card.dataset.sourceCode = item.source_code || '';
+        if (item.api_url) card.dataset.apiUrl = item.api_url;
+        card.dataset.videoKey = `${item.vod_name}|${item.vod_year || ''}`;
+        card.dataset.year = item.vod_year || '';
+        card.dataset.typeName = item.type_name || '';
+        card.dataset.remarks = item.vod_remarks || '';
+        card.dataset.area = item.vod_area || '';
+        card.dataset.actor = item.vod_actor || '';
+        card.dataset.director = item.vod_director || '';
+        card.dataset.blurb = item.vod_blurb || '';
+
+        // 设置点击事件
+        card.addEventListener('click', () => {
+            if (typeof window.showVideoDetail === 'function') {
+                window.showVideoDetail(item);
+            }
+        });
+    } catch (error) {
+        console.error('Error filling card data:', error);
     }
 
-    cardElement.onclick = handleResultClick;
-    return clone;
+    return card;
 }
 
 function handleResultClick(event) {

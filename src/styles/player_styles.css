@@ -42,7 +42,8 @@ media-player {
   left: 0;
   right: 0;
   bottom: 0;
-  display: flex;
+  display: none;
+  /* 默认隐藏，由JS控制显示 */
   align-items: center;
   justify-content: center;
   background-color: rgba(0, 0, 0, 0.7);

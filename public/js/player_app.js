@@ -1045,11 +1045,17 @@ function clearCurrentVideoAllEpisodeProgresses() {
 
 function renderEpisodes() {
   const sidebarGrid = document.getElementById('sidebar-episode-grid');
-  if (!sidebarGrid) return;
+  const episodeButtonsGrid = document.getElementById('episode-buttons-grid');
+  
+  if (!sidebarGrid && !episodeButtonsGrid) return;
 
-  sidebarGrid.innerHTML = '';
   if (!window.currentEpisodes || !window.currentEpisodes.length) {
-    sidebarGrid.innerHTML = '<div class="text-center text-white/20 py-10 italic">暂无集数信息</div>';
+    if (sidebarGrid) {
+      sidebarGrid.innerHTML = '<div class="text-center text-white/20 py-10 italic">暂无集数信息</div>';
+    }
+    if (episodeButtonsGrid) {
+      episodeButtonsGrid.innerHTML = '<div class="text-center text-white/20 py-10 italic">暂无集数信息</div>';
+    }
     return;
   }
 
@@ -1061,62 +1067,93 @@ function renderEpisodes() {
   const orderedEpisodes = episodesReversed ? [...currentEpisodes].reverse() : [...currentEpisodes];
   const originalEpisodeNames = JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
 
+  if (sidebarGrid) {
+    sidebarGrid.innerHTML = '';
+  }
+  if (episodeButtonsGrid) {
+    episodeButtonsGrid.innerHTML = '';
+  }
+
   orderedEpisodes.forEach((episodeData, index) => {
     const originalIndex = episodesReversed ? currentEpisodes.length - 1 - index : index;
     const isActive = originalIndex === currentEpisodeIndex;
 
-    const btn = document.createElement('button');
-    btn.className = `sidebar-episode-btn ${isActive ? 'active' : ''}`;
-    btn.dataset.index = originalIndex;
+    if (sidebarGrid) {
+      const btn = document.createElement('button');
+      btn.className = `sidebar-episode-btn ${isActive ? 'active' : ''}`;
+      btn.dataset.index = originalIndex;
 
-    const parts = (episodeData || '').split('$');
-    const episodeName = parts.length > 1 ? parts[0].trim() : '';
-    const originalName = originalEpisodeNames[originalIndex] || '';
+      const parts = (episodeData || '').split('$');
+      const episodeName = parts.length > 1 ? parts[0].trim() : '';
+      const originalName = originalEpisodeNames[originalIndex] || '';
 
-    // 内部结构：序号 + 指示器
-    const titleSpan = document.createElement('span');
-    titleSpan.className = 'flex items-center gap-4 overflow-hidden';
+      const titleSpan = document.createElement('span');
+      titleSpan.className = 'flex items-center gap-4 overflow-hidden';
 
-    const indexBox = document.createElement('div');
-    indexBox.className = `w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${isActive ? 'bg-white/20 text-white' : 'bg-white/5 text-white/40 border border-white/5'
-      }`;
-    indexBox.textContent = originalIndex + 1;
+      const indexBox = document.createElement('div');
+      indexBox.className = `w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${isActive ? 'bg-white/20 text-white' : 'bg-white/5 text-white/40 border border-white/5'
+        }`;
+      indexBox.textContent = originalIndex + 1;
 
-    const nameSpan = document.createElement('span');
-    nameSpan.className = `truncate font-medium ${isActive ? 'text-white' : 'text-white/70'}`;
-    nameSpan.textContent = isVarietyShow ? (originalName || episodeName || `第${originalIndex + 1}集`) : (originalName || `第 ${originalIndex + 1} 集`);
+      const nameSpan = document.createElement('span');
+      nameSpan.className = `truncate font-medium ${isActive ? 'text-white' : 'text-white/70'}`;
+      nameSpan.textContent = isVarietyShow ? (originalName || episodeName || `第${originalIndex + 1}集`) : (originalName || `第 ${originalIndex + 1} 集`);
 
-    titleSpan.appendChild(indexBox);
-    titleSpan.appendChild(nameSpan);
-    btn.appendChild(titleSpan);
+      titleSpan.appendChild(indexBox);
+      titleSpan.appendChild(nameSpan);
+      btn.appendChild(titleSpan);
 
-    if (isActive) {
-      const indicator = document.createElement('div');
-      indicator.className = 'playing-indicator';
-      indicator.innerHTML = '<span></span><span></span><span></span>';
-      btn.appendChild(indicator);
+      if (isActive) {
+        const indicator = document.createElement('div');
+        indicator.className = 'playing-indicator';
+        indicator.innerHTML = '<span></span><span></span><span></span>';
+        btn.appendChild(indicator);
+      }
+
+      sidebarGrid.appendChild(btn);
     }
 
-    sidebarGrid.appendChild(btn);
+    if (episodeButtonsGrid) {
+      const btn = document.createElement('button');
+      btn.className = isActive ? 'episode-active' : '';
+      btn.dataset.index = originalIndex;
+      btn.textContent = originalIndex + 1;
+      episodeButtonsGrid.appendChild(btn);
+    }
   });
 
-  // 绑定事件
-  if (!sidebarGrid._sListenerBound) {
-    sidebarGrid.addEventListener('click', (evt) => {
-      const target = evt.target.closest('button[data-index]');
-      if (target) playEpisode(+target.dataset.index);
-    });
-    sidebarGrid._sListenerBound = true;
+  if (sidebarGrid) {
+    if (!sidebarGrid._sListenerBound) {
+      sidebarGrid.addEventListener('click', (evt) => {
+        const target = evt.target.closest('button[data-index]');
+        if (target) playEpisode(+target.dataset.index);
+      });
+      sidebarGrid._sListenerBound = true;
+    }
+
+    setTimeout(() => {
+      const activeBtn = sidebarGrid.querySelector('.sidebar-episode-btn.active');
+      if (activeBtn) activeBtn.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, 100);
+  }
+
+  if (episodeButtonsGrid) {
+    if (!episodeButtonsGrid._sListenerBound) {
+      episodeButtonsGrid.addEventListener('click', (evt) => {
+        const target = evt.target.closest('button[data-index]');
+        if (target) playEpisode(+target.dataset.index);
+      });
+      episodeButtonsGrid._sListenerBound = true;
+    }
+
+    setTimeout(() => {
+      const activeBtn = episodeButtonsGrid.querySelector('.episode-active');
+      if (activeBtn) activeBtn.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }, 100);
   }
 
   updateEpisodeInfo();
   updateButtonStates();
-
-  // 滚动到当前活动项
-  setTimeout(() => {
-    const activeBtn = sidebarGrid.querySelector('.sidebar-episode-btn.active');
-    if (activeBtn) activeBtn.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }, 100);
 }
 
 function initEpisodeSidebar() {

@@ -348,7 +348,8 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                             stroke-linecap="round"
                             stroke-linejoin="round"
                             stroke-width="2"
-                            d="M2 17L12 22L22 17M2 12L12 17L22 12M12 2L2 7L12 12L22 7L12 2Z"></path>
+                            d="M17 8l4 4m0 0l-4 4m4-4H3M4 16V4h16v12M16 8a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"
+                          ></path>
                         </svg>
                       </button>
                       <div id="line-switch-dropdown" class="control-dropdown hidden"></div>
@@ -452,12 +453,31 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                               class="form-checkbox"
                             /></label
                           >
+                          <div class="flex items-center justify-between">
+                            <span class="text-xs text-white/70">预加载集数</span>
+                            <div class="flex items-center gap-2">
+                              <input
+                                type="checkbox"
+                                id="preloadingToggle"
+                                class="form-checkbox"
+                              />
+                              <input
+                                type="number"
+                                min="1"
+                                max="10"
+                                step="1"
+                                id="preloadCountInput"
+                                class="w-16 bg-black/40 border border-white/10 rounded-lg px-3 py-1 text-sm focus:border-indigo-500 transition-colors"
+                                placeholder="1"
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
 
-                    <!-- 锁定 / 复制按钮 (screenshot 里的左边那个框) -->
-                    <div class="flex items-center gap-1">
+                    <!-- 锁定按钮 -->
+                    <div class="control-btn-container">
                       <button id="lock-button" class="control-btn w-10! h-10!" title="锁定屏幕">
                         <svg
                           id="lock-icon"
@@ -470,6 +490,10 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                             d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                         </svg>
                       </button>
+                    </div>
+
+                    <!-- 复制按钮 -->
+                    <div class="control-btn-container">
                       <button
                         onclick="copyLinks()"
                         class="control-btn w-10! h-10!"

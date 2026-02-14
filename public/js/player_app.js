@@ -362,8 +362,8 @@ function hidePlayerOverlays() {
 }
 
 function showToast(message, type = 'info', duration = 3000) {
-  const toast = document.getElementById('player-toast');
-  const toastMessage = document.getElementById('player-toastMessage');
+  const toast = document.getElementById('toast');
+  const toastMessage = document.getElementById('toastMessage');
   if (!toast || !toastMessage) return;
 
   const bgColors = {
@@ -391,22 +391,22 @@ function showMessage(text, type = 'info', duration = 3000) {
   }
 
   let bgColorClass =
-    { error: 'bg-red-500', success: 'bg-green-500', warning: 'bg-yellow-500', info: 'bg-blue-500' }[
+    { error: 'bg-red-500', success: 'bg-green-500', warning: 'bg-yellow-500', info: 'bg-indigo-500' }[
     type
-    ] || 'bg-blue-500';
+    ] || 'bg-indigo-500';
 
-  messageElement.className = `fixed top-4 right-4 p-3 rounded shadow-lg z-[10001] text-sm ${bgColorClass} text-white transition-opacity duration-300 opacity-0`;
+  messageElement.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-[10001] text-sm ${bgColorClass} text-white transition-all duration-300 opacity-0 transform translate-y-[-10px]`;
   messageElement.textContent = text;
   messageElement.classList.remove('hidden');
 
   void messageElement.offsetWidth;
-  messageElement.classList.add('opacity-100');
+  messageElement.classList.add('opacity-100', 'translate-y-0');
 
   if (messageElement._messageTimeout) clearTimeout(messageElement._messageTimeout);
 
   messageElement._messageTimeout = setTimeout(() => {
-    messageElement.classList.remove('opacity-100');
-    messageElement.classList.add('opacity-0');
+    messageElement.classList.remove('opacity-100', 'translate-y-0');
+    messageElement.classList.add('opacity-0', 'translate-y-[-10px]');
     setTimeout(() => messageElement.classList.add('hidden'), 300);
   }, duration);
 }

@@ -390,7 +390,7 @@ async function performBasicSearch(query, selectedAPIs) {
           ...item,
           source_name: apiId.startsWith('custom_')
             ? APISourceManager?.getCustomApiInfo(parseInt(apiId.replace('custom_', '')))?.name ||
-              '自定义源'
+            '自定义源'
             : API_SITES[apiId]?.name || apiId,
           source_code: apiId,
           loadSpeed: '检测中...',
@@ -466,7 +466,7 @@ function renderBasicSearchResults(results) {
     if (item.loadSpeed && isValidSpeedValue(item.loadSpeed)) {
       speedBadge = `<span class="speed-tag inline-block px-2 py-1 text-xs rounded-full bg-green-600 text-white ml-2">${item.loadSpeed}</span>`;
     } else {
-      speedBadge = `<span data-field="speed-tag" class="speed-tag hidden inline-block px-2 py-1 text-xs rounded-full bg-green-600 text-white ml-2"></span>`;
+      speedBadge = `<span data-field="speed-tag" class="speed-tag hidden px-2 py-1 text-xs rounded-full bg-green-600 text-white ml-2"></span>`;
     }
 
     card.innerHTML = `
@@ -859,27 +859,38 @@ function handlePlayerKeydown(e) {
 }
 
 /**
- * 设置面板自动关闭
+ * 设置面板和模态框自动关闭（点击外部关闭）
  */
 function setupPlayerPanelAutoClose() {
   document.addEventListener('click', function (event) {
-    // 检查点击的元素
+    // 1. 历史记录面板：原来的侧滑面板逻辑
     const historyButton = document.getElementById('historyButton');
-    const searchButton = document.getElementById('searchButton');
     const historyPanel = document.getElementById('historyPanel');
-    const searchPanel = document.getElementById('searchPanel');
 
-    // 如果点击的是按钮或面板内部，不做处理
-    if (historyButton && historyButton.contains(event.target)) return;
-    if (searchButton && searchButton.contains(event.target)) return;
-    if (historyPanel && historyPanel.contains(event.target)) return;
-    if (searchPanel && searchPanel.contains(event.target)) return;
-
-    // 关闭面板
     if (historyPanel && historyPanel.classList.contains('show')) {
+      // 如果点击的是按钮或面板内部，不做处理
+      if (historyButton && historyButton.contains(event.target)) return;
+      if (historyPanel.contains(event.target)) return;
+      // 点击外部关闭
       closePlayerHistory();
     }
-    // 注意：搜索面板是模态框，不需要自动关闭
+
+    // 2. 搜索面板：由于它是 fixed inset-0 的全屏遮罩，点击它本身（即背景）就代表点击了外部
+    const searchPanel = document.getElementById('searchPanel');
+    if (searchPanel && !searchPanel.classList.contains('hidden')) {
+      // 如果点击的是遮罩层本身，而不是其内容的容器
+      if (event.target === searchPanel) {
+        closePlayerSearch();
+      }
+    }
+
+    // 3. 详情模态框：同理，处理详情模态框的背景点击关闭
+    const modal = document.getElementById('modal');
+    if (modal && !modal.classList.contains('hidden')) {
+      if (event.target === modal) {
+        closePlayerModal();
+      }
+    }
   });
 }
 

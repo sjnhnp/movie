@@ -957,7 +957,7 @@ function initializeAdditionalListeners() {
 }
 
 /**
- * 设置面板自动关闭功能
+ * 设置面板、侧边栏和模态框自动关闭功能
  */
 function setupPanelAutoClose() {
   // ✅ 移除旧的监听器（如果存在）
@@ -972,8 +972,31 @@ function setupPanelAutoClose() {
     const settingsPanel = document.getElementById('settingsPanel');
     const historyPanel = document.getElementById('historyPanel');
 
+    // 1. 处理详情模态框 (modal) 背景点击关闭
+    const modal = document.getElementById('modal');
+    if (modal && !modal.classList.contains('hidden')) {
+      if (event.target === modal) {
+        closeModal();
+        return;
+      }
+    }
+
+    // 2. 处理密码验证模态框 (passwordModal) 背景点击关闭
+    const passwordModal = document.getElementById('passwordModal');
+    if (passwordModal && passwordModal.style.display !== 'none') {
+      // 只有在验证“设置”密码时才允许点击背景关闭
+      if (event.target === passwordModal && window.verifyingPurpose === 'settings') {
+        if (typeof hidePasswordModal === 'function') {
+          hidePasswordModal();
+        } else {
+          passwordModal.style.display = 'none';
+        }
+        return;
+      }
+    }
+
+    // 3. 处理侧边栏面板 (Settings/History) 的逻辑
     // ✅ 检查点击是否在按钮或面板内部
-    // 使用可选链操作符以防元素不存在
     const clickedInsideSettings =
       settingsButton?.contains(event.target) || settingsPanel?.contains(event.target);
     const clickedInsideHistory =
@@ -988,14 +1011,12 @@ function setupPanelAutoClose() {
     if (settingsPanel && settingsPanel.classList.contains('show')) {
       settingsPanel.classList.remove('show');
       settingsPanel.setAttribute('aria-hidden', 'true');
-      console.log('Auto-closing settings panel'); // 调试日志
     }
 
     // ✅ 关闭历史面板
     if (historyPanel && historyPanel.classList.contains('show')) {
       historyPanel.classList.remove('show');
       historyPanel.setAttribute('aria-hidden', 'true');
-      console.log('Auto-closing history panel'); // 调试日志
     }
   };
 

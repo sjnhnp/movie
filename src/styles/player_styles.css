@@ -3,7 +3,7 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  background: var(--page-gradient-start);
+  background: transparent;
 }
 
 /* 播放器区域 */
@@ -138,25 +138,25 @@ media-player {
 }
 
 /* 选中状态 */
-input:checked + .slider {
+input:checked+.slider {
   background: #404040;
   border-color: transparent;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 /* 选中状态的滑块位置 */
-input:checked + .slider:before {
+input:checked+.slider:before {
   transform: translateX(22px);
   background: #ffffff;
 }
 
 /* 选中状态的悬停效果 */
-input:checked + .slider:hover {
+input:checked+.slider:hover {
   background: #505050;
 }
 
 /* 禁用状态 */
-input:disabled + .slider {
+input:disabled+.slider {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -518,6 +518,7 @@ media-player:focus-within #custom-right-controls {
 
 /* 响应式调整 */
 @media (max-width: 768px) {
+
   #prev-episode,
   #next-episode {
     padding: 0.375rem 0.5rem;
@@ -565,12 +566,12 @@ media-player:focus-within #custom-right-controls {
 }
 
 /* 选中状态下的文本标签 */
-.switch input:checked ~ .control-label {
+.switch input:checked~.control-label {
   color: #ffffff;
 }
 
 /* 容器样式优化 */
-.player-control-bar > div {
+.player-control-bar>div {
   display: flex;
   align-items: center;
   padding: 0.35rem 0.5rem;
@@ -578,12 +579,12 @@ media-player:focus-within #custom-right-controls {
   transition: background-color 0.3s ease;
 }
 
-.player-control-bar > div:hover {
+.player-control-bar>div:hover {
   background: rgba(255, 255, 255, 0.05);
 }
 
 /* 添加焦点状态 */
-.switch input:focus + .slider {
+.switch input:focus+.slider {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
@@ -602,7 +603,7 @@ media-player:focus-within #custom-right-controls {
   }
 }
 
-.switch input:checked + .slider {
+.switch input:checked+.slider {
   animation: switchOn 0.2s ease-out;
 }
 
@@ -618,7 +619,7 @@ media-player:focus-within #custom-right-controls {
     height: 16px;
   }
 
-  input:checked + .slider:before {
+  input:checked+.slider:before {
     transform: translateX(18px);
   }
 
@@ -741,6 +742,7 @@ media-player:focus-within #custom-right-controls {
 
 /* 移动端样式 - 只显示图标，统一大小 */
 @media (max-width: 768px) {
+
   /* 控制按钮容器包装器 */
   .player-control-bar-wrapper {
     width: 100%;
@@ -1478,6 +1480,7 @@ header {
 
 /* ———————————— 仅在移动端 生效 ———————————— */
 @media (max-width: 900px) {
+
   /* 让容器随宽度按 16:9 比例撑高 */
   #player-region {
     width: 100%;

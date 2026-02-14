@@ -434,35 +434,34 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                           偏好设置
                         </div>
                         <div class="space-y-4">
-                          <label class="flex items-center justify-between cursor-pointer"
-                            ><span class="text-xs text-white/70">自动播放下一集</span><input
-                              type="checkbox"
-                              id="autoplay-next"
-                              class="form-checkbox"
-                            /></label
-                          >
-                          <label class="flex items-center justify-between cursor-pointer"
-                            ><span class="text-xs text-white/70">跳过广告分片</span><input
-                              type="checkbox"
-                              id="adFilterToggle"
-                              class="form-checkbox"
-                            /></label
-                          >
-                          <label class="flex items-center justify-between cursor-pointer"
-                            ><span class="text-xs text-white/70">记住播放进度</span><input
-                              type="checkbox"
-                              id="remember-episode-progress-toggle"
-                              class="form-checkbox"
-                            /></label
-                          >
                           <div class="flex items-center justify-between">
-                            <span class="text-xs text-white/70">预加载集数</span>
+                            <span class="text-xs text-white/70">自动连播</span>
+                            <label class="switch">
+                              <input type="checkbox" id="autoplay-next" checked aria-label="自动播放" />
+                              <span class="slider"></span>
+                            </label>
+                          </div>
+                          <div class="flex items-center justify-between">
+                            <span class="text-xs text-white/70">记住进度</span>
+                            <label class="switch">
+                              <input type="checkbox" id="remember-episode-progress-toggle" checked aria-label="记住进度" />
+                              <span class="slider"></span>
+                            </label>
+                          </div>
+                          <div class="flex items-center justify-between">
+                            <span class="text-xs text-white/70">广告过滤</span>
+                            <label class="switch">
+                              <input type="checkbox" id="adFilterToggle" aria-label="分片 广告过滤" />
+                              <span class="slider"></span>
+                            </label>
+                          </div>
+                          <div class="flex items-center justify-between">
+                            <span class="text-xs text-white/70">预加载</span>
                             <div class="flex items-center gap-2">
-                              <input
-                                type="checkbox"
-                                id="preloadingToggle"
-                                class="form-checkbox"
-                              />
+                              <label class="switch">
+                                <input type="checkbox" id="preloadingToggle" aria-label=" 播放预加载" />
+                                <span class="slider"></span>
+                              </label>
                               <input
                                 type="number"
                                 min="1"
@@ -473,6 +472,20 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                                 placeholder="1"
                               />
                             </div>
+                          </div>
+                          <div class="flex items-center justify-between">
+                            <span class="text-xs text-white/70">播放速率</span>
+                            <select
+                              id="playback-speed-select"
+                              class="bg-black/40 text-white/70 rounded-lg px-3 py-1 text-sm border border-white/10 focus:border-indigo-500 transition-colors"
+                            >
+                              <option value="0.5">0.5x</option>
+                              <option value="0.75">0.75x</option>
+                              <option value="1" selected>1x</option>
+                              <option value="1.25">1.25x</option>
+                              <option value="1.5">1.5x</option>
+                              <option value="2">2x</option>
+                            </select>
                           </div>
                         </div>
                       </div>

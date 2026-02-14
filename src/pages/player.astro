@@ -371,7 +371,8 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
       </div>
 
       <!-- 播放控制和剧集信息 -->
-      <div class="flex items-center justify-between p-6">
+      <!-- 播放控制和剧集信息 -->
+      <div class="flex items-center justify-between px-6 pt-6 pb-2">
         <button
           id="prev-episode"
           class="bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl px-5 py-3 text-white/90 hover:text-white flex items-center gap-3 transition-all duration-300 shadow-lg hover:shadow-xl font-medium"
@@ -423,7 +424,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
       </div>
 
       <!-- 功能控制条 -->
-      <div class="p-6 bg-transparent border-t border-white/5 mx-6 mb-6">
+      <div class="px-0 py-2 bg-transparent mx-6 mb-2">
         <!-- 新增控制按钮容器 -->
         <div class="player-control-bar-wrapper">
           <div class="player-control-bar">
@@ -690,11 +691,11 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
       <!-- 剧集选择 -->
       <div
         id="episodes-container"
-        class="mt-2 mx-6 mb-6 hidden"
+        class="mt-0 mx-6 mb-8 hidden"
         role="navigation"
         aria-label="剧集选择"
       >
-        <div class="bg-transparent border-t border-white/5 p-6">
+        <div class="bg-transparent px-0 pt-2 pb-6">
           <div class="flex justify-between items-center mb-4">
             <h2 class="text-xl font-bold text-white/90">选集</h2>
             <span

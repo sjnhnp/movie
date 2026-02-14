@@ -43,12 +43,11 @@ function toggleWebFullscreen() {
   if (isWebFullscreen) {
     // 进入网页全屏 - 大部分样式现在由 CSS 类 .web-fullscreen-active 控制
 
-    // 隐藏其他元素，包括顶部导航栏
+    // 隐藏其他元素，包括顶部导航栏和侧边栏
     const elementsToHide = [
       'header',
-      '.flex.items-center.justify-between.p-6',
-      '.p-6.bg-white\\/5',
-      '#episodes-container',
+      '.py-10',
+      '#episode-sidebar'
     ];
 
     elementsToHide.forEach((selector) => {
@@ -70,9 +69,8 @@ function toggleWebFullscreen() {
     // 显示其他元素
     const elementsToShow = [
       'header',
-      '.flex.items-center.justify-between.p-6',
-      '.p-6.bg-white\\/5',
-      '#episodes-container',
+      '.py-10',
+      '#episode-sidebar'
     ];
 
     elementsToShow.forEach((selector) => {

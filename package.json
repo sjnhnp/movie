@@ -14,13 +14,15 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.6",
     "@astrojs/cloudflare": "^12.6.12",
     "@astrojs/netlify": "^6.6.4",
     "@astrojs/node": "^9.5.3",
     "@astrojs/vercel": "^9.0.4",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^5.17.2",
-    "tailwindcss": "^4.1.18"
+    "tailwindcss": "^4.1.18",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^8.55.0",

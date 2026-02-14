@@ -1200,13 +1200,6 @@ function clearCurrentVideoAllEpisodeProgresses() {
 }
 
 function renderEpisodes() {
-  const grid = document.getElementById('episode-grid');
-  if (!grid) {
-    setTimeout(renderEpisodes, 100);
-    return;
-  }
-
-  const container = document.getElementById('episodes-container');
   const sidebarGrid = document.getElementById('sidebar-episode-grid');
   if (!sidebarGrid) return;
 
@@ -1382,15 +1375,40 @@ function copyLinks() {
     if (typeof showToast === 'function') showToast('没有可复制的视频链接', 'warning');
     return;
   }
-  navigator.clipboard
-    .writeText(linkUrl)
-    .then(() => {
-      if (typeof showToast === 'function') showToast('当前视频链接已复制', 'success');
-    })
-    .catch((err) => {
-      console.error('复制链接失败:', err);
-      if (typeof showToast === 'function') showToast('复制失败，请检查浏览器权限', 'error');
-    });
+
+  // Fallback for clipboard API
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard
+      .writeText(linkUrl)
+      .then(() => {
+        if (typeof showToast === 'function') showToast('当前视频链接已复制', 'success');
+      })
+      .catch((err) => {
+        console.error('Clipboard API failed, trying fallback:', err);
+        fallbackCopyText(linkUrl);
+      });
+  } else {
+    fallbackCopyText(linkUrl);
+  }
+}
+
+function fallbackCopyText(text) {
+  const textArea = document.createElement('textarea');
+  textArea.value = text;
+  textArea.style.position = 'fixed';
+  textArea.style.left = '-999999px';
+  textArea.style.top = '-999999px';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+    if (typeof showToast === 'function') showToast('当前视频链接已复制', 'success');
+  } catch (err) {
+    console.error('Fallback copy failed:', err);
+    if (typeof showToast === 'function') showToast('复制失败，请检查浏览器权限', 'error');
+  }
+  document.body.removeChild(textArea);
 }
 
 function toggleLockScreen() {

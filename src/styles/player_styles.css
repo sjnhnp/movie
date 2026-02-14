@@ -2081,9 +2081,11 @@ media-fullscreen-button {
 
 #episode-sidebar.hidden-sidebar {
   width: 0;
+  min-width: 0;
   opacity: 0;
   pointer-events: none;
-  border-left-color: transparent;
+  border-left-width: 0;
+  overflow: hidden;
 }
 
 /* 渐变遮罩边缘 */

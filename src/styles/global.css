@@ -1,428 +1,124 @@
 @import 'tailwindcss';
 
-/* -------- 1. 全局 CSS 变量（现代简约风格） -------- */
+/* -------- Tailwind v4 Theme Configuration -------- */
+@theme {
+  --color-primary: #6366f1;
+  /* Indigo-500 */
+  --color-primary-light: #a5b4fc;
+  /* Indigo-300 */
+  --color-secondary: #0f0f23;
+  /* Main BG */
+  --color-accent: #8b5cf6;
+  /* Violet-500 */
+  --color-text-muted: #94a3b8;
+  /* Slate-400 */
+}
+
+/* -------- 1. Custom Variables (Non-Tailwind) -------- */
 :root {
-  --primary-color: #6366f1;
-  /* 现代紫色 */
-  --primary-light: #a5b4fc;
-  /* 浅紫色 */
-  --secondary-color: #0f0f23;
-  /* 深蓝黑 */
-  --accent-color: #8b5cf6;
-  /* 优雅紫色 */
-  --text-color: #f8fafc;
-  /* 纯净白 */
-  --text-muted: #94a3b8;
-  /* 温和灰 */
-  --border-color: rgba(148, 163, 184, 0.1);
-  /* 极淡边框 */
+  --border-color: rgba(255, 255, 255, 0.08);
+  /* 极细微边框 */
+
+  /* 渐变色系 - Deep Space */
   --page-gradient-start: #0f0f23;
-  /* 深色起始 */
-  --page-gradient-end: #1e1e3f;
-  /* 深色结束 */
-  --card-gradient-start: #1a1a2e;
-  /* 卡片渐变起始 */
-  --card-gradient-end: #16213e;
-  /* 卡片渐变结束 */
-  --card-accent: rgba(99, 102, 241, 0.05);
-  /* 极淡紫色 */
-  --card-hover-border: rgba(99, 102, 241, 0.3);
-  /* 悬停边框 */
-  --surface-color: #1e293b;
-  /* 表面颜色 */
-  --surface-hover: #334155;
-  /* 表面悬停 */
+  --page-gradient-end: #181832;
+
+  /* 玻璃质感 */
+  --glass-bg: rgba(15, 15, 35, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+
+  /* 交互反馈 */
+  --surface-hover: rgba(255, 255, 255, 0.03);
+
+  /* Map theme colors to variables for inline styles if needed */
+  --primary-color: #6366f1;
+  --accent-color: #8b5cf6;
 }
 
-/* -------- 2. 统一滚动条样式（全局应用） -------- */
-
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-.history-panel::-webkit-scrollbar,
-.episode-grid::-webkit-scrollbar,
-.custom-title-scroll::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-html::-webkit-scrollbar-track,
-body::-webkit-scrollbar-track,
-.history-panel::-webkit-scrollbar-track,
-.episode-grid::-webkit-scrollbar-track,
-.custom-title-scroll::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 4px;
-}
-
-html::-webkit-scrollbar-thumb,
-body::-webkit-scrollbar-thumb,
-.history-panel::-webkit-scrollbar-thumb,
-.episode-grid::-webkit-scrollbar-thumb,
-.custom-title-scroll::-webkit-scrollbar-thumb {
-  background-color: #444;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
-}
-
-html::-webkit-scrollbar-thumb:hover,
-body::-webkit-scrollbar-thumb:hover,
-.history-panel::-webkit-scrollbar-thumb:hover,
-.episode-grid::-webkit-scrollbar-thumb:hover,
-.custom-title-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: #555;
-}
-
-/* -------- 3. 页面背景（现代简约风格） -------- */
-.page-bg {
-  background:
-    linear-gradient(180deg, var(--page-gradient-start), var(--page-gradient-end)),
-    radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.02) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(99, 102, 241, 0.01) 0%, transparent 50%);
-  background-attachment: fixed;
-  min-height: 100vh;
-}
-
-/* 修复Android Chrome地址栏隐藏时底部白色背景问题 */
+/* -------- 2. 页面背景（深空模拟） -------- */
 html,
 body {
   background-color: var(--page-gradient-start);
+  color: #f8fafc;
+  /* Slate-50 */
   min-height: 100vh;
-  /* 确保页面至少占满视口高度 */
   overflow-x: hidden;
-  /* 防止水平滚动 */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-/* -------- 4. 按钮 & 卡片过渡（优化） -------- */
-button,
-.card-hover {
-  /* 替换 transition: all 为具体属性 */
-  transition:
-    transform 0.3s ease,
-    border-color 0.3s ease,
-    box-shadow 0.3s ease;
+.page-bg {
+  /* 径向渐变模拟深邃星空 */
+  background:
+    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 40%),
+    /* Indigo Glow */
+    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.06) 0%, transparent 40%),
+    /* Violet Glow */
+    linear-gradient(180deg, var(--page-gradient-start) 0%, var(--page-gradient-end) 100%);
+  background-attachment: fixed;
 }
 
-.card-hover {
-  will-change: transform, border-color, box-shadow;
+/* -------- 3. 极制玻璃 (Ultra Glass) 工具类 -------- */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  /* Ultra Blur */
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
 }
 
-/* -------- 5. 开关样式 -------- */
-.toggle-bg {
-  background-color: rgba(255, 255, 255, 0.2);
-  transition: background-color 0.3s ease-in-out;
+.btn-glass {
+  @apply relative overflow-hidden flex items-center justify-center;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  /* Silk-like transition */
 }
 
-.toggle-dot {
-  transform: translateX(0);
-  transition: transform 0.3s ease-in-out;
-}
-
-/* 选中状态的样式 */
-input[type='checkbox']:checked + .toggle-bg {
-  background-color: #6366f1 !important;
-  /* 使用主色调 */
-}
-
-input[type='checkbox']:checked + .toggle-bg + .toggle-dot {
-  transform: translateX(1.5rem);
-  /* 24px = 1.5rem */
-}
-
-/* -------- 6. 卡片基本样式（现代简约风格） -------- */
-.card-hover {
-  border: 1px solid var(--border-color);
-  background: var(--surface-color);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* 卡片内容布局优化 */
-.card-hover .flex-grow {
-  display: flex;
-  flex-direction: column;
-}
-
-/* 卡片标题文本溢出处理 */
-.card-hover h3 {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  line-height: 1.4;
-  word-break: break-word;
-  hyphens: auto;
-  font-weight: 500;
-  color: var(--text-color);
-}
-
-/* 现代简约悬停效果 */
-.card-hover:hover {
-  border-color: var(--card-hover-border);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.15);
-  background: var(--surface-hover);
-}
-
-/* 移除旧的光效动画 */
-.card-hover::before {
-  display: none;
-}
-
-/* -------- 6. 渐变文字 & 搜索按钮（现代简约风格） -------- */
-.gradient-text {
-  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-}
-
-/* 现代简约按钮样式 */
-.search-button {
-  background: var(--primary-color);
-  color: var(--text-color);
-  border-radius: 8px;
-  font-weight: 500;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.search-button:hover {
-  background: var(--accent-color);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-}
-
-/* 修复搜索按钮在移动端的图标居中问题 */
-@media (max-width: 640px) {
-  #homeButton svg,
-  button[aria-label='搜索按钮'] svg {
-    margin-right: 0 !important;
-  }
-
-  #homeButton,
-  button[aria-label='搜索按钮'] {
-    justify-content: center !important;
-    padding: 0.75rem !important;
-    min-width: 48px;
-  }
-}
-
-/* -------- 7. 设置面板（现代简约风格） -------- */
-.settings-panel {
-  transform: translateX(100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgba(15, 15, 35, 0.95);
-  backdrop-filter: blur(20px);
-  border-left: 1px solid var(--border-color);
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
-}
-
-.settings-panel.show {
-  transform: translateX(0);
-}
-
-/* -------- 8. 开关样式（现代简约风格） -------- */
-/* 现代开关背景样式 */
-#yellowFilterToggle:checked + .toggle-bg,
-#adFilterToggle:checked + .toggle-bg,
-#speedDetectionToggle:checked + .toggle-bg,
-#preloadingToggle:checked + .toggle-bg {
-  background-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-}
-
-#doubanToggle:checked + .toggle-bg {
-  background-color: #db2777; /* pink-600 */
-  box-shadow: 0 0 0 2px rgba(219, 39, 119, 0.2);
-}
-
-/* 现代开关点样式 */
-#yellowFilterToggle:checked ~ .toggle-dot,
-#adFilterToggle:checked ~ .toggle-dot,
-#doubanToggle:checked ~ .toggle-dot,
-#speedDetectionToggle:checked ~ .toggle-dot,
-#preloadingToggle:checked ~ .toggle-dot {
-  transform: translateX(1.5rem);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
-}
-
-/* 现代焦点与悬停样式 */
-#yellowFilterToggle:focus + .toggle-bg,
-#yellowFilterToggle:hover + .toggle-bg,
-#adFilterToggle:focus + .toggle-bg,
-#adFilterToggle:hover + .toggle-bg,
-#doubanToggle:focus + .toggle-bg,
-#doubanToggle:hover + .toggle-bg,
-#preloadingToggle:focus + .toggle-bg,
-#preloadingToggle:hover + .toggle-bg {
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-}
-
-/* 现代过渡效果 */
-.toggle-dot {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background: #ffffff;
-}
-
-.toggle-bg {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  background-color: var(--text-muted);
-  border-radius: 12px;
-}
-
-/* -------- 9. 表单复选框（保留自定义样式） -------- */
-.form-checkbox {
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  height: 14px;
-  width: 14px;
-  background-color: #222;
-  border: 1px solid #333;
-  border-radius: 3px;
-  cursor: pointer;
-  position: relative;
-  outline: none;
-}
-
-.form-checkbox:checked {
-  background-color: var(--primary-color);
-  border-color: var(--primary-color);
-}
-
-.form-checkbox:checked::after {
-  content: '';
-  position: absolute;
-  left: 4px;
-  top: 1px;
-  width: 4px;
-  height: 8px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-}
-
-/* 删除重复的滚动区样式，使用html中的全局样式 */
-
-/* -------- 10. 过滤器禁用样式 -------- */
-.filter-disabled {
-  position: relative;
-  opacity: 1;
-  pointer-events: none;
-  cursor: not-allowed;
-}
-
-.filter-disabled::after {
+/* 光影滑过效果 (Shine Effect) */
+.btn-glass::after {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
+  left: -100%;
+  width: 50%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.3);
-  border-radius: 0.5rem;
-  z-index: 5;
-}
-
-.filter-disabled > * {
-  opacity: 1;
-  z-index: 6;
-  position: relative;
-}
-
-.filter-disabled .toggle-bg {
-  background-color: #444 !important;
-  opacity: 0.8;
-}
-
-.filter-disabled .toggle-dot {
-  transform: translateX(0) !important;
-  background-color: #777 !important;
-  opacity: 0.9;
-}
-
-.filter-disabled .filter-description {
-  color: #ff7b9d !important;
-  font-style: italic;
-  font-weight: 500;
-  text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
-}
-
-.filter-tooltip {
-  background-color: rgba(255, 61, 87, 0.1);
-  border: 1px solid rgba(255, 61, 87, 0.2);
-  border-radius: 0.25rem;
-  padding: 0.5rem;
-  margin-top: 0.5rem;
-  display: flex;
-  align-items: center;
-  font-size: 0.75rem;
-  line-height: 1.25;
-  position: relative;
-  z-index: 10;
-}
-
-.filter-tooltip svg {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  margin-right: 0.35rem;
-}
-
-/* -------- 11. 页脚样式 -------- */
-.footer {
-  width: 100%;
-  margin-top: auto;
-  background: linear-gradient(to bottom, transparent, var(--page-gradient-start));
-  border-top: 1px solid var(--border-color);
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent);
+  transform: skewX(-20deg);
   transition: none;
 }
 
-.footer a:hover {
-  text-decoration: underline;
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px) scale(1.02);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* 基本布局可以用Tailwind替代 */
-body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
+.btn-glass:hover::after {
+  left: 200%;
+  transition: left 0.6s ease-in-out;
 }
 
-.container {
-  flex: 1;
+/* 按钮点击反馈 */
+.btn-glass:active {
+  transform: translateY(0) scale(0.98);
+  background: rgba(255, 255, 255, 0.05);
 }
 
-/* -------- 12. 响应式样式 -------- */
-@media screen and (max-width: 640px) {
-  .footer {
-    padding-bottom: 2rem;
-  }
-}
+/* -------- 4. 进场动画 (Stage Lights) -------- */
 
-@media screen and (max-width: 768px) {
-  .card-hover h3 {
-    min-height: 2.5rem;
-  }
-
-  .card-hover .flex-grow {
-    min-height: 80px;
-  }
-}
-
-/* -------- 13. 模态框动画（保留） -------- */
+/* 基础 Fade In */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -433,628 +129,247 @@ body {
   }
 }
 
-@keyframes fadeOut {
+/* 优雅的上滑淡入 (用于列表项、卡片) */
+@keyframes slideUpFade {
   from {
-    opacity: 1;
+    opacity: 0;
+    transform: translateY(20px);
   }
 
   to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 缩放淡入 (用于模态框、重要提示) */
+@keyframes scaleIn {
+  0% {
     opacity: 0;
+    transform: scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
-#modal.show {
-  animation: fadeIn 0.3s forwards;
+/* 应用动画的类 */
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 
-#modal.hide {
-  animation: fadeOut 0.3s forwards;
+.animate-slide-up {
+  animation: slideUpFade 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-#modal > div {
-  background: rgba(15, 15, 35, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-  border-radius: 16px;
+.animate-scale-in {
+  animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  /* 带一点弹性 */
 }
 
-#episodesGrid button {
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 8px;
-  font-weight: 500;
+/* 列表项交错动画延迟 */
+.search-card:nth-child(1) {
+  animation-delay: 50ms;
 }
 
-#episodesGrid button:hover {
-  background: var(--surface-hover);
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
-  transform: translateY(-1px);
+.search-card:nth-child(2) {
+  animation-delay: 100ms;
 }
 
-/* -------- 14. 历史记录面板（优化过渡效果） -------- */
+.search-card:nth-child(3) {
+  animation-delay: 150ms;
+}
+
+.search-card:nth-child(4) {
+  animation-delay: 200ms;
+}
+
+.search-card:nth-child(5) {
+  animation-delay: 250ms;
+}
+
+.search-card:nth-child(6) {
+  animation-delay: 300ms;
+}
+
+.search-card:nth-child(n+7) {
+  animation-delay: 350ms;
+}
+
+/* -------- 5. 搜索卡片优化 (Horizontal Layout) -------- */
+.search-card {
+  @apply relative flex flex-row h-full overflow-hidden rounded-xl bg-[#1e1e2d] border border-white/5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10 hover:border-primary/30 cursor-pointer;
+  animation: slideUpFade 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  .img-wrapper {
+    @apply relative w-1/3 min-w-[100px] max-w-[140px] aspect-[2/3] overflow-hidden bg-black/40 shrink-0;
+
+    img {
+      @apply w-full h-full object-cover transition-transform duration-700;
+    }
+
+    .play-icon {
+      @apply absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 bg-black/40 backdrop-blur-[2px];
+
+      svg {
+        @apply w-10 h-10 text-white drop-shadow-lg scale-90 transition-transform duration-300;
+      }
+    }
+
+    .score-tag {
+      @apply absolute top-2 right-2 bg-black/60 backdrop-blur-md text-primary-light text-[10px] font-bold px-1.5 py-0.5 rounded border border-white/10 shadow-sm;
+    }
+  }
+
+  .info {
+    @apply flex flex-col p-4 grow min-w-0 justify-between relative z-10;
+
+    /* 细微的背景光耗 */
+    &::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to right, rgba(255, 255, 255, 0.01), transparent);
+      pointer-events: none;
+    }
+
+    .result-title {
+      @apply text-base font-bold text-white mb-1.5 line-clamp-2 leading-snug transition-colors;
+    }
+
+    .result-sub {
+      @apply text-xs text-text-muted line-clamp-2 mb-2 leading-relaxed;
+    }
+
+    .result-details {
+      @apply flex flex-wrap gap-2 mb-2;
+    }
+
+    .tag {
+      @apply text-[10px] px-1.5 py-0.5 rounded bg-white/5 text-text-muted border border-white/5;
+    }
+
+    .result-source {
+      @apply mt-auto flex items-center gap-2 text-xs text-text-muted/60 pt-3 border-t border-white/5;
+    }
+  }
+
+  &:hover .img-wrapper img {
+    @apply scale-105;
+  }
+
+  &:hover .img-wrapper .play-icon {
+    @apply opacity-100;
+
+    svg {
+      @apply scale-100;
+    }
+  }
+
+  &:hover .info .result-title {
+    @apply text-primary-light;
+  }
+}
+
+/* -------- 6. 输入框与搜索标签 -------- */
+.input-glass {
+  @apply w-full bg-white/5 border border-white/10 text-white px-5 py-4 rounded-2xl focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-all duration-300 placeholder-white/30 text-lg shadow-inner;
+}
+
+.search-tag {
+  @apply inline-flex items-center px-4 py-2 rounded-xl text-sm font-medium text-text-muted bg-white/5 border border-white/5 cursor-pointer transition-all duration-300 hover:bg-white/10 hover:text-white hover:border-white/20 hover:scale-105 active:scale-95;
+
+  /* Tag enter animation */
+  animation: fadeIn 0.4s ease-out backwards;
+}
+
+/* -------- 7. 历史记录 (Side Panel) -------- */
 .history-panel {
-  position: fixed;
-  left: 0;
-  top: 0;
-  height: 100vh;
-  width: 320px;
-  background: rgba(15, 15, 35, 0.95) !important;
-  backdrop-filter: blur(20px);
-  border-right: 1px solid var(--border-color);
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow-y: auto;
-  overflow-x: hidden;
-  z-index: 40;
-  /* ✅ 默认隐藏在左侧 */
-  transform: translateX(-100%);
-  scrollbar-width: thin;
-  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+  @apply fixed left-0 top-0 h-full w-80 bg-[#0f0f23]/95 backdrop-blur-2xl border-r border-white/10 shadow-2xl z-50 transform -translate-x-full transition-transform duration-500 cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
-/* ✅ 显示状态 */
 .history-panel.show {
-  transform: translateX(0) !important;
-}
-
-/* 移动端适配 */
-@media (max-width: 768px) {
-  .history-panel {
-    width: 280px;
-  }
-}
-
-#historyList {
-  padding-right: 6px;
+  transform: translateX(0);
 }
 
 .history-item {
-  background: #1a1a1a;
-  border-radius: 6px;
-  border: 1px solid #333;
-  overflow: hidden;
-  transition:
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-  padding: 10px 14px;
-  position: relative;
-  margin-bottom: 8px;
-  width: 100%;
+  @apply relative flex items-start gap-3 p-3 mb-2 rounded-xl bg-white/5 border border-transparent transition-all duration-200 hover:bg-white/10 hover:border-white/10 cursor-pointer overflow-hidden;
+
+  /* Item hover reveal delete */
+  &:hover .delete-btn {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
-.history-item:hover {
-  transform: translateY(-2px);
-  border-color: #444;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* 现有的删除按钮样式 */
 .history-item .delete-btn {
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  @apply absolute right-2 top-2 p-1.5 rounded-lg text-white/40 hover:text-red-400 hover:bg-white/5 opacity-0 transform translate-x-2 transition-all duration-200;
 }
 
-.history-item:hover .delete-btn {
-  opacity: 1;
-}
-
-/* 移动端优化：始终显示删除按钮 */
-@media (max-width: 768px) {
-  .history-item .delete-btn {
-    opacity: 1 !important;
-    background-color: rgba(239, 68, 68, 0.1);
-    border: 1px solid rgba(239, 68, 68, 0.3);
-    border-radius: 50%;
-    padding: 0.25rem;
-  }
-
-  .history-item .delete-btn:active {
-    background-color: rgba(239, 68, 68, 0.2);
-    transform: scale(0.95);
-  }
-}
-
-.history-info {
-  padding: 10px;
-  min-height: 70px;
-}
-
-.history-title {
-  font-weight: 500;
-  font-size: 0.95rem;
-  margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.history-meta {
-  color: #bbb;
-  font-size: 0.75rem;
-  display: flex;
-  flex-wrap: wrap;
-  margin-bottom: 1px;
-}
-
-.history-episode {
-  color: #3b82f6;
-}
-
-.history-source {
-  color: #10b981;
-}
-
-.history-time {
-  color: #888;
-  font-size: 0.8rem;
-  margin-top: 4px;
-}
-
-/* 历史分隔符样式 */
-.history-separator {
-  color: #666;
-  margin-left: 0.25rem;
-  /* Equivalent to mx-1 */
-  margin-right: 0.25rem;
-  /* Equivalent to mx-1 */
-}
-
-.history-thumbnail {
-  width: 100%;
-  height: 90px;
-  background-color: #222;
-  overflow: hidden;
-}
-
-.history-thumbnail img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* 播放进度条 */
-.history-progress {
-  margin: 5px 0;
-}
-
-.progress-bar {
-  height: 3px;
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 2px;
-  overflow: hidden;
-  margin-bottom: 2px;
-}
-
-.progress-filled {
-  height: 100%;
-  background: linear-gradient(to right, #00ccff, #3b82f6);
-  border-radius: 2px;
-}
-
-.progress-text {
-  font-size: 10px;
-  color: #888;
-  text-align: right;
-}
-
-/* 恢复播放提示 */
-.position-restore-hint {
-  position: absolute;
-  bottom: 60px;
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 14px;
-  z-index: 100;
-  opacity: 0;
-  transition:
-    transform 0.3s ease,
-    opacity 0.3s ease;
-}
-
-.position-restore-hint.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* 锁定控制时屏蔽交互（未变动） */
-.player-container.controls-locked .dplayer-controller,
-.player-container.controls-locked .dplayer-mask,
-.player-container.controls-locked .dplayer-bar-wrap,
-.player-container.controls-locked .dplayer-statusbar,
-.player-container.controls-locked .shortcut-hint {
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-.player-container.controls-locked #lockToggle {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}
-
-/* API组标题样式 */
-.api-group-title {
-  grid-column: span 2;
-  padding: 0.25rem 0;
-  margin-top: 0.5rem;
-  border-top: 1px solid #333;
-  color: #8599b2;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* 搜索记录标签样式（现代简约风格） */
-.search-tag {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  color: var(--text-color);
-  padding: 0.5rem 1rem;
-  border-radius: 12px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  display: inline-block;
-  position: relative;
-  overflow: hidden;
-}
-
-.search-tag::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.1), transparent);
-  transition: left 0.5s ease;
-}
-
-.search-tag:hover {
-  background: rgba(99, 102, 241, 0.1);
-  border-color: var(--primary-color);
-  color: var(--primary-light);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
-}
-
-.search-tag:hover::before {
-  left: 100%;
-}
-
-/* 搜索卡片结果居中*/
-#results {
-  justify-content: center;
-}
-
-/* 播放器顶部header移动端优化 */
-.player-header {
-  gap: 0.5rem;
-}
-
-.custom-title-scroll {
-  overflow-x: auto;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.custom-title-scroll::-webkit-scrollbar {
-  display: none;
-}
-
-.logo-text {
-  display: inline;
-}
-
-.home-btn-text {
-  display: inline;
-}
-
-@media (max-width: 640px) {
-  .logo-text {
-    display: none;
-  }
-
-  .home-btn-text {
-    display: none;
-  }
-
-  .logo-icon {
-    margin-right: 0;
-  }
-
-  .home-btn svg {
-    margin-right: 0;
-  }
-
-  .player-header {
-    padding-left: 2px !important;
-    padding-right: 2px !important;
-  }
-
-  .custom-title-scroll {
-    font-size: 1rem;
-  }
-}
-
-/* 搜索结果卡片优化：横向布局 */
-.search-card-img-container {
-  width: 100px;
-  height: 150px;
-  overflow: hidden;
-  background-color: #191919;
-}
-
-/* 确保图片不会被拉伸，并且能够正确显示 */
-.search-card-img-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* 针对搜索结果卡片修改网格布局以适应横向卡片 */
-@media (max-width: 640px) {
-  #results {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-}
-
-/* 响应式调整：在小屏幕上依然保持较好的视觉效果 */
-@media (min-width: 641px) and (max-width: 768px) {
-  #results {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* 调整网格布局，减少每行卡片数量以适应更大尺寸的卡片 */
-@media (min-width: 769px) and (max-width: 1024px) {
-  #results {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1025px) {
-  #results {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-/* 增加卡片内字体大小 */
-.card-hover h3 {
-  font-size: 0.95rem;
-  line-height: 1.3rem;
-  margin-bottom: 0.5rem;
-}
-
-.card-hover p {
-  font-size: 0.8rem;
-}
-
-/* 优化卡片内元素间距 */
-.card-hover .p-2 {
-  padding: 0.5rem;
-}
-
-.logo-text {
-  display: inline;
-}
-
-.home-btn-text {
-  display: inline;
-}
-
-/* -------- 卡片内集数/备注样式 (图14) -------- */
-.result-remarks {
-  font-weight: normal;
-}
-
-/* 确保卡片标题和元信息有足够空间 */
-.card-hover h3.result-title {
-  min-height: 2.4em;
-  margin-bottom: 0.375rem;
-}
-
-.card-hover .result-meta {
-  min-height: 1.5em;
-  margin-bottom: 0.375rem;
-}
-
-/* -------- 模态框内按钮样式 (图12) -------- */
-.modal-icon-button {
-  padding: 0.5rem;
-  background-color: #374151;
-  color: white;
-  border-radius: 0.5rem;
-  transition: background-color 0.2s ease-in-out;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-icon-button:hover {
-  background-color: #4b5563;
-}
-
-.modal-icon-button svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-/* -------- 模态框标题样式优化 -------- */
-#modalTitle {
-  font-size: 1.5rem !important;
-  /* 24px，比text-3xl(30px)更内敛 */
-  font-weight: 600 !important;
-  /* 比font-bold(700)更优雅 */
-  line-height: 1.4 !important;
-  letter-spacing: -0.02em !important;
-}
-
-/* 移动端进一步优化标题大小 */
-@media (max-width: 768px) {
-  #modalTitle {
-    font-size: 1.25rem !important;
-    /* 20px，移动端更小 */
-    font-weight: 600 !important;
-    line-height: 1.3 !important;
-  }
-}
-
-/* 超小屏幕进一步优化 */
-@media (max-width: 480px) {
-  #modalTitle {
-    font-size: 1.125rem !important;
-    /* 18px，超小屏幕最小 */
-    font-weight: 600 !important;
-    line-height: 1.3 !important;
-  }
-}
-
-/* 让删除按钮不额外撑高内容 */
-.search-tag + span[role='button'] {
-  margin-left: 0.45em;
-  display: flex;
-  align-items: center;
-  height: 100%;
-}
-
-/* 鼠标悬停在x变手势 */
-.search-tag + span[role='button'] {
-  cursor: pointer;
-}
-
-/* -------- 历史面板优化（现代简约风格） -------- */
-.history-panel {
-  background: rgba(15, 15, 35, 0.95) !important;
-  backdrop-filter: blur(20px);
-  border-right: 1px solid var(--border-color);
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
-  scrollbar-width: thin;
-  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
-}
-
-/* Webkit 滚动条样式 */
-.history-panel::-webkit-scrollbar {
+/* -------- 8. 滚动条 (Minimalist) -------- */
+::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
-.history-panel::-webkit-scrollbar-track {
+::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.history-panel::-webkit-scrollbar-thumb {
-  background-color: rgba(99, 102, 241, 0.3);
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
 }
 
-.history-panel::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(99, 102, 241, 0.5);
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* 清空历史按钮 - 现代简约风格 */
-.history-panel .mt-4.text-center.sticky.bottom-0 {
-  background: transparent !important;
-  padding: 0.75rem 1rem;
-  margin: 0;
+/* -------- 9. 工具类补充 -------- */
+.gradient-text {
+  background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.history-panel .clear-history-btn {
-  background: rgba(99, 102, 241, 0.1) !important;
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  border-radius: 12px;
-  margin: 0;
-  padding: 0.75rem 1.5rem;
-  width: 100%;
-  box-sizing: border-box;
-  color: var(--primary-color);
-  font-weight: 500;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+.btn-primary {
+  @apply px-6 py-2.5 rounded-xl font-medium text-white transition-all duration-300 shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0;
+  background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
 }
 
-.history-panel .clear-history-btn:hover {
-  background: rgba(99, 102, 241, 0.2) !important;
-  border-color: var(--primary-color);
-  color: var(--primary-light);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+.btn-icon {
+  @apply p-2 rounded-xl text-white/70 hover:text-white hover:bg-white/10 transition-colors;
 }
 
-/* --- 观看历史删除按钮优化 --- */
+/* -------- 10. Switch/Toggle (Modern) -------- */
+.switch {
+  @apply relative inline-block w-11 h-6 bottom-0.5;
 
-/* 默认在非移动端隐藏 (桌面端) */
-.history-item .history-item-delete-btn {
-  opacity: 0;
-}
-
-/* 桌面端：鼠标悬停时显示 */
-.history-item:hover .history-item-delete-btn {
-  opacity: 1;
-}
-
-/* 移动端：始终显示删除按钮 */
-@media (max-width: 768px) {
-  .history-item .history-item-delete-btn {
-    opacity: 1;
-    /* 为了在移动端有更好的点击效果，可以加一点样式 */
-    background-color: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 50%;
-    padding: 0.2rem;
-    /* 微调点击区域 */
+  input {
+    @apply opacity-0 w-0 h-0;
   }
 
-  .history-item .history-item-delete-btn:active {
-    background-color: rgba(239, 68, 68, 0.2);
-    transform: scale(0.95);
+  .slider {
+    @apply absolute cursor-pointer inset-0 bg-white/20 transition-all duration-300 rounded-full;
+
+    &:before {
+      @apply absolute content-[''] h-4 w-4 left-1 bottom-1 bg-white transition-all duration-300 rounded-full shadow-sm;
+    }
   }
-}
 
-/* 综艺按钮专用样式 (首页弹窗) */
-/* 综艺节目容器的自适应网格布局 */
-.variety-grid-layout {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 8px;
-}
+  input:checked+.slider {
+    @apply bg-primary;
+  }
 
-/* 综艺节目按钮的样式 (仅在.variety-grid-layout容器内生效) */
-.variety-grid-layout .episode-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  color: white;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: center;
-  width: 100%;
-}
+  input:checked+.slider:before {
+    @apply translate-x-5;
+  }
 
-.variety-grid-layout .episode-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: var(--primary-color);
-}
-
-/* 全局激活按钮的样式 (对所有类型节目都有效) */
-.episode-active {
-  background: #3b82f6 !important;
-  border-color: #60a5fa !important;
-  color: #fff !important;
-  font-weight: bold;
+  input:focus+.slider {
+    box-shadow: 0 0 1px var(--primary-color);
+  }
 }

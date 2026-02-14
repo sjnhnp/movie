@@ -2211,6 +2211,28 @@ media-fullscreen-button {
   }
 }
 
+/* Floating Dock Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .dock-btn {
+    width: 2rem !important;
+    height: 2rem !important;
+  }
+
+  .dock-btn svg {
+    width: 1rem !important;
+    height: 1rem !important;
+  }
+
+  .dock-group {
+    padding: 0.25rem 0.35rem !important;
+    gap: 0 !important;
+  }
+
+  .control-dropdown {
+    bottom: calc(100% + 8px) !important;
+  }
+}
+
 /* -------- 16. Floating Dock & Overlay Styles (Masterful Design) -------- */
 
 .dock-group {

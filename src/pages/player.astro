@@ -48,62 +48,62 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
   </head>
   <body class="page-bg text-white font-sans min-h-screen">
     <div class="player-page-wrapper">
+      <!-- 历史记录面板 (放在最外层，fixed 定位) -->
+      <aside
+        id="historyPanel"
+        class="history-panel p-6"
+        aria-label="观看历史"
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        <div class="flex justify-between items-center mb-8">
+          <h3 class="text-2xl font-bold gradient-text">观看历史</h3>
+          <button
+            id="closeHistoryPanelButton"
+            class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300"
+            aria-label="关闭历史"
+            type="button"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div id="historyList" class="pb-4" role="region" aria-live="polite">
+          <div class="text-center text-white/60 py-12">
+            <svg
+              class="w-16 h-16 mx-auto mb-4 text-white/30"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-lg font-medium">暂无观看记录</p>
+            <p class="text-sm text-white/40 mt-2">开始观看视频后，历史记录会显示在这里</p>
+          </div>
+        </div>
+        <div class="mt-4 text-center sticky bottom-0 pb-2 pt-2">
+          <button
+            onclick="clearViewingHistory()"
+            class="clear-history-btn w-full transition-all duration-300"
+            type="button"
+          >
+            清空历史记录
+          </button>
+        </div>
+      </aside>
+
       <!-- 左侧主内容区域 -->
       <main class="player-main-content">
-        <!-- 历史记录面板 -->
-        <aside
-          id="historyPanel"
-          class="history-panel p-6"
-          aria-label="观看历史"
-          aria-hidden="true"
-          tabindex="-1"
-        >
-          <div class="flex justify-between items-center mb-8">
-            <h3 class="text-2xl font-bold gradient-text">观看历史</h3>
-            <button
-              id="closeHistoryPanelButton"
-              class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300"
-              aria-label="关闭历史"
-              type="button"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
-          <div id="historyList" class="pb-4" role="region" aria-live="polite">
-            <div class="text-center text-white/60 py-12">
-              <svg
-                class="w-16 h-16 mx-auto mb-4 text-white/30"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              <p class="text-lg font-medium">暂无观看记录</p>
-              <p class="text-sm text-white/40 mt-2">开始观看视频后，历史记录会显示在这里</p>
-            </div>
-          </div>
-          <div class="mt-4 text-center sticky bottom-0 pb-2 pt-2">
-            <button
-              onclick="clearViewingHistory()"
-              class="clear-history-btn w-full transition-all duration-300"
-              type="button"
-            >
-              清空历史记录
-            </button>
-          </div>
-        </aside>
-
         <!-- 搜索面板 -->
         <div
           id="searchPanel"

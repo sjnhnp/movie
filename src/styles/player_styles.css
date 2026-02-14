@@ -41,11 +41,8 @@ input[type=number] {
 /* 基本布局和播放器相关样式（现代简约风格） */
 .player-container {
   width: 100%;
-  max-width: 100%;
-  /* Change to 100% to fill width */
-  margin: 0;
-  padding: 0;
-  /* Remove padding to avoid side gaps */
+  max-width: 95%;
+  margin: 0 auto;
   background: transparent;
   display: flex;
   flex-direction: column;
@@ -53,13 +50,13 @@ input[type=number] {
 
 /* 播放器区域 */
 #player-region {
-  width: 100%;
-  height: auto;
+  height: 85vh;
   aspect-ratio: 16 / 9;
+  width: auto;
+  max-width: 100%;
   margin: 0 auto;
+  position: relative;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 85vh;
-  /* Slightly increased for better immersion */
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5), 0 18px 36px -18px rgba(0, 0, 0, 0.5);
@@ -73,18 +70,6 @@ input[type=number] {
   }
 }
 
-/* 侧边栏隐藏时的全屏/大屏适配 */
-.sidebar-hidden .player-container {
-  max-width: 1540px !important;
-  padding-left: 1.5rem !important;
-  padding-right: 1.5rem !important;
-}
-
-.sidebar-hidden #player-region {
-  max-height: 88vh;
-  /* 更大的沉浸感 */
-  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.7);
-}
 
 /* 确保 Vidstack 播放器和其内部 video 元素正确缩放 */
 #player,
@@ -102,10 +87,10 @@ media-player {
 }
 
 #player video {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover;
-  /* Use cover to fill and avoid transparent bars */
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  margin: auto;
 }
 
 /* 加载和错误覆盖层 */
@@ -153,15 +138,6 @@ media-player {
   margin-bottom: 10px;
 }
 
-/* 确保 Vidstack 播放器和其内部 video 元素填满容器，无黑边 */
-#player video,
-media-player video,
-video {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: fill !important;
-  /* Force fill to eliminate all transparent bars */
-}
 
 .player-control-bar {
   display: flex !important;

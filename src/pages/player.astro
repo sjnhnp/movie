@@ -336,23 +336,6 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                 <div class="flex items-center gap-3">
                   <!-- 播放控制条 -->
                   <div class="player-control-bar mb-0! p-1.5! overflow-visible">
-                    <!-- 选集排序 -->
-                    <div class="control-btn-container">
-                      <button id="order-button" class="control-btn w-10! h-10!" title="切换顺序">
-                        <svg
-                          id="order-icon"
-                          class="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                      </button>
-                    </div>
-
-                    <div class="control-divider h-6!"></div>
-
                     <!-- 线路切换 -->
                     <div class="control-btn-container line-switch-container">
                       <button
@@ -379,11 +362,9 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                         title="智能跳过"
                       >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <polygon points="5 4 15 12 5 20 5 4"></polygon><line
-                            x1="19"
-                            y1="5"
-                            x2="19"
-                            y2="19"></line>
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <polyline points="12 6 12 12 16 14"></polyline>
+                          <path d="M12 2a10 10 0 1 0 10 10" stroke-dasharray="4 4"></path>
                         </svg>
                       </button>
                       <div id="skip-control-dropdown" class="control-dropdown hidden p-4 w-64">
@@ -413,15 +394,15 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                               placeholder="例如: 120"
                             />
                           </div>
-                          <div class="flex gap-2 pt-2">
+                          <div class="grid grid-cols-2 gap-3 pt-2">
                             <button
                               id="apply-skip-settings"
-                              class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-2 rounded-lg transition-colors"
+                              class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold h-10 rounded-xl transition-all shadow-lg active:scale-95"
                               >应用</button
                             >
                             <button
                               id="reset-skip-settings"
-                              class="px-3 bg-white/5 hover:bg-white/10 text-white/60 text-xs py-2 rounded-lg transition-colors"
+                              class="bg-white/5 hover:bg-white/10 text-white/60 text-xs font-bold h-10 rounded-xl transition-all"
                               >重置</button
                             >
                           </div>
@@ -475,10 +456,8 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                       </div>
                     </div>
 
-                    <div class="control-divider h-6!"></div>
-
                     <!-- 锁定 / 复制按钮 (screenshot 里的左边那个框) -->
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-1">
                       <button id="lock-button" class="control-btn w-10! h-10!" title="锁定屏幕">
                         <svg
                           id="lock-icon"
@@ -496,13 +475,15 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                         class="control-btn w-10! h-10!"
                         title="复制链接"
                       >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2"
-                          ></path>
+                        <svg
+                          class="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          viewBox="0 0 24 24"
+                        >
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
                         </svg>
                       </button>
                     </div>

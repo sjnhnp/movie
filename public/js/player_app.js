@@ -1284,8 +1284,14 @@ function initEpisodeSidebar() {
   if (toggleBtn && sidebar) {
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      sidebar.classList.toggle('hidden-sidebar');
+      const isHidden = sidebar.classList.toggle('hidden-sidebar');
       sidebar.classList.toggle('show-mobile');
+
+      // 同时切换外层容器的类名，方便整体布局调整
+      const wrapper = document.querySelector('.player-page-wrapper');
+      if (wrapper) {
+        wrapper.classList.toggle('sidebar-hidden', isHidden);
+      }
     });
   }
 

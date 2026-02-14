@@ -46,6 +46,8 @@ input[type=number] {
   background: transparent;
   display: flex;
   flex-direction: column;
+  gap: 2rem;
+  padding: 2rem 0;
 }
 
 /* 播放器区域 */

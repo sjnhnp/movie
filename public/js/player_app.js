@@ -318,12 +318,12 @@ function updateWebFullscreenControlButton(button) {
     // 根据当前状态设置不同的图标
     button.innerHTML = isWebFullscreen
       ? // "退出网页全屏" 图标
-        `<svg class="w-5 h-5" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      `<svg class="w-5 h-5" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M19.913 6.45826V9.56817C19.913 9.68695 20.0566 9.74644 20.1406 9.66245L24.0458 5.75727C24.3061 5.49692 24.7283 5.49692 24.9886 5.75727L26.2143 6.98293C26.4746 7.24328 26.4746 7.66539 26.2143 7.92573L22.3093 11.8306C22.2253 11.9146 22.2848 12.0583 22.4036 12.0583H25.5137C25.8819 12.0583 26.1804 12.3567 26.1804 12.7249V14.4583C26.1804 14.8265 25.8819 15.1249 25.5137 15.1249L19.2468 15.1249C19.2466 15.1249 19.2469 15.1249 19.2468 15.1249H17.5137C17.1455 15.1249 16.8463 14.8265 16.8463 14.4583V6.45826C16.8463 6.09007 17.1448 5.7916 17.513 5.7916H19.2463C19.6145 5.7916 19.913 6.09007 19.913 6.45826Z" fill="currentColor" />
                 <path d="M9.73054 19.9416C9.84933 19.9416 9.90882 20.0852 9.82482 20.1692L5.91991 24.0741C5.65956 24.3345 5.65956 24.7566 5.91991 25.0169L7.14556 26.2426C7.40591 26.5029 7.82802 26.5029 8.08837 26.2426L11.9935 22.3374C12.0775 22.2534 12.2212 22.3129 12.2212 22.4317V25.5416C12.2212 25.9098 12.5196 26.2083 12.8878 26.2083H14.6212C14.9893 26.2083 15.2878 25.9098 15.2878 25.5416L15.2878 17.5416C15.2878 17.1734 14.9893 16.8749 14.6212 16.8749H6.62046C6.25227 16.8749 5.9538 17.1734 5.9538 17.5416V19.2749C5.9538 19.6431 6.25227 19.9416 6.62046 19.9416H9.73054Z" fill="currentColor" />
             </svg>`
       : // "进入网页全屏" 图标
-        `<svg class="w-5 h-5" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      `<svg class="w-5 h-5" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M17.3183 12.4856L21.2231 8.58073C21.3071 8.49674 21.2476 8.35312 21.1288 8.35312H18.0189C17.6507 8.35312 17.3522 8.05464 17.3522 7.68645V5.95312C17.3522 5.58493 17.6507 5.28645 18.0189 5.28645H26.0189C26.387 5.28645 26.6862 5.58493 26.6862 5.95312V13.9531C26.6862 14.3213 26.3877 14.6198 26.0196 14.6198H24.2862C23.918 14.6198 23.6196 14.3213 23.6196 13.9531V10.8431C23.6196 10.7243 23.4759 10.6648 23.3919 10.7488L19.4867 14.6541C19.2264 14.9144 18.8043 14.9144 18.5439 14.6541L17.3183 13.4284C17.0579 13.1681 17.0579 12.7459 17.3183 12.4856Z" fill="currentColor" />
                 <path d="M6.1153 26.7135H14.1153C14.4835 26.7135 14.782 26.4151 14.782 26.0469V24.3135C14.782 23.9453 14.4835 23.6469 14.1153 23.6469H11.0053C10.8865 23.6469 10.827 23.5033 10.911 23.4193L14.8159 19.5144C15.0763 19.254 15.0763 18.8319 14.8159 18.5716L13.5903 17.3459C13.3299 17.0856 12.9078 17.0856 12.6474 17.3459L8.74222 21.2512C8.65822 21.3351 8.5146 21.2757 8.5146 21.1569L8.51461 18.0469C8.51461 17.6787 8.21613 17.3802 7.84794 17.3802H6.11461C5.74642 17.3802 5.44794 17.6787 5.44794 18.0469V26.0469C5.44794 26.4151 5.74711 26.7135 6.1153 26.7135Z" fill="currentColor" />
             </svg>`;
@@ -392,7 +392,7 @@ function showMessage(text, type = 'info', duration = 3000) {
 
   let bgColorClass =
     { error: 'bg-red-500', success: 'bg-green-500', warning: 'bg-yellow-500', info: 'bg-blue-500' }[
-      type
+    type
     ] || 'bg-blue-500';
 
   messageElement.className = `fixed top-4 right-4 p-3 rounded shadow-lg z-[10001] text-sm ${bgColorClass} text-white transition-opacity duration-300 opacity-0`;
@@ -575,9 +575,10 @@ async function initPlayer(videoUrl, title) {
   // 网页全屏功能初始化
   addWebFullscreenKeyboardShortcut();
 
-  // 等待播放器完全初始化后再初始化右侧控制条
+  // 等待播放器完全初始化后再初始化其他 UI 逻辑
   setTimeout(() => {
     initCustomRightControls();
+    initEpisodeSidebar();
   }, 100);
 }
 
@@ -1040,15 +1041,34 @@ function handleKeyboardShortcuts(e) {
 
     case 'f':
     case 'F':
-      // e.preventDefault(); // REMOVE THIS LINE
       if (player) {
         if (player.state.fullscreen) {
           player.exitFullscreen();
         } else {
           player.enterFullscreen();
         }
-        actionText = '切换全屏';
+        actionText = '全屏切换';
       }
+      break;
+
+    case 'e':
+    case 'E':
+      const sidebar = document.getElementById('episode-sidebar');
+      if (sidebar) {
+        sidebar.classList.toggle('hidden-sidebar');
+        sidebar.classList.toggle('show-mobile');
+        actionText = sidebar.classList.contains('hidden-sidebar') ? '关闭选集' : '打开选集';
+      }
+      break;
+
+    case '[':
+      playPreviousEpisode();
+      actionText = '上一集';
+      break;
+
+    case ']':
+      playNextEpisode();
+      actionText = '下一集';
       break;
   }
 
@@ -1187,114 +1207,139 @@ function renderEpisodes() {
   }
 
   const container = document.getElementById('episodes-container');
-  if (container) {
-    container.classList.toggle('hidden', currentEpisodes.length <= 1);
+  const sidebarGrid = document.getElementById('sidebar-episode-grid');
+  if (!sidebarGrid) return;
+
+  sidebarGrid.innerHTML = '';
+  if (!window.currentEpisodes || !window.currentEpisodes.length) {
+    sidebarGrid.innerHTML = '<div class="text-center text-white/20 py-10 italic">暂无集数信息</div>';
+    return;
   }
 
-  const countSpan = document.getElementById('episodes-count');
-  if (countSpan) {
-    countSpan.textContent = `共 ${currentEpisodes.length} 集`;
-  }
-
-  // 定义综艺类型关键词
   const varietyShowTypes = ['综艺', '脱口秀', '真人秀'];
   const isVarietyShow = varietyShowTypes.some(
     (type) => currentVideoTypeName && currentVideoTypeName.includes(type)
   );
 
-  // 根据类型切换容器的CSS类
-  if (isVarietyShow) {
-    // 综艺
-    grid.className = 'episode-grid-container variety-grid-layout';
-  } else {
-    // 非综艺
-    grid.className = 'episode-grid grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2';
-  }
-
-  grid.innerHTML = '';
-  if (!currentEpisodes.length) {
-    grid.innerHTML =
-      '<div class="col-span-full text-center text-gray-400 py-4">没有可用的剧集</div>';
-    return;
-  }
-
-  // 读取localStorage中保存的原始剧集名称
+  const orderedEpisodes = episodesReversed ? [...currentEpisodes].reverse() : [...currentEpisodes];
   const originalEpisodeNames = JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
 
-  const orderedEpisodes = episodesReversed ? [...currentEpisodes].reverse() : [...currentEpisodes];
   orderedEpisodes.forEach((episodeData, index) => {
     const originalIndex = episodesReversed ? currentEpisodes.length - 1 - index : index;
+    const isActive = originalIndex === currentEpisodeIndex;
 
     const btn = document.createElement('button');
-    btn.type = 'button';
+    btn.className = `sidebar-episode-btn ${isActive ? 'active' : ''}`;
     btn.dataset.index = originalIndex;
 
     const parts = (episodeData || '').split('$');
     const episodeName = parts.length > 1 ? parts[0].trim() : '';
-
-    // 优先使用原始剧集名称
-    // 从保存的原始名称中取对应索引的名称（如“20200101”）
     const originalName = originalEpisodeNames[originalIndex] || '';
 
-    // 根据是否为综艺决定按钮文本和标题
-    if (isVarietyShow) {
-      // 综艺：优先用原始名称，其次用剧集数据中的名称，最后用索引
-      btn.textContent = originalName || episodeName || `第${originalIndex + 1}集`;
-      btn.title = btn.textContent;
-    } else {
-      // 非综艺：
-      // 1 采用优先原始名称
-      //const originalName = (originalEpisodeNames && originalEpisodeNames[originalIndex]) || '';
-      //btn.textContent = originalName || (originalIndex + 1).toString();
-      // btn.title = originalName || `第${originalIndex + 1}集`;
+    // 内部结构：序号 + 指示器
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'flex items-center gap-3 overflow-hidden';
 
-      // 2 采用默认索引
-      btn.textContent = originalIndex + 1;
-      // 1和2 共有
-      btn.title = `第 ${originalIndex + 1} 集`;
+    const indexSpan = document.createElement('span');
+    indexSpan.className = `w-6 h-6 flex items-center justify-center rounded-md text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-black/20 text-white/40'}`;
+    indexSpan.textContent = originalIndex + 1;
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'truncate font-medium';
+    nameSpan.textContent = isVarietyShow ? (originalName || episodeName || `第${originalIndex + 1}集`) : (originalName || `第 ${originalIndex + 1} 集`);
+
+    titleSpan.appendChild(indexSpan);
+    titleSpan.appendChild(nameSpan);
+    btn.appendChild(titleSpan);
+
+    if (isActive) {
+      const indicator = document.createElement('div');
+      indicator.className = 'playing-indicator';
+      indicator.innerHTML = '<span></span><span></span><span></span>';
+      btn.appendChild(indicator);
     }
 
-    // 高亮当前播放的集数
-    if (originalIndex === currentEpisodeIndex) {
-      btn.classList.add('episode-active');
-    }
-
-    grid.appendChild(btn);
+    sidebarGrid.appendChild(btn);
   });
 
-  if (!grid._sListenerBound) {
-    grid.addEventListener('click', (evt) => {
+  // 绑定事件
+  if (!sidebarGrid._sListenerBound) {
+    sidebarGrid.addEventListener('click', (evt) => {
       const target = evt.target.closest('button[data-index]');
       if (target) playEpisode(+target.dataset.index);
     });
-    grid._sListenerBound = true;
+    sidebarGrid._sListenerBound = true;
   }
+
   updateEpisodeInfo();
   updateButtonStates();
+
+  // 滚动到当前活动项
+  setTimeout(() => {
+    const activeBtn = sidebarGrid.querySelector('.sidebar-episode-btn.active');
+    if (activeBtn) activeBtn.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, 100);
+}
+
+function initEpisodeSidebar() {
+  const toggleBtn = document.getElementById('sidebar-toggle');
+  const sidebar = document.getElementById('episode-sidebar');
+  const sortBtn = document.getElementById('sort-episodes');
+  const mainContent = document.querySelector('.player-main-content');
+
+  if (toggleBtn && sidebar) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sidebar.classList.toggle('hidden-sidebar');
+      sidebar.classList.toggle('show-mobile');
+    });
+  }
+
+  if (sortBtn) {
+    sortBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleEpisodeOrder();
+    });
+  }
+
+  // 移动端：点击主内容区关闭侧边栏
+  if (mainContent && sidebar) {
+    mainContent.addEventListener('click', () => {
+      if (window.innerWidth <= 1024 && !sidebar.classList.contains('hidden-sidebar')) {
+        sidebar.classList.add('hidden-sidebar');
+        sidebar.classList.remove('show-mobile');
+      }
+    });
+  }
 }
 
 function updateEpisodeInfo() {
-  const episodeInfoSpan = document.getElementById('episode-info-span');
-  if (!episodeInfoSpan) return;
-  const siteName =
-    window.SITE_CONFIG && window.SITE_CONFIG.name ? window.SITE_CONFIG.name : '播放器';
-  const totalEpisodes = window.currentEpisodes ? window.currentEpisodes.length : 0;
-  if (currentVideoTitle && totalEpisodes > 1) {
-    document.title = `${currentVideoTitle} - 第 ${currentEpisodeIndex + 1} 集 - ${siteName}`;
-  } else if (currentVideoTitle) {
-    document.title = `${currentVideoTitle} - ${siteName}`;
-  } else {
-    document.title = siteName;
+  const sidebarCount = document.getElementById('player-sidebar-count');
+  const episodeTitle = document.getElementById('player-current-episode-title');
+  const videoMeta = document.getElementById('player-video-meta');
+
+  const siteName = window.SITE_CONFIG?.name || '播放器';
+  const totalEpisodes = window.currentEpisodes?.length || 0;
+
+  if (currentVideoTitle) {
+    const epInfo = totalEpisodes > 1 ? ` - 第 ${currentEpisodeIndex + 1} 集` : '';
+    document.title = `${currentVideoTitle}${epInfo} - ${siteName}`;
+
+    if (episodeTitle) {
+      episodeTitle.textContent = currentVideoTitle;
+    }
+
+    if (videoMeta) {
+      videoMeta.innerHTML = `
+        <span class="text-indigo-400">正在播放</span>
+        <span class="mx-2 opacity-20">|</span>
+        ${totalEpisodes > 1 ? `第 ${currentEpisodeIndex + 1} / ${totalEpisodes} 集` : '单集视频'}
+      `;
+    }
   }
-  if (window.currentEpisodes && window.currentEpisodes.length > 1) {
-    const currentDisplayNumber = window.currentEpisodeIndex + 1;
-    episodeInfoSpan.textContent = `第 ${currentDisplayNumber} / ${totalEpisodes} 集`;
-    episodeInfoSpan.style.display = 'flex'; // 显示集数信息
-    const episodesCountEl = document.getElementById('episodes-count');
-    if (episodesCountEl) episodesCountEl.textContent = `共 ${totalEpisodes} 集`;
-  } else {
-    episodeInfoSpan.textContent = '';
-    episodeInfoSpan.style.display = 'none'; // 隐藏集数信息
+
+  if (sidebarCount) {
+    sidebarCount.textContent = `${totalEpisodes} EPISODES`;
   }
 }
 

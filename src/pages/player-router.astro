@@ -1,0 +1,49 @@
+---
+import '../styles/global.css';
+
+import { createHash } from 'crypto';
+const password = import.meta.env.PASSWORD || '';
+const settingsPassword = import.meta.env.SETTINGS_PASSWORD || '';
+
+const sha256 = (str: string) => createHash('sha256').update(str).digest('hex');
+const passwordHash = password ? sha256(password) : '';
+const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
+
+const userAgent = Astro.request.headers.get('user-agent') || '';
+const isMobile = /Mobile|Android|iPhone|iPad|iPod|Windows Phone/i.test(userAgent);
+
+const currentUrl = Astro.url.toString();
+const mobileUrl = currentUrl.replace('/player', '/player-mobile');
+const desktopUrl = currentUrl.replace('/player-mobile', '/player');
+
+if (isMobile && !currentUrl.includes('/player-mobile')) {
+  return Astro.redirect(mobileUrl);
+} else if (!isMobile && currentUrl.includes('/player-mobile')) {
+  return Astro.redirect(desktopUrl);
+}
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="看看讲究将就看看" />
+    <title>播放器</title>
+    <meta http-equiv="refresh" content="0;url=/player" />
+  </head>
+  <body>
+    <script>
+      const isMobile = /Mobile|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent);
+      const currentPath = window.location.pathname;
+      
+      if (isMobile && !currentPath.includes('/player-mobile')) {
+        window.location.href = currentPath.replace('/player', '/player-mobile');
+      } else if (!isMobile && currentPath.includes('/player-mobile')) {
+        window.location.href = currentPath.replace('/player-mobile', '/player');
+      } else if (!currentPath.includes('/player') && !currentPath.includes('/player-mobile')) {
+        window.location.href = '/player';
+      }
+    </script>
+  </body>
+</html>

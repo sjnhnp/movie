@@ -97,12 +97,29 @@ input[type=number] {
 @media (max-width: 768px) {
   #player-region {
     height: 56.25vw;
-    max-height: 50vh;
+    max-height: 60vh;
   }
 
   /* 移动端侧边栏显示时，进一步减小播放器高度以避免遮挡 */
   .player-page-wrapper:not(:has(#episode-sidebar.hidden-sidebar)) #player-region {
-    max-height: 35vh;
+    max-height: 40vh;
+  }
+}
+
+@media (max-width: 900px) {
+
+  #player-region {
+    width: 100%;
+    height: auto !important;
+    aspect-ratio: 16/9;
+    background-color: transparent;
+  }
+
+  #player video,
+  media-player video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
   }
 }
 

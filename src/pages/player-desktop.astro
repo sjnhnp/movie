@@ -1,0 +1,813 @@
+---
+import '../styles/global.css';
+import '../styles/player_styles.css';
+
+import { createHash } from 'crypto';
+const password = import.meta.env.PASSWORD || '';
+const settingsPassword = import.meta.env.SETTINGS_PASSWORD || '';
+
+const sha256 = (str: string) => createHash('sha256').update(str).digest('hex');
+const passwordHash = password ? sha256(password) : '';
+const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="看看讲究将就看看" />
+    <title>播放器</title>
+
+    <link rel="stylesheet" href="https://cdn.vidstack.io/player/theme.css" />
+    <link rel="stylesheet" href="https://cdn.vidstack.io/player/video.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script is:inline src="/libs/sha256.min.js" defer></script>
+    <script is:inline src="/js/config.js" defer></script>
+    <script is:inline src="/js/utils.js" defer></script>
+    <!-- 注入服务端环境变量到客户端 -->
+    <script is:inline define:vars={{ passwordHash, settingsPasswordHash }}>
+      window.__ENV__ = window.__ENV__ || {};
+      window.__ENV__.PASSWORD = passwordHash;
+      window.__ENV__.SETTINGS_PASSWORD = settingsPasswordHash;
+    </script>
+    <script is:inline src="/js/password.js" defer></script>
+    <script is:inline src="/js/simple_quality_detector.js" defer></script>
+    <script is:inline src="/js/speed_tester.js" defer></script>
+    <script is:inline src="/js/ui.js" defer></script>
+    <script is:inline src="/js/api.js" defer></script>
+    <script is:inline src="/js/api_source_manager.js" defer></script>
+    <script is:inline src="/js/player_preload.js" defer></script>
+  </head>
+  <body class="page-bg text-white font-sans min-h-screen">
+    <div class="player-page-wrapper">
+      <!-- 历史记录面板 (放在最外层，fixed 定位) -->
+      <aside
+        id="historyPanel"
+        class="history-panel p-6"
+        aria-label="观看历史"
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        <div class="flex justify-between items-center mb-8">
+          <h3 class="text-2xl font-bold gradient-text">观看历史</h3>
+          <button
+            id="closeHistoryPanelButton"
+            class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300"
+            aria-label="关闭历史"
+            type="button"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div id="historyList" class="pb-4" role="region" aria-live="polite">
+          <div class="text-center text-white/60 py-12">
+            <svg
+              class="w-16 h-16 mx-auto mb-4 text-white/30"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-lg font-medium">暂无观看记录</p>
+            <p class="text-sm text-white/40 mt-2">开始观看视频后，历史记录会显示在这里</p>
+          </div>
+        </div>
+        <div class="mt-4 text-center sticky bottom-0 pb-2 pt-2">
+          <button
+            onclick="clearViewingHistory()"
+            class="clear-history-btn w-full transition-all duration-300"
+            type="button"
+          >
+            清空历史记录
+          </button>
+        </div>
+      </aside>
+
+      <!-- 左侧主内容区域 -->
+      <main class="player-main-content">
+        <!-- 搜索面板 -->
+        <div
+          id="searchPanel"
+          class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center transition-opacity duration-300 z-10001"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="searchPanelTitle"
+          aria-hidden="true"
+          tabindex="-1"
+        >
+          <div
+            class="bg-black/20 backdrop-blur-xl border border-white/10 p-6 rounded-2xl w-[95%] max-w-5xl max-h-[90vh] flex flex-col shadow-2xl"
+          >
+            <!-- 顶部区域：搜索框和关闭按钮 -->
+            <div class="flex-none mb-4">
+              <div class="flex items-center gap-4 relative">
+                <!-- 搜索框 -->
+                <div class="flex-1 pr-12">
+                  <!-- 为关闭按钮预留空间 -->
+                  <form id="searchForm">
+                    <div class="relative group">
+                      <div
+                        class="absolute -inset-1.5 bg-linear-to-r from-indigo-500 to-purple-600 rounded-full blur-xl opacity-30 group-hover:opacity-60 transition-all duration-500"
+                        aria-hidden="true"
+                      >
+                      </div>
+
+                      <div
+                        class="relative flex items-stretch h-14 bg-black/40 backdrop-blur-md border border-white/10 rounded-full overflow-hidden shadow-2xl"
+                      >
+                        <input
+                          type="text"
+                          id="searchInput"
+                          class="flex-1 bg-transparent text-white pl-7 pr-4 py-0 focus:outline-none placeholder-white/50 text-lg"
+                          placeholder="搜索你想看的..."
+                          autocomplete="off"
+                          aria-label="视频搜索框"
+                        />
+
+                        <button
+                          type="submit"
+                          class="w-14 shrink-0 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300"
+                          aria-label="搜索按钮"
+                        >
+                          <svg
+                            class="w-6 h-6"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- 关闭按钮 -->
+                <button
+                  id="closeSearchPanelButton"
+                  class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300 shrink-0 absolute right-0"
+                  aria-label="关闭搜索"
+                  type="button"
+                >
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- 搜索历史区域 -->
+            <div class="flex-none mb-4">
+              <div class="flex flex-col gap-2">
+                <div class="flex justify-between items-center">
+                  <span class="text-white/70 text-sm font-medium whitespace-nowrap">最近搜索：</span
+                  >
+                  <button
+                    id="clearSearchHistory"
+                    class="text-white/50 hover:text-white/80 text-xs whitespace-nowrap transition-colors"
+                  >
+                    清除
+                  </button>
+                </div>
+                <div id="recentSearches" class="flex flex-wrap gap-2"></div>
+              </div>
+            </div>
+
+            <!-- 搜索结果区域 -->
+            <div class="overflow-auto flex-1 min-h-0 bg-white/5 rounded-xl p-4 md:p-6">
+              <div id="searchFeedbackArea" class="w-full text-center mb-4 hidden"></div>
+              <div id="searchResultsArea" class="w-full hidden">
+                <div id="searchResults" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="player-container">
+          <!-- 播放器区域 -->
+          <div id="player-region" class="relative group overflow-hidden" role="region">
+            <media-player
+              id="player"
+              class="w-full h-full"
+              crossOrigin
+              key-target="document"
+              playsinline
+              autoplay
+            >
+              <media-provider></media-provider>
+              <media-video-layout></media-video-layout>
+            </media-player>
+            <div id="player-loading" class="loading-container hidden">
+              <div class="loading-spinner"></div>
+            </div>
+
+            <!-- 顶部信息浮层 (Title & Header) -->
+            <div
+              id="video-header-overlay"
+              class="absolute top-0 left-0 right-0 p-6 bg-linear-to-b from-black/80 to-transparent z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex justify-between items-start"
+            >
+              <div class="pointer-events-auto flex flex-col gap-1">
+                <div class="flex items-center gap-4 mb-2">
+                  <a href="/" class="text-white/80 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg
+                    >
+                  </a>
+                  <h1
+                    id="player-current-episode-title"
+                    class="text-xl md:text-2xl font-bold text-white leading-tight drop-shadow-md"
+                  >
+                    正在加载...
+                  </h1>
+                </div>
+                <p
+                  id="player-video-meta"
+                  class="text-white/60 text-xs font-medium tracking-wide flex items-center gap-2 pl-10"
+                >
+                  <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+                  加载中
+                </p>
+              </div>
+
+              <!-- 顶部右侧功能入口 -->
+              <div class="pointer-events-auto flex items-center gap-3">
+                <button
+                  id="historyButton"
+                  class="icon-btn-glass"
+                  aria-label="观看历史"
+                  title="观看历史"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg
+                  >
+                </button>
+                <button id="sidebar-toggle" class="icon-btn-glass" title="选集列表">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 6h16M4 12h16m-7 6h7"></path></svg
+                  >
+                </button>
+                <button id="searchButton" class="icon-btn-glass" title="搜索">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg
+                  >
+                </button>
+              </div>
+            </div>
+
+            <!-- 底部功能灵动坞 (Floating Dock) -->
+            <div
+              id="video-controls-overlay"
+              class="absolute bottom-20 md:bottom-28 right-6 md:right-8 z-50 flex items-center gap-2 md:gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none translate-y-4 group-hover:translate-y-0"
+            >
+              <!-- 剧集导航 (Prev/Next) -->
+              <div class="dock-group pointer-events-auto">
+                <button id="prev-episode" class="dock-btn" title="前一集">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M15 19l-7-7 7-7"></path></svg
+                  >
+                </button>
+                <button id="next-episode" class="dock-btn" title="后一集">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 5l7 7-7 7"></path></svg
+                  >
+                </button>
+              </div>
+
+              <!-- 功能按钮组 -->
+              <div class="dock-group pointer-events-auto">
+                <!-- 线路切换 -->
+                <div class="control-btn-container line-switch-container">
+                  <button id="line-switch-button" class="dock-btn" title="切换线路">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg
+                    >
+                  </button>
+                  <div id="line-switch-dropdown" class="control-dropdown hidden"></div>
+                </div>
+
+                <!-- 跳过设置 -->
+                <div class="control-btn-container skip-control-container">
+                  <button id="skip-control-button" class="dock-btn" title="智能跳过">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      ><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"
+                      ></polyline><path d="M12 2a10 10 0 1 0 10 10" stroke-dasharray="4 4"
+                      ></path></svg
+                    >
+                  </button>
+                  <div id="skip-control-dropdown" class="control-dropdown hidden p-4 w-64">
+                    <!-- Dropdown content preserved -->
+                    <div class="text-sm font-bold mb-3 border-b border-white/10 pb-2">设置</div>
+                    <div class="space-y-4">
+                      <div>
+                        <label class="block text-xs text-white/40 mb-1.5 uppercase tracking-tighter"
+                          >跳过片头 (秒)</label
+                        ><input
+                          type="number"
+                          id="skip-intro-input"
+                          class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-colors"
+                          placeholder="例如: 90"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-xs text-white/40 mb-1.5 uppercase tracking-tighter"
+                          >跳过片尾 (秒)</label
+                        ><input
+                          type="number"
+                          id="skip-outro-input"
+                          class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-colors"
+                          placeholder="例如: 120"
+                        />
+                      </div>
+                      <div class="grid grid-cols-2 gap-3 pt-2">
+                        <button
+                          id="apply-skip-settings"
+                          class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold h-10 rounded-xl transition-all shadow-lg active:scale-95"
+                          >应用</button
+                        >
+                        <button
+                          id="reset-skip-settings"
+                          class="bg-white/5 hover:bg-white/10 text-white/60 text-xs font-bold h-10 rounded-xl transition-all"
+                          >重置</button
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 播放设置 -->
+                <div class="control-btn-container play-settings-container">
+                  <button id="play-settings-button" class="dock-btn" title="显示设定">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                      ><circle cx="12" cy="12" r="3"></circle><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                      ></path></svg
+                    >
+                  </button>
+                  <div id="play-settings-dropdown" class="control-dropdown hidden p-5 w-72">
+                    <!-- Dropdown content preserved -->
+                    <div class="text-sm font-bold mb-4 border-b border-white/10 pb-2">偏好设置</div>
+                    <div class="space-y-4">
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs text-white/70">自动连播</span><label class="switch"
+                          ><input
+                            type="checkbox"
+                            id="autoplay-next"
+                            checked
+                            aria-label="自动播放"
+                          /><span class="slider"></span></label
+                        >
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs text-white/70">记住进度</span><label class="switch"
+                          ><input
+                            type="checkbox"
+                            id="remember-episode-progress-toggle"
+                            checked
+                            aria-label="记住进度"
+                          /><span class="slider"></span></label
+                        >
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs text-white/70">广告过滤</span><label class="switch"
+                          ><input
+                            type="checkbox"
+                            id="adFilterToggle"
+                            aria-label="分片 广告过滤"
+                          /><span class="slider"></span></label
+                        >
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs text-white/70">预加载</span><div
+                          class="flex items-center gap-2"
+                        >
+                          <label class="switch"
+                            ><input
+                              type="checkbox"
+                              id="preloadingToggle"
+                              aria-label="播放预加载"
+                            /><span class="slider"></span></label
+                          ><input
+                            type="number"
+                            min="1"
+                            max="10"
+                            step="1"
+                            id="preloadCountInput"
+                            class="w-16 bg-black/40 border border-white/10 rounded-lg px-3 py-1 text-sm focus:border-indigo-500 transition-colors"
+                            placeholder="1"
+                          />
+                        </div>
+                      </div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-xs text-white/70">播放速率</span><select
+                          id="playback-speed-select"
+                          class="bg-black/40 text-white/70 rounded-lg px-3 py-1 text-sm border border-white/10 focus:border-indigo-500 transition-colors"
+                          ><option value="0.5">0.5x</option><option value="0.75">0.75x</option
+                          ><option value="1" selected>1x</option><option value="1.25">1.25x</option
+                          ><option value="1.5">1.5x</option><option value="2">2x</option></select
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 锁定按钮 -->
+                <div class="control-btn-container">
+                  <button id="lock-button" class="dock-btn" title="锁定屏幕">
+                    <svg
+                      id="lock-icon"
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                      ><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path
+                        d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg
+                    >
+                  </button>
+                </div>
+
+                <!-- 复制按钮 -->
+                <div class="control-btn-container">
+                  <button onclick="copyLinks()" class="dock-btn" title="复制链接">
+                    <svg
+                      class="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      ><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path
+                        d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg
+                    >
+                  </button>
+                </div>
+
+                <div class="w-px h-6 bg-white/20 mx-1"></div>
+
+                <!-- 全屏按钮 (Keep ID for JS) -->
+                <button id="fullscreen-button" class="dock-btn" title="全屏">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"
+                    ></path></svg
+                  >
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧选集侧边栏 -->
+        <aside id="episode-sidebar" class="hidden-sidebar">
+          <div class="sidebar-header">
+            <div class="flex justify-between items-center">
+              <h3 class="text-xl font-black flex items-center gap-3">
+                <span class="w-1.5 h-6 bg-indigo-500 rounded-full"></span>
+                选集列表
+              </h3>
+              <div class="flex items-center gap-1">
+                <button
+                  id="sort-episodes"
+                  class="p-2.5 hover:bg-white/10 rounded-xl text-white/40 hover:text-white transition-all"
+                  title="反转顺序"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    ><path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg
+                  >
+                </button>
+              </div>
+            </div>
+            <div class="mt-4 flex items-center gap-2">
+              <span
+                id="player-sidebar-count"
+                class="text-[10px] font-bold uppercase tracking-widest bg-indigo-500/20 text-indigo-400 px-3 py-1 rounded-full border border-indigo-500/20"
+                >0 EPISODES</span
+              >
+            </div>
+          </div>
+          <div class="sidebar-content custom-scrollbar" id="sidebar-episode-grid">
+            <!-- 剧集按钮将在此动态生成 -->
+          </div>
+        </aside>
+      </main>
+
+      <!-- 快捷键和消息提示 -->
+      <div id="shortcut-hint" class="shortcut-hint" aria-live="polite" aria-atomic="true">
+        <span id="shortcut-key"></span>
+        <span id="shortcut-action"></span>
+      </div>
+      <div
+        id="message"
+        class="fixed top-4 right-4 p-4 rounded shadow-lg z-50 hidden"
+        aria-live="polite"
+      >
+      </div>
+
+      <!-- 详情模态框 -->
+      <div
+        id="modal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md hidden items-center justify-center transition-all duration-300 z-10002 p-4"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+        aria-hidden="true"
+        tabindex="-1"
+      >
+        <div
+          class="bg-[#1a1a2e]/90 backdrop-blur-2xl border border-white/10 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden"
+        >
+          <div class="flex justify-between items-center p-6 border-b border-white/10 flex-none">
+            <h2 id="modalTitle" class="text-2xl md:text-3xl font-bold gradient-text truncate pr-4">
+            </h2>
+            <button
+              id="closeModalButton"
+              class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-2xl p-2.5 transition-all duration-300 shrink-0"
+              aria-label="关闭详情"
+              type="button"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+          <div id="modalContent" class="overflow-y-auto flex-1 p-6 md:p-8 custom-scrollbar"></div>
+        </div>
+      </div>
+
+      <!-- 加载提示 -->
+      <div
+        id="loading"
+        class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-10003"
+      >
+        <div
+          class="bg-black/20 backdrop-blur-xl border border-white/10 p-8 rounded-2xl text-center"
+        >
+          <div class="loading-spinner mb-4"></div>
+          <p class="text-white text-lg">加载中...</p>
+        </div>
+      </div>
+
+      <!-- Toast 消息 -->
+      <div
+        id="toast"
+        class="fixed top-4 left-1/2 -translate-x-1/2 opacity-0 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 text-white z-10004 pointer-events-none"
+      >
+        <span id="toastMessage"></span>
+      </div>
+
+      <!-- 记住进度弹窗 -->
+      <div
+        id="progress-restore-modal"
+        tabindex="-1"
+        aria-modal="true"
+        role="dialog"
+        style="display: none;"
+      >
+        <div class="progress-restore-card" role="document">
+          <div class="progress-modal-title">继续播放？</div>
+          <div class="progress-modal-content"><!-- JS填充 --></div>
+          <div class="progress-modal-actions">
+            <button class="progress-modal-btn cancel" id="progress-restore-cancel">取消</button>
+            <button class="progress-modal-btn confirm" id="progress-restore-confirm">确定</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <template id="search-result-template">
+      <div
+        class="card-hover group bg-white/5 backdrop-blur-md rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-[1.02] h-full shadow-lg hover:shadow-indigo-500/20 border border-white/10 hover:border-indigo-500/50"
+        data-id=""
+        data-source-code=""
+      >
+        <div class="flex h-full">
+          <div class="w-24 md:w-32 relative shrink-0 overflow-hidden">
+            <img
+              src="https://via.placeholder.com/100x150/191919/555555?text=No+Image"
+              alt="视频封面"
+              class="result-img h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+              loading="lazy"
+              data-field="pic"
+              onerror="this.onerror=null; this.src='https://via.placeholder.com/100x150/191919/555555?text=Error';"
+            />
+            <div class="absolute inset-0 bg-linear-to-r from-black/60 to-transparent"></div>
+          </div>
+          <div class="p-3 md:p-4 flex flex-col grow min-w-0">
+            <div class="grow">
+              <h3
+                class="result-title font-bold text-sm md:text-base mb-2 wrap-break-word line-clamp-2 text-white/90 group-hover:text-indigo-400 transition-colors"
+                data-field="title"
+                title="视频标题"
+              >
+                视频标题
+              </h3>
+              <div class="result-meta flex flex-wrap items-center gap-2 mb-2">
+                <span
+                  class="result-type hidden text-[10px] uppercase tracking-wider py-1 px-2 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/20"
+                  data-field="type">类型</span
+                >
+                <span
+                  class="result-year hidden text-[10px] uppercase tracking-wider py-1 px-2 rounded-lg bg-purple-500/20 text-purple-300 border border-purple-500/20"
+                  data-field="year">年份</span
+                >
+              </div>
+              <p
+                class="result-remarks hidden text-xs text-white/50 mb-2 line-clamp-1 italic"
+                data-field="remarks"
+              >
+                更新状态
+              </p>
+            </div>
+            <div
+              class="result-source flex justify-between items-center mt-auto pt-2 border-t border-white/5 gap-2"
+            >
+              <span
+                class="result-source-name text-[10px] text-white/30 uppercase tracking-widest font-bold whitespace-nowrap truncate"
+                data-field="source">数据源</span
+              >
+              <span
+                class="quality-tag text-xs font-medium py-0.5 px-1.5 rounded bg-white/10 text-white/60 cursor-pointer transition-colors hover:bg-white/20 whitespace-nowrap shrink-0"
+                data-field="quality-tag"
+                data-action="retest-quality"
+                title="重新检测">检测中...</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <template id="video-details-template">
+      <div class="space-y-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-white/5 rounded-2xl p-3 border border-white/5">
+                <span class="block text-xs text-white/40 mb-1">类型</span>
+                <span class="font-medium text-white/90" data-field="type">-</span>
+              </div>
+              <div class="bg-white/5 rounded-2xl p-3 border border-white/5">
+                <span class="block text-xs text-white/40 mb-1">年份</span>
+                <span class="font-medium text-white/90" data-field="year">-</span>
+              </div>
+              <div class="bg-white/5 rounded-2xl p-3 border border-white/5">
+                <span class="block text-xs text-white/40 mb-1">地区</span>
+                <span class="font-medium text-white/90" data-field="area">-</span>
+              </div>
+              <div class="bg-white/5 rounded-2xl p-3 border border-white/5">
+                <span class="block text-xs text-white/40 mb-1">备注</span>
+                <span class="font-medium text-purple-400" data-field="remarks">-</span>
+              </div>
+            </div>
+            <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+              <span class="block text-xs text-white/40 mb-2">导演</span>
+              <span class="text-white/90" data-field="director">-</span>
+            </div>
+          </div>
+          <div class="bg-white/5 rounded-2xl p-4 border border-white/5">
+            <span class="block text-xs text-white/40 mb-2">主演</span>
+            <p class="text-white/80 text-sm leading-relaxed line-clamp-4" data-field="actor">-</p>
+          </div>
+        </div>
+
+        <div class="bg-white/5 rounded-2xl p-6 border border-white/5">
+          <h4 class="text-lg font-bold text-white/90 mb-3 flex items-center gap-2">
+            <span class="w-1.5 h-6 bg-indigo-500 rounded-full"></span>
+            内容简介
+          </h4>
+          <p class="text-white/60 text-sm leading-relaxed" data-field="description">-</p>
+        </div>
+
+        <div data-field="episodesContainer" class="space-y-4">
+          <div
+            class="flex justify-between items-center bg-white/5 rounded-2xl p-4 border border-white/5"
+          >
+            <div class="flex items-center gap-3">
+              <span class="text-sm font-medium text-white/60"
+                >共 <span data-field="episode-count" class="text-white/90">0</span> 集</span
+              >
+              <span
+                class="px-2.5 py-1 bg-indigo-500/20 text-indigo-300 text-xs font-bold rounded-lg border border-indigo-500/30"
+                data-field="quality-tag">检测中...</span
+              >
+              <span
+                class="px-2.5 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-bold rounded-lg border border-emerald-500/30 hidden"
+                data-field="speed-tag"></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                data-action="copy-links"
+                class="p-2.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-xl transition-all duration-300 border border-white/10"
+                title="复制链接"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"
+                  ></path></svg
+                >
+              </button>
+              <button
+                data-action="toggle-order"
+                class="p-2.5 bg-white/10 hover:bg-white/20 text-white/80 hover:text-white rounded-xl transition-all duration-300 border border-white/10"
+                title="切换排序"
+              >
+                <svg
+                  data-field="order-icon"
+                  class="w-5 h-5 transition-transform duration-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg
+                >
+              </button>
+            </div>
+          </div>
+          <div
+            data-field="episode-buttons-grid"
+            class="grid grid-cols-3 xs:grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3 mt-4"
+          >
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <script is:inline src="/js/player_search_history.js" defer></script>
+    <script type="module" src="/js/player_app.js"></script>
+  </body>
+</html>

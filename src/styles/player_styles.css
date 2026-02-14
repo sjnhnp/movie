@@ -423,6 +423,10 @@ media-player .vds-controls-group {
   z-index: 9999 !important;
 }
 
+.web-fullscreen-active #player-region {
+  height: 100vh !important;
+}
+
 #play-settings-dropdown,
 #line-switch-dropdown,
 #skip-control-dropdown {

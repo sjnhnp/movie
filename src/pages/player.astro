@@ -238,7 +238,9 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
               </a>
               <button
                 id="historyButton"
-                class="hidden sm:flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl px-4 py-2.5 text-white/90 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl font-medium"
+                class="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 hover:border-white/40 rounded-xl px-3 py-2 md:px-4 md:py-2.5 text-white/90 hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+                aria-label="观看历史"
+                type="button"
               >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path

@@ -410,73 +410,6 @@ media-player .vds-controls-group {
 
 /* 但是要确保下拉菜单有更高的z-index */
 
-/* 自定义右侧控制条 - 覆盖在播放器上，与底部控制条同步 */
-#custom-right-controls {
-  position: absolute;
-  top: 50%;
-  /* 将顶部定位改为50% */
-  right: 1rem;
-  transform: translateY(-50%);
-  /* 使用transform向上偏移自身高度的一半，实现垂直居中 */
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  z-index: 50;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-/* 当鼠标悬停在播放器区域时显示右侧控制条 */
-#player-region:hover #custom-right-controls {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* 播放器未开始时隐藏右侧控制条 */
-media-player:not([data-started]) #custom-right-controls {
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-/* 当播放器获得焦点时显示右侧控制条 */
-media-player:focus-within #custom-right-controls {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* 网页全屏按钮样式 */
-#web-fullscreen-control-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: transparent;
-  /* Current background */
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: rgba(255, 255, 255, 0.9);
-  cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* 按钮悬停效果 */
-#web-fullscreen-control-btn:hover {
-  background: rgba(0, 0, 0, 0.7);
-  border-color: rgba(255, 255, 255, 0.4);
-  color: white;
-  transform: scale(1.05);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-}
-
-#web-fullscreen-control-btn:active {
-  transform: scale(0.95);
-}
-
 /* 网页全屏状态下的整体布局 */
 .player-container.web-fullscreen-active {
   max-width: none !important;
@@ -489,38 +422,6 @@ media-player:focus-within #custom-right-controls {
   left: 0 !important;
   z-index: 9999 !important;
 }
-
-.web-fullscreen-active #player-region {
-  height: 100vh !important;
-}
-
-/* 网页全屏状态下的按钮样式 */
-.web-fullscreen-active #web-fullscreen-control-btn {
-  background: rgba(59, 130, 246, 0.3);
-  border-color: rgba(59, 130, 246, 0.5);
-  color: #60a5fa;
-}
-
-.web-fullscreen-active #web-fullscreen-control-btn:hover {
-  background: rgba(59, 130, 246, 0.4);
-  border-color: rgba(59, 130, 246, 0.6);
-}
-
-/* 确保按钮图标居中 */
-#web-fullscreen-control-btn svg {
-  width: 16px;
-  /* 调整图标宽度，使其更小 */
-  height: 16px;
-  /* 调整图标高度，使其更小 */
-  stroke-width: 2;
-}
-
-/* 在网页全屏模式下，右侧控制条始终显示 
-.web-fullscreen-active #custom-right-controls {
-  opacity: 1 !important;
-  pointer-events: auto !important;
-} 
-*/
 
 #play-settings-dropdown,
 #line-switch-dropdown,

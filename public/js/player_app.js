@@ -1238,17 +1238,18 @@ function renderEpisodes() {
 
     // 内部结构：序号 + 指示器
     const titleSpan = document.createElement('span');
-    titleSpan.className = 'flex items-center gap-3 overflow-hidden';
+    titleSpan.className = 'flex items-center gap-4 overflow-hidden';
 
-    const indexSpan = document.createElement('span');
-    indexSpan.className = `w-6 h-6 flex items-center justify-center rounded-md text-[10px] font-bold ${isActive ? 'bg-white/20' : 'bg-black/20 text-white/40'}`;
-    indexSpan.textContent = originalIndex + 1;
+    const indexBox = document.createElement('div');
+    indexBox.className = `w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${isActive ? 'bg-white/20 text-white' : 'bg-white/5 text-white/40 border border-white/5'
+      }`;
+    indexBox.textContent = originalIndex + 1;
 
     const nameSpan = document.createElement('span');
-    nameSpan.className = 'truncate font-medium';
+    nameSpan.className = `truncate font-medium ${isActive ? 'text-white' : 'text-white/70'}`;
     nameSpan.textContent = isVarietyShow ? (originalName || episodeName || `第${originalIndex + 1}集`) : (originalName || `第 ${originalIndex + 1} 集`);
 
-    titleSpan.appendChild(indexSpan);
+    titleSpan.appendChild(indexBox);
     titleSpan.appendChild(nameSpan);
     btn.appendChild(titleSpan);
 

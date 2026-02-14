@@ -1,4 +1,3 @@
-/* 播放器主体布局 */
 .player-page-wrapper {
   display: flex;
   flex-direction: row;
@@ -14,23 +13,28 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  width: 100%;
-  /* 确保填满 */
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100vh;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
   position: relative;
   z-index: 1;
+  scrollbar-width: none;
+  /* Hide scrollbar for main content */
+}
+
+.player-main-content::-webkit-scrollbar {
+  display: none;
 }
 
 /* 基本布局和播放器相关样式（现代简约风格） */
 .player-container {
   width: 100%;
-  max-width: 1200px;
-  /* 给一个合适的宽度限制 */
+  max-width: 1400px;
   margin: 0 auto;
-  /* 居中 */
-  padding: 0 1.5rem;
+  padding: 0 2rem;
   background: transparent;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 播放器区域 */
@@ -40,8 +44,11 @@
   aspect-ratio: 16 / 9;
   margin: 0 auto;
   position: relative;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 85vh;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 80vh;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.5), 0 18px 36px -18px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 768px) {
@@ -2039,23 +2046,37 @@ media-fullscreen-button {
 
 /* ==================== 右侧剧集侧边栏 ==================== */
 #episode-sidebar {
-  width: 350px;
+  width: 380px;
   height: 100vh;
-  background: rgba(15, 15, 20, 0.7);
-  backdrop-filter: blur(30px);
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(15, 15, 25, 0.6);
+  backdrop-filter: blur(40px);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
   flex-shrink: 0;
+  position: relative;
 }
 
 #episode-sidebar.hidden-sidebar {
-  margin-right: -350px;
   width: 0;
   opacity: 0;
   pointer-events: none;
+  border-left-color: transparent;
+}
+
+/* 渐变遮罩边缘 */
+#episode-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(to bottom, rgba(15, 15, 25, 0.8), transparent);
+  pointer-events: none;
+  z-index: 2;
 }
 
 .sidebar-header {
@@ -2073,38 +2094,41 @@ media-fullscreen-button {
 /* 侧边栏集数按钮 */
 .sidebar-episode-btn {
   width: 100%;
-  padding: 0.85rem 1rem;
+  padding: 0.75rem 1rem;
   margin-bottom: 0.5rem;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   text-align: left;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  cursor: pointer;
 }
 
 .sidebar-episode-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
   transform: translateX(4px);
+  color: #fff;
 }
 
 .sidebar-episode-btn.active {
-  background: var(--indigo-500);
-  border-color: var(--indigo-400);
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border-color: rgba(255, 255, 255, 0.2);
   color: white;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
 }
 
 /* 正在播放的小动画 */
 .playing-indicator {
   display: flex;
   align-items: flex-end;
-  gap: 2px;
-  height: 12px;
+  gap: 2.5px;
+  height: 14px;
 }
 
 .playing-indicator span {

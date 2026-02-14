@@ -46,11 +46,13 @@ input[type=number] {
   background: transparent;
   display: flex;
   flex-direction: column;
+  gap: 2rem;
+  padding: 2rem 0;
 }
 
 /* 播放器区域 */
 #player-region {
-  height: 85vh;
+  height: 75vh;
   aspect-ratio: 16 / 9;
   width: auto;
   max-width: 100%;
@@ -64,7 +66,7 @@ input[type=number] {
 
 /* 侧边栏显示时的播放器适配 - 降低高度以适应更窄的容器 */
 .player-page-wrapper:not(:has(#episode-sidebar.hidden-sidebar)) #player-region {
-  height: 70vh;
+  height: 65vh;
 }
 
 @media (max-width: 768px) {

@@ -1,20 +1,20 @@
 /* -------- 1. 全局 CSS 变量（现代简约风格） -------- */
 :root {
-  --primary-color: #6366f1;  /* 现代紫色 */
-  --primary-light: #a5b4fc;  /* 浅紫色 */
-  --secondary-color: #0f0f23;  /* 深蓝黑 */
-  --accent-color: #8b5cf6;  /* 优雅紫色 */
-  --text-color: #f8fafc;  /* 纯净白 */
-  --text-muted: #94a3b8;  /* 温和灰 */
-  --border-color: rgba(148, 163, 184, 0.1);  /* 极淡边框 */
-  --page-gradient-start: #0f0f23;  /* 深色起始 */
-  --page-gradient-end: #1e1e3f;  /* 深色结束 */
-  --card-gradient-start: #1a1a2e;  /* 卡片渐变起始 */
-  --card-gradient-end: #16213e;  /* 卡片渐变结束 */
-  --card-accent: rgba(99, 102, 241, 0.05);  /* 极淡紫色 */
-  --card-hover-border: rgba(99, 102, 241, 0.3);  /* 悬停边框 */
-  --surface-color: #1e293b;  /* 表面颜色 */
-  --surface-hover: #334155;  /* 表面悬停 */
+  --primary-color: #6366f1; /* 现代紫色 */
+  --primary-light: #a5b4fc; /* 浅紫色 */
+  --secondary-color: #0f0f23; /* 深蓝黑 */
+  --accent-color: #8b5cf6; /* 优雅紫色 */
+  --text-color: #f8fafc; /* 纯净白 */
+  --text-muted: #94a3b8; /* 温和灰 */
+  --border-color: rgba(148, 163, 184, 0.1); /* 极淡边框 */
+  --page-gradient-start: #0f0f23; /* 深色起始 */
+  --page-gradient-end: #1e1e3f; /* 深色结束 */
+  --card-gradient-start: #1a1a2e; /* 卡片渐变起始 */
+  --card-gradient-end: #16213e; /* 卡片渐变结束 */
+  --card-accent: rgba(99, 102, 241, 0.05); /* 极淡紫色 */
+  --card-hover-border: rgba(99, 102, 241, 0.3); /* 悬停边框 */
+  --surface-color: #1e293b; /* 表面颜色 */
+  --surface-hover: #334155; /* 表面悬停 */
 }
 
 /* -------- 2. 统一滚动条样式（全局应用） -------- */
@@ -67,7 +67,8 @@ body::-webkit-scrollbar-thumb:hover,
 }
 
 /* 修复Android Chrome地址栏隐藏时底部白色背景问题 */
-html, body {
+html,
+body {
   background-color: var(--page-gradient-start);
   min-height: 100vh;
   /* 确保页面至少占满视口高度 */
@@ -101,11 +102,11 @@ button,
 }
 
 /* 选中状态的样式 */
-input[type="checkbox"]:checked + .toggle-bg {
+input[type='checkbox']:checked + .toggle-bg {
   background-color: #6366f1 !important; /* 使用主色调 */
 }
 
-input[type="checkbox"]:checked + .toggle-bg + .toggle-dot {
+input[type='checkbox']:checked + .toggle-bg + .toggle-dot {
   transform: translateX(1.5rem); /* 24px = 1.5rem */
 }
 
@@ -137,7 +138,7 @@ input[type="checkbox"]:checked + .toggle-bg + .toggle-dot {
   overflow: hidden;
   text-overflow: ellipsis;
   -webkit-line-clamp: 2;
-  line-clamp: 2; 
+  line-clamp: 2;
   line-height: 1.4;
   word-break: break-word;
   hyphens: auto;
@@ -186,12 +187,12 @@ input[type="checkbox"]:checked + .toggle-bg + .toggle-dot {
 /* 修复搜索按钮在移动端的图标居中问题 */
 @media (max-width: 640px) {
   #homeButton svg,
-  button[aria-label="搜索按钮"] svg {
+  button[aria-label='搜索按钮'] svg {
     margin-right: 0 !important;
   }
-  
+
   #homeButton,
-  button[aria-label="搜索按钮"] {
+  button[aria-label='搜索按钮'] {
     justify-content: center !important;
     padding: 0.75rem !important;
     min-width: 48px;
@@ -214,32 +215,32 @@ input[type="checkbox"]:checked + .toggle-bg + .toggle-dot {
 
 /* -------- 8. 开关样式（现代简约风格） -------- */
 /* 现代开关背景样式 */
-#yellowFilterToggle:checked+.toggle-bg,
-#adFilterToggle:checked+.toggle-bg,
-#doubanToggle:checked+.toggle-bg,
-#preloadingToggle:checked+.toggle-bg {
+#yellowFilterToggle:checked + .toggle-bg,
+#adFilterToggle:checked + .toggle-bg,
+#doubanToggle:checked + .toggle-bg,
+#preloadingToggle:checked + .toggle-bg {
   background-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 /* 现代开关点样式 */
-#yellowFilterToggle:checked~.toggle-dot,
-#adFilterToggle:checked~.toggle-dot,
-#doubanToggle:checked~.toggle-dot,
-#preloadingToggle:checked~.toggle-dot {
+#yellowFilterToggle:checked ~ .toggle-dot,
+#adFilterToggle:checked ~ .toggle-dot,
+#doubanToggle:checked ~ .toggle-dot,
+#preloadingToggle:checked ~ .toggle-dot {
   transform: translateX(1.5rem);
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
 }
 
 /* 现代焦点与悬停样式 */
-#yellowFilterToggle:focus+.toggle-bg,
-#yellowFilterToggle:hover+.toggle-bg,
-#adFilterToggle:focus+.toggle-bg,
-#adFilterToggle:hover+.toggle-bg,
-#doubanToggle:focus+.toggle-bg,
-#doubanToggle:hover+.toggle-bg,
-#preloadingToggle:focus+.toggle-bg,
-#preloadingToggle:hover+.toggle-bg {
+#yellowFilterToggle:focus + .toggle-bg,
+#yellowFilterToggle:hover + .toggle-bg,
+#adFilterToggle:focus + .toggle-bg,
+#adFilterToggle:hover + .toggle-bg,
+#doubanToggle:focus + .toggle-bg,
+#doubanToggle:hover + .toggle-bg,
+#preloadingToggle:focus + .toggle-bg,
+#preloadingToggle:hover + .toggle-bg {
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
@@ -310,7 +311,7 @@ input[type="checkbox"]:checked + .toggle-bg + .toggle-dot {
   z-index: 5;
 }
 
-.filter-disabled>* {
+.filter-disabled > * {
   opacity: 1;
   z-index: 6;
   position: relative;
@@ -425,7 +426,7 @@ body {
   animation: fadeOut 0.3s forwards;
 }
 
-#modal>div {
+#modal > div {
   background: rgba(15, 15, 35, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border-color);
@@ -529,7 +530,7 @@ body {
     border-radius: 50%;
     padding: 0.25rem;
   }
-  
+
   .history-item .delete-btn:active {
     background-color: rgba(239, 68, 68, 0.2);
     transform: scale(0.95);
@@ -632,7 +633,9 @@ body {
   font-size: 14px;
   z-index: 100;
   opacity: 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 .position-restore-hint.show {
@@ -860,7 +863,7 @@ body {
 }
 
 .modal-icon-button:hover {
-  background-color: #4B5563;
+  background-color: #4b5563;
 }
 
 .modal-icon-button svg {
@@ -895,7 +898,7 @@ body {
 }
 
 /* 让删除按钮不额外撑高内容 */
-.search-tag+span[role=button] {
+.search-tag + span[role='button'] {
   margin-left: 0.45em;
   display: flex;
   align-items: center;
@@ -903,7 +906,7 @@ body {
 }
 
 /* 鼠标悬停在x变手势 */
-.search-tag+span[role=button] {
+.search-tag + span[role='button'] {
   cursor: pointer;
 }
 
@@ -977,19 +980,19 @@ body {
 
 /* 移动端：始终显示删除按钮 */
 @media (max-width: 768px) {
-.history-item .history-item-delete-btn {
-  opacity: 1;
-  /* 为了在移动端有更好的点击效果，可以加一点样式 */
-  background-color: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 50%;
-  padding: 0.2rem; /* 微调点击区域 */
-}
+  .history-item .history-item-delete-btn {
+    opacity: 1;
+    /* 为了在移动端有更好的点击效果，可以加一点样式 */
+    background-color: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 50%;
+    padding: 0.2rem; /* 微调点击区域 */
+  }
 
-.history-item .history-item-delete-btn:active {
-  background-color: rgba(239, 68, 68, 0.2);
-  transform: scale(0.95);
-}
+  .history-item .history-item-delete-btn:active {
+    background-color: rgba(239, 68, 68, 0.2);
+    transform: scale(0.95);
+  }
 }
 
 /* 综艺按钮专用样式 (首页弹窗) */

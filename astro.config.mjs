@@ -18,10 +18,10 @@ function getAdapter() {
 export default defineConfig({
   output: 'server',
   build: {
-    format: 'directory'
+    format: 'directory',
   },
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
   },
-  adapter: getAdapter()
+  adapter: getAdapter(),
 });

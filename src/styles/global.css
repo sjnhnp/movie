@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* -------- 1. 全局 CSS 变量（现代简约风格） -------- */
 :root {
@@ -119,12 +119,12 @@ button,
 }
 
 /* 选中状态的样式 */
-input[type="checkbox"]:checked+.toggle-bg {
+input[type='checkbox']:checked + .toggle-bg {
   background-color: #6366f1 !important;
   /* 使用主色调 */
 }
 
-input[type="checkbox"]:checked+.toggle-bg+.toggle-dot {
+input[type='checkbox']:checked + .toggle-bg + .toggle-dot {
   transform: translateX(1.5rem);
   /* 24px = 1.5rem */
 }
@@ -205,14 +205,13 @@ input[type="checkbox"]:checked+.toggle-bg+.toggle-dot {
 
 /* 修复搜索按钮在移动端的图标居中问题 */
 @media (max-width: 640px) {
-
   #homeButton svg,
-  button[aria-label="搜索按钮"] svg {
+  button[aria-label='搜索按钮'] svg {
     margin-right: 0 !important;
   }
 
   #homeButton,
-  button[aria-label="搜索按钮"] {
+  button[aria-label='搜索按钮'] {
     justify-content: center !important;
     padding: 0.75rem !important;
     min-width: 48px;
@@ -235,32 +234,38 @@ input[type="checkbox"]:checked+.toggle-bg+.toggle-dot {
 
 /* -------- 8. 开关样式（现代简约风格） -------- */
 /* 现代开关背景样式 */
-#yellowFilterToggle:checked+.toggle-bg,
-#adFilterToggle:checked+.toggle-bg,
-#doubanToggle:checked+.toggle-bg,
-#preloadingToggle:checked+.toggle-bg {
+#yellowFilterToggle:checked + .toggle-bg,
+#adFilterToggle:checked + .toggle-bg,
+#speedDetectionToggle:checked + .toggle-bg,
+#preloadingToggle:checked + .toggle-bg {
   background-color: var(--primary-color);
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
+#doubanToggle:checked + .toggle-bg {
+  background-color: #db2777; /* pink-600 */
+  box-shadow: 0 0 0 2px rgba(219, 39, 119, 0.2);
+}
+
 /* 现代开关点样式 */
-#yellowFilterToggle:checked~.toggle-dot,
-#adFilterToggle:checked~.toggle-dot,
-#doubanToggle:checked~.toggle-dot,
-#preloadingToggle:checked~.toggle-dot {
+#yellowFilterToggle:checked ~ .toggle-dot,
+#adFilterToggle:checked ~ .toggle-dot,
+#doubanToggle:checked ~ .toggle-dot,
+#speedDetectionToggle:checked ~ .toggle-dot,
+#preloadingToggle:checked ~ .toggle-dot {
   transform: translateX(1.5rem);
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
 }
 
 /* 现代焦点与悬停样式 */
-#yellowFilterToggle:focus+.toggle-bg,
-#yellowFilterToggle:hover+.toggle-bg,
-#adFilterToggle:focus+.toggle-bg,
-#adFilterToggle:hover+.toggle-bg,
-#doubanToggle:focus+.toggle-bg,
-#doubanToggle:hover+.toggle-bg,
-#preloadingToggle:focus+.toggle-bg,
-#preloadingToggle:hover+.toggle-bg {
+#yellowFilterToggle:focus + .toggle-bg,
+#yellowFilterToggle:hover + .toggle-bg,
+#adFilterToggle:focus + .toggle-bg,
+#adFilterToggle:hover + .toggle-bg,
+#doubanToggle:focus + .toggle-bg,
+#doubanToggle:hover + .toggle-bg,
+#preloadingToggle:focus + .toggle-bg,
+#preloadingToggle:hover + .toggle-bg {
   box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
@@ -331,7 +336,7 @@ input[type="checkbox"]:checked+.toggle-bg+.toggle-dot {
   z-index: 5;
 }
 
-.filter-disabled>* {
+.filter-disabled > * {
   opacity: 1;
   z-index: 6;
   position: relative;
@@ -446,7 +451,7 @@ body {
   animation: fadeOut 0.3s forwards;
 }
 
-#modal>div {
+#modal > div {
   background: rgba(15, 15, 35, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border-color);
@@ -649,7 +654,9 @@ body {
   font-size: 14px;
   z-index: 100;
   opacity: 0;
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
 }
 
 .position-restore-hint.show {
@@ -877,7 +884,7 @@ body {
 }
 
 .modal-icon-button:hover {
-  background-color: #4B5563;
+  background-color: #4b5563;
 }
 
 .modal-icon-button svg {
@@ -916,7 +923,7 @@ body {
 }
 
 /* 让删除按钮不额外撑高内容 */
-.search-tag+span[role=button] {
+.search-tag + span[role='button'] {
   margin-left: 0.45em;
   display: flex;
   align-items: center;
@@ -924,7 +931,7 @@ body {
 }
 
 /* 鼠标悬停在x变手势 */
-.search-tag+span[role=button] {
+.search-tag + span[role='button'] {
   cursor: pointer;
 }
 

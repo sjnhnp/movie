@@ -6,18 +6,18 @@ window.SEARCH_HISTORY_KEY = window.SEARCH_HISTORY_KEY || 'searchHistory';
 
 // UI样式类型
 const TOAST_BG_COLORS = {
-    'error': 'bg-red-500',
-    'success': 'bg-green-500',
-    'info': 'bg-blue-500',
-    'warning': 'bg-yellow-500'
+  error: 'bg-red-500',
+  success: 'bg-green-500',
+  info: 'bg-blue-500',
+  warning: 'bg-yellow-500',
 };
-const HISTORY_MAX_ITEMS = 50;           // 观看历史最大数量
+const HISTORY_MAX_ITEMS = 50; // 观看历史最大数量
 
 /**
  * 实际切换设置面板的函数
  */
 function actuallyToggleSettingsPanel() {
-    togglePanel('settingsPanel', 'historyPanel');
+  togglePanel('settingsPanel', 'historyPanel');
 }
 
 /**
@@ -27,44 +27,50 @@ function actuallyToggleSettingsPanel() {
 // js/ui.js
 
 function toggleSettings(e) {
-    e?.stopPropagation();
+  e?.stopPropagation();
 
-    const settingsPasswordHash = window.__ENV__?.SETTINGS_PASSWORD;
-    const isProtected = settingsPasswordHash && settingsPasswordHash.length === 64 && !/^0+$/.test(settingsPasswordHash);
+  const settingsPasswordHash = window.__ENV__?.SETTINGS_PASSWORD;
+  const isProtected =
+    settingsPasswordHash &&
+    settingsPasswordHash.length === 64 &&
+    !/^0+$/.test(settingsPasswordHash);
 
-    if (isProtected && typeof isSettingsPasswordVerified === 'function' && !isSettingsPasswordVerified()) {
-        window.verifyingPurpose = 'settings';
-        const modal = getElement('passwordModal');
-        const title = getElement('passwordModalTitle');
-        const p = modal?.querySelector('p');
+  if (
+    isProtected &&
+    typeof isSettingsPasswordVerified === 'function' &&
+    !isSettingsPasswordVerified()
+  ) {
+    window.verifyingPurpose = 'settings';
+    const modal = getElement('passwordModal');
+    const title = getElement('passwordModalTitle');
+    const p = modal?.querySelector('p');
 
-        if (title) title.textContent = "设置项验证";
-        if (p) p.textContent = "请输入密码以访问设置";
+    if (title) title.textContent = '设置项验证';
+    if (p) p.textContent = '请输入密码以访问设置';
 
-        if (typeof showPasswordModal === 'function') {
-            showPasswordModal();
-        }
-    } else {
-        // 如果没有设置密码，或者已经验证通过，直接打开
-        actuallyToggleSettingsPanel();
+    if (typeof showPasswordModal === 'function') {
+      showPasswordModal();
     }
+  } else {
+    // 如果没有设置密码，或者已经验证通过，直接打开
+    actuallyToggleSettingsPanel();
+  }
 }
 
 /**
- * 生成「剧 + 集」唯一标识  
- * - 优先：title + sourceCode + vod_id + _epX  
- * - 兜底：title + sourceCode + url 最后一段 + _epX  
+ * 生成「剧 + 集」唯一标识
+ * - 优先：title + sourceCode + vod_id + _epX
+ * - 兜底：title + sourceCode + url 最后一段 + _epX
  */
 function getUniqueEpisodeId(v) {
-    const getUrlKey = (raw = '') =>
-        (raw.split('/').pop().split(/[?#]/)[0] || raw).slice(-80); // 取文件名或 URL 尾部
+  const getUrlKey = (raw = '') => (raw.split('/').pop().split(/[?#]/)[0] || raw).slice(-80); // 取文件名或 URL 尾部
 
-    const sc = v.sourceCode || 'unknown_source';
-    const vid = v.vod_id || '';
-    const ep = (typeof v.episodeIndex === 'number') ? `_ep${v.episodeIndex}` : '';
+  const sc = v.sourceCode || 'unknown_source';
+  const vid = v.vod_id || '';
+  const ep = typeof v.episodeIndex === 'number' ? `_ep${v.episodeIndex}` : '';
 
-    if (vid) return `${v.title}_${sc}_${vid}${ep}`;
-    return `${v.title}_${sc}_${getUrlKey(v.url)}${ep}`;
+  if (vid) return `${v.title}_${sc}_${vid}${ep}`;
+  return `${v.title}_${sc}_${getUrlKey(v.url)}${ep}`;
 }
 
 // DOM元素缓存
@@ -77,28 +83,27 @@ const domCache = new Map();
  */
 // ui.js 里替换 getElement 的实现 —— 失效即更新缓存
 function getElement(id) {
-    const cached = domCache.get(id);
-    if (cached && cached.isConnected) {
-        return cached;
-    }
-    const fresh = document.getElementById(id);
-    if (fresh) domCache.set(id, fresh);
-    return fresh;
+  const cached = domCache.get(id);
+  if (cached && cached.isConnected) {
+    return cached;
+  }
+  const fresh = document.getElementById(id);
+  if (fresh) domCache.set(id, fresh);
+  return fresh;
 }
-
 
 /**
  * 检查密码保护
  * @returns {boolean} 是否通过密码验证
  */
 function checkPasswordProtection() {
-    if (window.isPasswordProtected && window.isPasswordVerified) {
-        if (window.isPasswordProtected() && !window.isPasswordVerified()) {
-            if (typeof showPasswordModal === 'function') showPasswordModal();
-            return false;
-        }
+  if (window.isPasswordProtected && window.isPasswordVerified) {
+    if (window.isPasswordProtected() && !window.isPasswordVerified()) {
+      if (typeof showPasswordModal === 'function') showPasswordModal();
+      return false;
     }
-    return true;
+  }
+  return true;
 }
 
 /**
@@ -109,30 +114,30 @@ function checkPasswordProtection() {
  * @returns {boolean} 是否成功切换面板
  */
 function togglePanel(panelIdToShow, panelIdToHide, onShowCallback) {
-    if (!checkPasswordProtection()) return false;
+  if (!checkPasswordProtection()) return false;
 
-    const panelToShow = getElement(panelIdToShow);
-    if (!panelToShow) return false;
+  const panelToShow = getElement(panelIdToShow);
+  if (!panelToShow) return false;
 
-    // 切换目标面板
-    const isShowing = panelToShow.classList.toggle('show');
-    panelToShow.setAttribute('aria-hidden', !isShowing);
+  // 切换目标面板
+  const isShowing = panelToShow.classList.toggle('show');
+  panelToShow.setAttribute('aria-hidden', !isShowing);
 
-    // 如果指定了要隐藏的面板，确保它被关闭
-    if (panelIdToHide) {
-        const panelToHide = getElement(panelIdToHide);
-        if (panelToHide && panelToHide.classList.contains('show')) {
-            panelToHide.classList.remove('show');
-            panelToHide.setAttribute('aria-hidden', 'true');
-        }
+  // 如果指定了要隐藏的面板，确保它被关闭
+  if (panelIdToHide) {
+    const panelToHide = getElement(panelIdToHide);
+    if (panelToHide && panelToHide.classList.contains('show')) {
+      panelToHide.classList.remove('show');
+      panelToHide.setAttribute('aria-hidden', 'true');
     }
+  }
 
-    // 如果面板被显示且有回调，执行回调
-    if (isShowing && typeof onShowCallback === 'function') {
-        onShowCallback();
-    }
+  // 如果面板被显示且有回调，执行回调
+  if (isShowing && typeof onShowCallback === 'function') {
+    onShowCallback();
+  }
 
-    return true;
+  return true;
 }
 
 // =============== UI相关函数 =============================
@@ -146,153 +151,161 @@ function togglePanel(panelIdToShow, panelIdToHide, onShowCallback) {
  * @param {Event} e 事件对象
  */
 function toggleHistory(e) {
-    if (e) {
-        e.stopPropagation(); // ✅ 阻止事件冒泡，防止触发自动关闭
+  if (e) {
+    e.stopPropagation(); // ✅ 阻止事件冒泡，防止触发自动关闭
+  }
+
+  console.log('toggleHistory called'); // 保留调试日志
+
+  const historyPanel = getElement('historyPanel');
+  console.log('historyPanel element:', historyPanel);
+
+  if (!historyPanel) {
+    console.error('History panel not found!');
+    return;
+  }
+
+  // ✅ 检查当前状态
+  const isCurrentlyShowing = historyPanel.classList.contains('show');
+  console.log('Panel currently showing:', isCurrentlyShowing);
+
+  if (isCurrentlyShowing) {
+    // 关闭面板
+    historyPanel.classList.remove('show');
+    historyPanel.setAttribute('aria-hidden', 'true');
+    console.log('Closing history panel');
+  } else {
+    // 打开面板
+    // 先关闭设置面板
+    const settingsPanel = getElement('settingsPanel');
+    if (settingsPanel && settingsPanel.classList.contains('show')) {
+      settingsPanel.classList.remove('show');
+      settingsPanel.setAttribute('aria-hidden', 'true');
     }
 
-    console.log('toggleHistory called'); // 保留调试日志
+    // 打开历史面板
+    historyPanel.classList.add('show');
+    historyPanel.setAttribute('aria-hidden', 'false');
+    console.log('Opening history panel');
 
-    const historyPanel = getElement('historyPanel');
-    console.log('historyPanel element:', historyPanel);
-
-    if (!historyPanel) {
-        console.error('History panel not found!');
-        return;
+    // 渲染历史记录
+    if (typeof renderViewingHistory === 'function') {
+      renderViewingHistory();
     }
-
-    // ✅ 检查当前状态
-    const isCurrentlyShowing = historyPanel.classList.contains('show');
-    console.log('Panel currently showing:', isCurrentlyShowing);
-
-    if (isCurrentlyShowing) {
-        // 关闭面板
-        historyPanel.classList.remove('show');
-        historyPanel.setAttribute('aria-hidden', 'true');
-        console.log('Closing history panel');
-    } else {
-        // 打开面板
-        // 先关闭设置面板
-        const settingsPanel = getElement('settingsPanel');
-        if (settingsPanel && settingsPanel.classList.contains('show')) {
-            settingsPanel.classList.remove('show');
-            settingsPanel.setAttribute('aria-hidden', 'true');
-        }
-
-        // 打开历史面板
-        historyPanel.classList.add('show');
-        historyPanel.setAttribute('aria-hidden', 'false');
-        console.log('Opening history panel');
-
-        // 渲染历史记录
-        if (typeof renderViewingHistory === 'function') {
-            renderViewingHistory();
-        }
-    }
+  }
 }
 
 // ------------- Toast功能（支持队列） -------------
 const toastQueue = [];
 let isShowingToast = false;
 
-/** 
+/**
  * 显示消息Toast（支持消息队列，背景色可变更）
  * @param {string} message 消息内容
  * @param {string} type 消息类型 (error|success|info|warning)
  */
 function showToast(message, type = 'error') {
-    toastQueue.push({ message, type });
-    if (!isShowingToast) showNextToast();
+  toastQueue.push({ message, type });
+  if (!isShowingToast) showNextToast();
 }
 
 /**
  * 显示下一条Toast消息
  */
 function showNextToast() {
-    if (!toastQueue.length) return isShowingToast = false;
-    isShowingToast = true;
-    const { message, type } = toastQueue.shift();
-    const toast = getElement('toast');
-    const toastMessage = getElement('toastMessage');
-    if (!toast || !toastMessage) return;
+  if (!toastQueue.length) return (isShowingToast = false);
+  isShowingToast = true;
+  const { message, type } = toastQueue.shift();
+  const toast = getElement('toast');
+  const toastMessage = getElement('toastMessage');
+  if (!toast || !toastMessage) return;
 
-    // 设置样式
-    const bg = TOAST_BG_COLORS[type] || TOAST_BG_COLORS.error;
-    toast.className = `fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${bg} text-white z-50`;
-    toastMessage.textContent = message;
+  // 设置样式
+  const bg = TOAST_BG_COLORS[type] || TOAST_BG_COLORS.error;
+  toast.className = `fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${bg} text-white z-50`;
+  toastMessage.textContent = message;
 
-    toast.style.opacity = '1';
-    toast.style.transform = 'translateX(-50%) translateY(0)';
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
 
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(-50%) translateY(-100%)';
-        setTimeout(showNextToast, 300);
-    }, 3000);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(-100%)';
+    setTimeout(showNextToast, 300);
+  }, 3000);
 }
 
 // ----------- Loading区域 --------------
 let loadingTimeoutId = null;
 
-/** 
+/**
  * 显示Loading
  * @param {string} message 加载提示文本
  */
 function showLoading(message = '加载中...') {
-    if (loadingTimeoutId) { clearTimeout(loadingTimeoutId); loadingTimeoutId = null; }
-    const loading = getElement('loading');
-    if (!loading) return;
-    const p = loading.querySelector('p');
-    if (p) p.textContent = message;
-    loading.style.display = 'flex';
-    loadingTimeoutId = setTimeout(() => {
-        hideLoading();
-        showToast('操作超时，请稍后重试', 'warning');
-    }, 30000);
+  if (loadingTimeoutId) {
+    clearTimeout(loadingTimeoutId);
+    loadingTimeoutId = null;
+  }
+  const loading = getElement('loading');
+  if (!loading) return;
+  const p = loading.querySelector('p');
+  if (p) p.textContent = message;
+  loading.style.display = 'flex';
+  loadingTimeoutId = setTimeout(() => {
+    hideLoading();
+    showToast('操作超时，请稍后重试', 'warning');
+  }, 30000);
 }
 
-/** 
+/**
  * 隐藏Loading
  */
 function hideLoading() {
-    if (loadingTimeoutId) { clearTimeout(loadingTimeoutId); loadingTimeoutId = null; }
-    const loading = getElement('loading');
-    if (loading) loading.style.display = 'none';
+  if (loadingTimeoutId) {
+    clearTimeout(loadingTimeoutId);
+    loadingTimeoutId = null;
+  }
+  const loading = getElement('loading');
+  if (loading) loading.style.display = 'none';
 }
 
 // ----------- 模态框管理 --------------
 let lastFocusedElement = null;
 
-/** 
+/**
  * 显示模态框
  * @param {string} content 模态框内容
  * @param {string} title 模态框标题（可选）
  */
 function showModal(contentNode, title = '') {
-    const modal = getElement('modal');
-    const modalContent = getElement('modalContent');
-    const modalTitle = getElement('modalTitle');
+  const modal = getElement('modal');
+  const modalContent = getElement('modalContent');
+  const modalTitle = getElement('modalTitle');
 
-    if (!modal || !modalContent) return;
+  if (!modal || !modalContent) return;
 
-    lastFocusedElement = document.activeElement;
+  lastFocusedElement = document.activeElement;
 
-    // 关键修复：从 .innerHTML 赋值改为 .appendChild
-    modalContent.innerHTML = ''; // 先清空旧内容
-    modalContent.appendChild(contentNode); // 直接附加带有事件监听的DOM节点
+  // 关键修复：从 .innerHTML 赋值改为 .appendChild
+  modalContent.innerHTML = ''; // 先清空旧内容
+  modalContent.appendChild(contentNode); // 直接附加带有事件监听的DOM节点
 
-    if (modalTitle && title) modalTitle.textContent = title;
+  if (modalTitle && title) modalTitle.textContent = title;
 
-    modal.classList.remove('hidden');
-    modal.setAttribute('aria-hidden', 'false');
+  modal.classList.remove('hidden');
+  modal.setAttribute('aria-hidden', 'false');
 
-    setupFocusTrap(modal);
+  setupFocusTrap(modal);
 
-    const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    if (focusableElements.length) {
-        focusableElements[0].focus();
-    } else {
-        modal.focus();
-    }
+  const focusableElements = modal.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  if (focusableElements.length) {
+    focusableElements[0].focus();
+  } else {
+    modal.focus();
+  }
 }
 
 /**
@@ -300,99 +313,113 @@ function showModal(contentNode, title = '') {
  * @param {HTMLElement} container 需要设置焦点陷阱的容器
  */
 function setupFocusTrap(container) {
-    container.addEventListener('keydown', function (e) {
-        // 如果按下的不是Tab键，不处理
-        if (e.key !== 'Tab') return;
+  container.addEventListener('keydown', function (e) {
+    // 如果按下的不是Tab键，不处理
+    if (e.key !== 'Tab') return;
 
-        const focusableElements = container.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-        if (!focusableElements.length) return;
+    const focusableElements = container.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusableElements.length) return;
 
-        const firstElement = focusableElements[0];
-        const lastElement = focusableElements[focusableElements.length - 1];
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
 
-        // Shift+Tab 从第一个元素循环到最后一个
-        if (e.shiftKey && document.activeElement === firstElement) {
-            e.preventDefault();
-            lastElement.focus();
-        }
-        // Tab 从最后一个元素循环到第一个
-        else if (!e.shiftKey && document.activeElement === lastElement) {
-            e.preventDefault();
-            firstElement.focus();
-        }
-    });
+    // Shift+Tab 从第一个元素循环到最后一个
+    if (e.shiftKey && document.activeElement === firstElement) {
+      e.preventDefault();
+      lastElement.focus();
+    }
+    // Tab 从最后一个元素循环到第一个
+    else if (!e.shiftKey && document.activeElement === lastElement) {
+      e.preventDefault();
+      firstElement.focus();
+    }
+  });
 }
 
-/** 
+/**
  * 关闭详情弹窗
  */
 function closeModal() {
-    const modal = getElement('modal');
-    const modalContent = getElement('modalContent');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.setAttribute('aria-hidden', 'true');
-    }
-    if (modalContent) modalContent.innerHTML = '';
+  const modal = getElement('modal');
+  const modalContent = getElement('modalContent');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden', 'true');
+  }
+  if (modalContent) modalContent.innerHTML = '';
 
-    // 恢复焦点
-    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
-        lastFocusedElement.focus();
-    }
+  // 恢复焦点
+  if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+    lastFocusedElement.focus();
+  }
 }
 
 // ========== 搜索历史相关 ================
 
-/** 
+/**
  * 获取历史（兼容老新格式）
  * @returns {Array} 搜索历史数组
  */
 function getSearchHistory() {
-    try {
-        const data = localStorage.getItem(SEARCH_HISTORY_KEY);
-        if (!data) return [];
-        const parsed = JSON.parse(data);
-        if (!Array.isArray(parsed)) return [];
-        return parsed
-            .map(item => typeof item === 'string' ? { text: item, timestamp: 0 } : item)
-            .filter(item => item && item.text);
-    } catch (e) {
-        console.error('获取搜索历史出错:', e);
-        return [];
-    }
+  try {
+    const data = localStorage.getItem(SEARCH_HISTORY_KEY);
+    if (!data) return [];
+    const parsed = JSON.parse(data);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((item) => (typeof item === 'string' ? { text: item, timestamp: 0 } : item))
+      .filter((item) => item && item.text);
+  } catch (e) {
+    console.error('获取搜索历史出错:', e);
+    return [];
+  }
 }
 
-/** 
+/**
  * 保存搜索历史，记录时间戳，去重，控量，防止XSS
  * @param {string} query 搜索关键词
  */
 function saveSearchHistory(query) {
-    if (!query || !query.trim()) return;
-    query = query.trim().slice(0, 50).replace(/[<>"]/g, c => ({
-        '<': '&lt;', '>': '&gt;', '"': '&quot;'
-    })[c]);
-    let history = getSearchHistory();
-    const now = Date.now();
-    // 2个月有效、去重
-    history = history.filter(item =>
-        typeof item === 'object' && item.timestamp && (now - item.timestamp < 5184000000) &&
-        item.text !== query
+  if (!query || !query.trim()) return;
+  query = query
+    .trim()
+    .slice(0, 50)
+    .replace(
+      /[<>"]/g,
+      (c) =>
+        ({
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+        })[c]
     );
-    // 新项在最前
-    history.unshift({ text: query, timestamp: now });
-    if (history.length > MAX_HISTORY_ITEMS) history = history.slice(0, MAX_HISTORY_ITEMS);
+  let history = getSearchHistory();
+  const now = Date.now();
+  // 2个月有效、去重
+  history = history.filter(
+    (item) =>
+      typeof item === 'object' &&
+      item.timestamp &&
+      now - item.timestamp < 5184000000 &&
+      item.text !== query
+  );
+  // 新项在最前
+  history.unshift({ text: query, timestamp: now });
+  if (history.length > MAX_HISTORY_ITEMS) history = history.slice(0, MAX_HISTORY_ITEMS);
+  try {
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+  } catch (e) {
+    // 空间不足时清理
+    localStorage.removeItem(SEARCH_HISTORY_KEY);
     try {
-        localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
-    } catch (e) {
-        // 空间不足时清理
-        localStorage.removeItem(SEARCH_HISTORY_KEY);
-        try {
-            localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, 3)));
-        } catch (e2) {
-            // 两次都失败则放弃
-        }
+      localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, 3)));
+    } catch (e2) {
+      // 两次都失败则放弃
     }
-    renderSearchHistory();
+  }
+  renderSearchHistory();
 }
 
 /**
@@ -400,138 +427,139 @@ function saveSearchHistory(query) {
  * @param {Event} e 事件对象
  */
 function handleSearchTagClick(e) {
-    // 删除按钮点击
-    const delSpan = e.target.closest('span[data-deletequery]');
-    if (delSpan) {
-        deleteSingleSearchHistory(delSpan.dataset.deletequery);
-        e.stopPropagation();
-        return;
-    }
+  // 删除按钮点击
+  const delSpan = e.target.closest('span[data-deletequery]');
+  if (delSpan) {
+    deleteSingleSearchHistory(delSpan.dataset.deletequery);
+    e.stopPropagation();
+    return;
+  }
 
-    // 标签点击（只有非X按钮才允许搜索）
-    const tagBtn = e.target.closest('.search-tag');
-    if (tagBtn && !e.target.closest('span[data-deletequery]')) {
-        const searchInput = getElement('searchInput');
-        if (searchInput) {
-            searchInput.value = tagBtn.textContent.trim();
-            if (typeof search === 'function') search();
-        }
-        return;
+  // 标签点击（只有非X按钮才允许搜索）
+  const tagBtn = e.target.closest('.search-tag');
+  if (tagBtn && !e.target.closest('span[data-deletequery]')) {
+    const searchInput = getElement('searchInput');
+    if (searchInput) {
+      searchInput.value = tagBtn.textContent.trim();
+      if (typeof search === 'function') search();
     }
+    return;
+  }
 }
 
 /**
  * 渲染搜索历史标签
  */
 function renderSearchHistory() {
-    const historyContainer = getElement('recentSearches');
-    if (!historyContainer) return;
-    const history = getSearchHistory();
-    if (!history.length) { historyContainer.innerHTML = ''; return; }
-
-    const frag = document.createDocumentFragment();
-
-    const hasExternalHeader = document.getElementById('clearSearchHistory');
-    if (!hasExternalHeader) {
-        const header = document.createElement('div');
-        header.className = "flex justify-between items-center w-full mb-2";
-
-        const titleDiv = document.createElement('div');
-        titleDiv.className = "text-gray-500";
-        titleDiv.textContent = "最近搜索:";
-
-        const clearBtn = document.createElement('button');
-        clearBtn.id = "clearHistoryBtn";
-        clearBtn.className = "text-gray-500 hover:text-white transition-colors";
-        clearBtn.setAttribute('aria-label', "清除搜索历史");
-        clearBtn.textContent = "清除搜索历史";
-        clearBtn.onclick = clearSearchHistory;
-
-        header.appendChild(titleDiv);
-        header.appendChild(clearBtn);
-        frag.appendChild(header);
-    }
-
-    history.forEach(item => {
-        const tagWrap = document.createElement('div');
-        tagWrap.className = 'inline-flex items-center mb-2 mr-2';
-
-        const tag = document.createElement('button');
-        tag.className = 'search-tag';
-        tag.textContent = item.text;
-        if (item.timestamp) tag.title =
-            `搜索于: ${new Date(item.timestamp).toLocaleString()}`;
-
-        const deleteBtn = document.createElement('span');
-        deleteBtn.className =
-            'ml-2 text-gray-400 hover:text-red-500 cursor-pointer select-none flex items-center';
-        deleteBtn.setAttribute('role', 'button');
-        deleteBtn.setAttribute('aria-label', '删除');
-        deleteBtn.dataset.deletequery = item.text;
-        deleteBtn.style.fontSize = '1.15em';
-        deleteBtn.innerHTML =
-            '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none;">' +
-            '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>' +
-            '</svg>';
-
-        tagWrap.appendChild(tag);
-        tagWrap.appendChild(deleteBtn);
-        frag.appendChild(tagWrap);
-    });
-
+  const historyContainer = getElement('recentSearches');
+  if (!historyContainer) return;
+  const history = getSearchHistory();
+  if (!history.length) {
     historyContainer.innerHTML = '';
-    historyContainer.appendChild(frag);
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+
+  const hasExternalHeader = document.getElementById('clearSearchHistory');
+  if (!hasExternalHeader) {
+    const header = document.createElement('div');
+    header.className = 'flex justify-between items-center w-full mb-2';
+
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'text-gray-500';
+    titleDiv.textContent = '最近搜索:';
+
+    const clearBtn = document.createElement('button');
+    clearBtn.id = 'clearHistoryBtn';
+    clearBtn.className = 'text-gray-500 hover:text-white transition-colors';
+    clearBtn.setAttribute('aria-label', '清除搜索历史');
+    clearBtn.textContent = '清除搜索历史';
+    clearBtn.onclick = clearSearchHistory;
+
+    header.appendChild(titleDiv);
+    header.appendChild(clearBtn);
+    frag.appendChild(header);
+  }
+
+  history.forEach((item) => {
+    const tagWrap = document.createElement('div');
+    tagWrap.className = 'inline-flex items-center mb-2 mr-2';
+
+    const tag = document.createElement('button');
+    tag.className = 'search-tag';
+    tag.textContent = item.text;
+    if (item.timestamp) tag.title = `搜索于: ${new Date(item.timestamp).toLocaleString()}`;
+
+    const deleteBtn = document.createElement('span');
+    deleteBtn.className =
+      'ml-2 text-gray-400 hover:text-red-500 cursor-pointer select-none flex items-center';
+    deleteBtn.setAttribute('role', 'button');
+    deleteBtn.setAttribute('aria-label', '删除');
+    deleteBtn.dataset.deletequery = item.text;
+    deleteBtn.style.fontSize = '1.15em';
+    deleteBtn.innerHTML =
+      '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="pointer-events:none;">' +
+      '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>' +
+      '</svg>';
+
+    tagWrap.appendChild(tag);
+    tagWrap.appendChild(deleteBtn);
+    frag.appendChild(tagWrap);
+  });
+
+  historyContainer.innerHTML = '';
+  historyContainer.appendChild(frag);
 }
-
-
 
 /**
  * 删除单条搜索历史
  * @param {string} query 要删除的标签内容
  */
 function deleteSingleSearchHistory(query) {
-    try {
-        let history = getSearchHistory();
-        // 防XSS与历史一致
-        history = history.filter(item => item.text !== query);
-        localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
-        renderSearchHistory(); // 重新渲染
-    } catch (e) {
-        console.error('删除单条搜索历史失败:', e);
-        showToast('删除单条搜索历史失败', 'error');
-    }
+  try {
+    let history = getSearchHistory();
+    // 防XSS与历史一致
+    history = history.filter((item) => item.text !== query);
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+    renderSearchHistory(); // 重新渲染
+  } catch (e) {
+    console.error('删除单条搜索历史失败:', e);
+    showToast('删除单条搜索历史失败', 'error');
+  }
 }
 
 /**
  * 清除搜索历史
  */
 function clearSearchHistory() {
-    if (!checkPasswordProtection()) return;
+  if (!checkPasswordProtection()) return;
 
-    try {
-        localStorage.removeItem(SEARCH_HISTORY_KEY);
-        renderSearchHistory();
-        showToast('搜索历史已清除', 'success');
-    } catch (e) {
-        console.error('清除搜索历史失败:', e);
-        showToast('清除搜索历史失败', 'error');
-    }
+  try {
+    localStorage.removeItem(SEARCH_HISTORY_KEY);
+    renderSearchHistory();
+    showToast('搜索历史已清除', 'success');
+  } catch (e) {
+    console.error('清除搜索历史失败:', e);
+    showToast('清除搜索历史失败', 'error');
+  }
 }
 
 // ========== 观看历史相关 ================
 
-/** 
+/**
  * 时间戳人性化显示
  * @param {number} timestamp 时间戳
  * @returns {string} 格式化后的时间字符串
  */
 function formatTimestamp(timestamp) {
-    const date = new Date(timestamp), now = new Date();
-    const diff = now - date;
-    if (diff < 3600000) return `${Math.max(0, Math.floor(diff / 60000)) || '刚刚'}分钟前`;
-    if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
-    if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`;
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}
+  const date = new Date(timestamp),
+    now = new Date();
+  const diff = now - date;
+  if (diff < 3600000) return `${Math.max(0, Math.floor(diff / 60000)) || '刚刚'}分钟前`;
+  if (diff < 86400000) return `${Math.floor(diff / 3600000)}小时前`;
+  if (diff < 604800000) return `${Math.floor(diff / 86400000)}天前`;
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}
         ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
@@ -540,13 +568,13 @@ function formatTimestamp(timestamp) {
  * @returns {Array} 观看历史数组
  */
 function getViewingHistory() {
-    try {
-        const data = localStorage.getItem('viewingHistory');
-        return data ? JSON.parse(data) : [];
-    } catch (e) {
-        console.error('获取观看历史失败:', e);
-        return [];
-    }
+  try {
+    const data = localStorage.getItem('viewingHistory');
+    return data ? JSON.parse(data) : [];
+  } catch (e) {
+    console.error('获取观看历史失败:', e);
+    return [];
+  }
 }
 
 /**
@@ -554,50 +582,51 @@ function getViewingHistory() {
  * @param {Event} e 事件对象
  */
 function handleHistoryListClick(e) {
-    // ✅ 阻止事件冒泡到 document，防止触发自动关闭
-    e.stopPropagation();
+  // ✅ 阻止事件冒泡到 document，防止触发自动关闭
+  e.stopPropagation();
 
-    // 处理删除按钮点击
-    const deleteButton = e.target.closest('.history-item-delete-btn');
-    if (deleteButton) {
-        e.stopPropagation(); // 额外确保
-        const historyItem = deleteButton.closest('.history-item');
-        // Use the correct dataset attribute
-        if (historyItem && historyItem.dataset.internalId) {
-            deleteHistoryItem(historyItem.dataset.internalId); // Use internalId
-        }
-        return;
+  // 处理删除按钮点击
+  const deleteButton = e.target.closest('.history-item-delete-btn');
+  if (deleteButton) {
+    e.stopPropagation(); // 额外确保
+    const historyItem = deleteButton.closest('.history-item');
+    // Use the correct dataset attribute
+    if (historyItem && historyItem.dataset.internalId) {
+      deleteHistoryItem(historyItem.dataset.internalId); // Use internalId
+    }
+    return;
+  }
+
+  // 处理历史项点击
+  const historyItem = e.target.closest('.history-item');
+  if (historyItem) {
+    const url = historyItem.dataset.url;
+    const title = historyItem.dataset.title;
+    const episodeIndex = parseInt(historyItem.dataset.episodeIndex, 10);
+    const playbackPosition = parseInt(historyItem.dataset.playbackPosition, 10);
+    const typeName = historyItem.dataset.typeName;
+
+    // ✅ 播放前先关闭历史面板
+    const historyPanel = getElement('historyPanel');
+    if (historyPanel) {
+      historyPanel.classList.remove('show');
+      historyPanel.setAttribute('aria-hidden', 'true');
     }
 
-    // 处理历史项点击
-    const historyItem = e.target.closest('.history-item');
-    if (historyItem) {
-        const url = historyItem.dataset.url;
-        const title = historyItem.dataset.title;
-        const episodeIndex = parseInt(historyItem.dataset.episodeIndex, 10);
-        const playbackPosition = parseInt(historyItem.dataset.playbackPosition, 10);
-        const typeName = historyItem.dataset.typeName;
-
-        // ✅ 播放前先关闭历史面板
-        const historyPanel = getElement('historyPanel');
-        if (historyPanel) {
-            historyPanel.classList.remove('show');
-            historyPanel.setAttribute('aria-hidden', 'true');
-        }
-
-        playFromHistory(url, title, episodeIndex, playbackPosition, typeName);
-    }
+    playFromHistory(url, title, episodeIndex, playbackPosition, typeName);
+  }
 }
 
-/** 
+/**
  * mm:ss时间格式
  * @param {number} seconds 秒数
  * @returns {string} 格式化后的时间字符串
  */
 function formatPlaybackTime(seconds) {
-    if (!seconds || isNaN(seconds)) return '00:00';
-    const m = Math.floor(seconds / 60), s = Math.floor(seconds % 60);
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  if (!seconds || isNaN(seconds)) return '00:00';
+  const m = Math.floor(seconds / 60),
+    s = Math.floor(seconds % 60);
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
 /**
@@ -605,379 +634,402 @@ function formatPlaybackTime(seconds) {
  * @param {Object} videoInfo 视频信息对象
  */
 function addToViewingHistory(videoInfo) {
-    if (!checkPasswordProtection()) return;
-    const originalEpisodeNames = JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
+  if (!checkPasswordProtection()) return;
+  const originalEpisodeNames = JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
 
-    try {
-        let history = getViewingHistory();
+  try {
+    let history = getViewingHistory();
 
-        // 使用统一工具生成「剧 + 集」级唯一键，避免同名不同集互相覆盖
-        const internalShowIdentifier = getUniqueEpisodeId(videoInfo);
+    // 使用统一工具生成「剧 + 集」级唯一键，避免同名不同集互相覆盖
+    const internalShowIdentifier = getUniqueEpisodeId(videoInfo);
 
-        // 先用内部标识精确查重
-        let idx = history.findIndex(item => item.internalShowIdentifier === internalShowIdentifier);
-        // 如未找到，再用「标题+源+集」做一次宽松查重（兼容旧纪录缺 vod_id/year）
-        if (idx === -1) {
-            idx = history.findIndex(item =>
-                item.title === videoInfo.title &&
-                item.sourceCode === videoInfo.sourceCode &&
-                item.episodeIndex === videoInfo.episodeIndex
-            );
-        }
-
-        if (idx !== -1) { // 如果这部剧已在历史中
-            const item = history[idx];
-            // 更新为最新观看的这一集的信息
-            item.url = videoInfo.url; // 当前播放的特定集的URL
-            item.episodeIndex = videoInfo.episodeIndex;
-            item.playbackPosition = videoInfo.playbackPosition;
-            item.duration = videoInfo.duration;
-            item.timestamp = Date.now();
-            item.year = videoInfo.year || item.year;
-
-            if (videoInfo.episodes && videoInfo.episodes.length > 0) {
-                if (!item.episodes || item.episodes.length !== videoInfo.episodes.length || (item.episodes[0] !== videoInfo.episodes[0])) {
-                    item.episodes = [...videoInfo.episodes];
-                }
-            }
-            item.sourceName = videoInfo.sourceName || item.sourceName; // 保留旧的，除非新的明确提供
-
-            history.splice(idx, 1); // 移除旧条目
-            history.unshift(item);  // 将更新后的条目移到最前面
-            // 更新原始剧集名称
-            if (videoInfo.originalEpisodeNames) {
-                item.originalEpisodeNames = videoInfo.originalEpisodeNames;
-            } else if (originalEpisodeNames.length > 0) {
-                item.originalEpisodeNames = originalEpisodeNames;
-            }
-        } else {
-            // 如果是新的剧集条目
-            const originalEpisodeNames = AppState.get('originalEpisodeNames') ||
-                JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
-            const newItem = {
-                title: videoInfo.title,
-                url: videoInfo.url,
-                episodeIndex: videoInfo.episodeIndex,
-                sourceName: videoInfo.sourceName,
-                sourceCode: videoInfo.sourceCode,
-                vod_id: videoInfo.vod_id,
-                internalShowIdentifier: internalShowIdentifier, // 保存这个内部标识符
-                playbackPosition: videoInfo.playbackPosition,
-                duration: videoInfo.duration,
-                year: videoInfo.year,
-                timestamp: Date.now(),
-                episodes: (videoInfo.episodes && videoInfo.episodes.length > 0) ? [...videoInfo.episodes] : [],
-                originalEpisodeNames: originalEpisodeNames,
-                typeName: videoInfo.typeName || (window.currentVideoTypeName || '')
-            };
-            history.unshift(newItem);
-        }
-
-        if (history.length > HISTORY_MAX_ITEMS) {
-            history.splice(HISTORY_MAX_ITEMS);
-        }
-        localStorage.setItem('viewingHistory', JSON.stringify(history));
-    } catch (e) {
-        console.error('保存观看历史失败:', e);
+    // 先用内部标识精确查重
+    let idx = history.findIndex((item) => item.internalShowIdentifier === internalShowIdentifier);
+    // 如未找到，再用「标题+源+集」做一次宽松查重（兼容旧纪录缺 vod_id/year）
+    if (idx === -1) {
+      idx = history.findIndex(
+        (item) =>
+          item.title === videoInfo.title &&
+          item.sourceCode === videoInfo.sourceCode &&
+          item.episodeIndex === videoInfo.episodeIndex
+      );
     }
+
+    if (idx !== -1) {
+      // 如果这部剧已在历史中
+      const item = history[idx];
+      // 更新为最新观看的这一集的信息
+      item.url = videoInfo.url; // 当前播放的特定集的URL
+      item.episodeIndex = videoInfo.episodeIndex;
+      item.playbackPosition = videoInfo.playbackPosition;
+      item.duration = videoInfo.duration;
+      item.timestamp = Date.now();
+      item.year = videoInfo.year || item.year;
+
+      if (videoInfo.episodes && videoInfo.episodes.length > 0) {
+        if (
+          !item.episodes ||
+          item.episodes.length !== videoInfo.episodes.length ||
+          item.episodes[0] !== videoInfo.episodes[0]
+        ) {
+          item.episodes = [...videoInfo.episodes];
+        }
+      }
+      item.sourceName = videoInfo.sourceName || item.sourceName; // 保留旧的，除非新的明确提供
+
+      history.splice(idx, 1); // 移除旧条目
+      history.unshift(item); // 将更新后的条目移到最前面
+      // 更新原始剧集名称
+      if (videoInfo.originalEpisodeNames) {
+        item.originalEpisodeNames = videoInfo.originalEpisodeNames;
+      } else if (originalEpisodeNames.length > 0) {
+        item.originalEpisodeNames = originalEpisodeNames;
+      }
+    } else {
+      // 如果是新的剧集条目
+      const originalEpisodeNames =
+        AppState.get('originalEpisodeNames') ||
+        JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
+      const newItem = {
+        title: videoInfo.title,
+        url: videoInfo.url,
+        episodeIndex: videoInfo.episodeIndex,
+        sourceName: videoInfo.sourceName,
+        sourceCode: videoInfo.sourceCode,
+        vod_id: videoInfo.vod_id,
+        internalShowIdentifier: internalShowIdentifier, // 保存这个内部标识符
+        playbackPosition: videoInfo.playbackPosition,
+        duration: videoInfo.duration,
+        year: videoInfo.year,
+        timestamp: Date.now(),
+        episodes:
+          videoInfo.episodes && videoInfo.episodes.length > 0 ? [...videoInfo.episodes] : [],
+        originalEpisodeNames: originalEpisodeNames,
+        typeName: videoInfo.typeName || window.currentVideoTypeName || '',
+      };
+      history.unshift(newItem);
+    }
+
+    if (history.length > HISTORY_MAX_ITEMS) {
+      history.splice(HISTORY_MAX_ITEMS);
+    }
+    localStorage.setItem('viewingHistory', JSON.stringify(history));
+  } catch (e) {
+    console.error('保存观看历史失败:', e);
+  }
 }
 
 /**
  * 清空观看历史
  */
 function clearViewingHistory() {
-    if (!checkPasswordProtection()) return;
+  if (!checkPasswordProtection()) return;
 
-    try {
-        localStorage.removeItem('viewingHistory');
-        renderViewingHistory();
-        showToast('观看历史已清除', 'success');
-    } catch (e) {
-        console.error('清除观看历史失败:', e);
-        showToast('清除观看历史失败', 'error');
-    }
+  try {
+    localStorage.removeItem('viewingHistory');
+    renderViewingHistory();
+    showToast('观看历史已清除', 'success');
+  } catch (e) {
+    console.error('清除观看历史失败:', e);
+    showToast('清除观看历史失败', 'error');
+  }
 }
 
 /**
  * 渲染历史面板
  */
 function renderViewingHistory() {
-    const historyList = getElement('historyList');
-    if (!historyList) return;
-    const history = getViewingHistory();
-    if (!history.length) {
-        historyList.innerHTML = `<div class="text-center text-gray-500 py-8">暂无观看记录</div>`;
-        return;
+  const historyList = getElement('historyList');
+  if (!historyList) return;
+  const history = getViewingHistory();
+  if (!history.length) {
+    historyList.innerHTML = `<div class="text-center text-gray-500 py-8">暂无观看记录</div>`;
+    return;
+  }
+
+  const frag = document.createDocumentFragment();
+
+  history.forEach((item) => {
+    // 防XSS
+    const safeTitle = (item.title || '').replace(
+      /[<>"']/g,
+      (c) => ({ '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
+    );
+    const safeSource = (item.sourceName || '未知来源').replace(
+      /[<>"']/g,
+      (c) => ({ '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]
+    );
+    let episodeText = '';
+    if (item.episodeIndex !== undefined) {
+      // 优先使用保存的原始剧集名称
+      if (item.originalEpisodeNames && item.originalEpisodeNames.length > item.episodeIndex) {
+        episodeText = item.originalEpisodeNames[item.episodeIndex];
+      } else {
+        // 兼容旧记录
+        if (item.episodes && item.episodes[item.episodeIndex]) {
+          const episodeString = item.episodes[item.episodeIndex];
+          if (typeof episodeString === 'string' && episodeString.includes('$')) {
+            episodeText = episodeString.split('$')[0].trim();
+          }
+        }
+      }
+      // 如果还是没有，则显示"第X集"
+      if (!episodeText) {
+        episodeText = `第${item.episodeIndex + 1}集`;
+      }
+    }
+    const historyItem = document.createElement('div');
+    historyItem.className = 'history-item cursor-pointer relative group';
+    historyItem.dataset.url = item.url;
+    historyItem.dataset.title = safeTitle;
+    historyItem.dataset.episodeIndex = item.episodeIndex || 0;
+    historyItem.dataset.playbackPosition = item.playbackPosition || 0;
+    historyItem.dataset.internalId = item.internalShowIdentifier;
+    historyItem.dataset.typeName = item.typeName || '';
+
+    // 构建历史项内容
+    const historyInfo = document.createElement('div');
+    historyInfo.className = 'history-info';
+
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'history-title';
+    titleDiv.innerHTML = safeTitle;
+
+    const metaDiv = document.createElement('div');
+    metaDiv.className = 'history-meta';
+
+    if (episodeText) {
+      const episodeSpan = document.createElement('span');
+      episodeSpan.className = 'history-episode';
+      episodeSpan.innerHTML = episodeText;
+      metaDiv.appendChild(episodeSpan);
+
+      const separatorSpan = document.createElement('span');
+      separatorSpan.className = 'history-separator mx-1';
+      separatorSpan.innerHTML = '·';
+      metaDiv.appendChild(separatorSpan);
     }
 
-    const frag = document.createDocumentFragment();
+    const sourceSpan = document.createElement('span');
+    sourceSpan.className = 'history-source';
+    sourceSpan.innerHTML = safeSource;
+    metaDiv.appendChild(sourceSpan);
 
-    history.forEach(item => {
-        // 防XSS
-        const safeTitle = (item.title || '').replace(/[<>"']/g, c => ({ '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-        const safeSource = (item.sourceName || '未知来源').replace(/[<>"']/g, c => ({ '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-        let episodeText = '';
-        if (item.episodeIndex !== undefined) {
-            // 优先使用保存的原始剧集名称
-            if (item.originalEpisodeNames && item.originalEpisodeNames.length > item.episodeIndex) {
-                episodeText = item.originalEpisodeNames[item.episodeIndex];
-            } else {
-                // 兼容旧记录
-                if (item.episodes && item.episodes[item.episodeIndex]) {
-                    const episodeString = item.episodes[item.episodeIndex];
-                    if (typeof episodeString === 'string' && episodeString.includes('$')) {
-                        episodeText = episodeString.split('$')[0].trim();
-                    }
-                }
-            }
-            // 如果还是没有，则显示"第X集"
-            if (!episodeText) {
-                episodeText = `第${item.episodeIndex + 1}集`;
-            }
-        }
-        const historyItem = document.createElement('div');
-        historyItem.className = 'history-item cursor-pointer relative group';
-        historyItem.dataset.url = item.url;
-        historyItem.dataset.title = safeTitle;
-        historyItem.dataset.episodeIndex = item.episodeIndex || 0;
-        historyItem.dataset.playbackPosition = item.playbackPosition || 0;
-        historyItem.dataset.internalId = item.internalShowIdentifier;
-        historyItem.dataset.typeName = item.typeName || '';
+    const timeDiv = document.createElement('div');
+    timeDiv.className = 'history-time';
+    timeDiv.textContent = formatTimestamp(item.timestamp);
 
-        // 构建历史项内容
-        const historyInfo = document.createElement('div');
-        historyInfo.className = 'history-info';
+    historyInfo.appendChild(titleDiv);
+    historyInfo.appendChild(metaDiv);
 
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'history-title';
-        titleDiv.innerHTML = safeTitle;
+    // 进度条
+    if (
+      item.playbackPosition &&
+      item.duration &&
+      item.playbackPosition > 10 &&
+      item.playbackPosition < item.duration * 0.95
+    ) {
+      const progressDiv = document.createElement('div');
+      progressDiv.className = 'history-progress';
 
-        const metaDiv = document.createElement('div');
-        metaDiv.className = 'history-meta';
+      const progressBar = document.createElement('div');
+      progressBar.className = 'progress-bar';
 
-        if (episodeText) {
-            const episodeSpan = document.createElement('span');
-            episodeSpan.className = 'history-episode';
-            episodeSpan.innerHTML = episodeText;
-            metaDiv.appendChild(episodeSpan);
+      const progressFilled = document.createElement('div');
+      progressFilled.className = 'progress-filled';
+      progressFilled.style.width = `${Math.round((item.playbackPosition / item.duration) * 100)}%`;
 
-            const separatorSpan = document.createElement('span');
-            separatorSpan.className = 'history-separator mx-1';
-            separatorSpan.innerHTML = '·';
-            metaDiv.appendChild(separatorSpan);
-        }
+      const progressText = document.createElement('div');
+      progressText.className = 'progress-text';
+      progressText.textContent = `${formatPlaybackTime(item.playbackPosition)} / ${formatPlaybackTime(item.duration)}`;
 
-        const sourceSpan = document.createElement('span');
-        sourceSpan.className = 'history-source';
-        sourceSpan.innerHTML = safeSource;
-        metaDiv.appendChild(sourceSpan);
+      progressBar.appendChild(progressFilled);
+      progressDiv.appendChild(progressBar);
+      progressDiv.appendChild(progressText);
+      historyInfo.appendChild(progressDiv);
+    }
 
-        const timeDiv = document.createElement('div');
-        timeDiv.className = 'history-time';
-        timeDiv.textContent = formatTimestamp(item.timestamp);
+    historyInfo.appendChild(timeDiv);
+    historyItem.appendChild(historyInfo);
 
-        historyInfo.appendChild(titleDiv);
-        historyInfo.appendChild(metaDiv);
-
-        // 进度条
-        if (item.playbackPosition && item.duration && item.playbackPosition > 10 && item.playbackPosition < item.duration * 0.95) {
-            const progressDiv = document.createElement('div');
-            progressDiv.className = 'history-progress';
-
-            const progressBar = document.createElement('div');
-            progressBar.className = 'progress-bar';
-
-            const progressFilled = document.createElement('div');
-            progressFilled.className = 'progress-filled';
-            progressFilled.style.width = `${Math.round(item.playbackPosition / item.duration * 100)}%`;
-
-            const progressText = document.createElement('div');
-            progressText.className = 'progress-text';
-            progressText.textContent = `${formatPlaybackTime(item.playbackPosition)} / ${formatPlaybackTime(item.duration)}`;
-
-            progressBar.appendChild(progressFilled);
-            progressDiv.appendChild(progressBar);
-            progressDiv.appendChild(progressText);
-            historyInfo.appendChild(progressDiv);
-        }
-
-        historyInfo.appendChild(timeDiv);
-        historyItem.appendChild(historyInfo);
-
-        // 删除按钮
-        const deleteButton = document.createElement('button');
-        deleteButton.className = 'history-item-delete-btn absolute right-2 top-2 transition-opacity duration-200 text-gray-400 hover:text-red-400 p-1 rounded-full hover:bg-gray-800 z-10';
-        deleteButton.title = '删除记录';
-        deleteButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    // 删除按钮
+    const deleteButton = document.createElement('button');
+    deleteButton.className =
+      'history-item-delete-btn absolute right-2 top-2 transition-opacity duration-200 text-gray-400 hover:text-red-400 p-1 rounded-full hover:bg-gray-800 z-10';
+    deleteButton.title = '删除记录';
+    deleteButton.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>`;
 
-        historyItem.appendChild(deleteButton);
-        frag.appendChild(historyItem);
-    });
+    historyItem.appendChild(deleteButton);
+    frag.appendChild(historyItem);
+  });
 
-    historyList.innerHTML = '';
-    historyList.appendChild(frag);
-    if (history.length > 5) historyList.classList.add('pb-4');
+  historyList.innerHTML = '';
+  historyList.appendChild(frag);
+  if (history.length > 5) historyList.classList.add('pb-4');
 }
 
 /**
  * 初始化事件监听器
  */
 function attachEventListeners() {
-    // 设置按钮事件
-    const settingsButton = getElement('settingsButton');
-    if (settingsButton) {
-        settingsButton.addEventListener('click', (e) => (window.toggleSettings || toggleSettings)(e));
-    }
+  // 设置按钮事件
+  const settingsButton = getElement('settingsButton');
+  if (settingsButton) {
+    settingsButton.addEventListener('click', (e) => (window.toggleSettings || toggleSettings)(e));
+  }
 
-    // 监听设置密码验证成功的事件
-    document.addEventListener('settingsPasswordVerified', actuallyToggleSettingsPanel);
+  // 监听设置密码验证成功的事件
+  document.addEventListener('settingsPasswordVerified', actuallyToggleSettingsPanel);
 
-    // ✅ 修改：简化历史按钮的事件绑定
-    const historyButton = getElement('historyButton');
-    if (historyButton) {
-        console.log('Binding history button'); // 调试日志
-        historyButton.addEventListener('click', toggleHistory); // 直接绑定，不使用复杂逻辑
-    }
+  // ✅ 修改：简化历史按钮的事件绑定
+  const historyButton = getElement('historyButton');
+  if (historyButton) {
+    console.log('Binding history button'); // 调试日志
+    historyButton.addEventListener('click', toggleHistory); // 直接绑定，不使用复杂逻辑
+  }
 
-    // 关闭设置面板按钮
-    const closeSettingsPanelButton = getElement('closeSettingsPanelButton');
-    if (closeSettingsPanelButton) {
-        closeSettingsPanelButton.addEventListener('click', toggleSettings);
-    }
+  // 关闭设置面板按钮
+  const closeSettingsPanelButton = getElement('closeSettingsPanelButton');
+  if (closeSettingsPanelButton) {
+    closeSettingsPanelButton.addEventListener('click', toggleSettings);
+  }
 
-    // 关闭历史面板按钮
-    const closeHistoryPanelButton = getElement('closeHistoryPanelButton');
-    if (closeHistoryPanelButton) {
-        closeHistoryPanelButton.addEventListener('click', toggleHistory);
-    }
+  // 关闭历史面板按钮
+  const closeHistoryPanelButton = getElement('closeHistoryPanelButton');
+  if (closeHistoryPanelButton) {
+    closeHistoryPanelButton.addEventListener('click', toggleHistory);
+  }
 
-    // 清空观看历史按钮
-    const clearViewingHistoryBtn = getElement('clearViewingHistoryBtn') || getElement('clearViewingHistoryButton');
-    if (clearViewingHistoryBtn) {
-        clearViewingHistoryBtn.addEventListener('click', clearViewingHistory);
-    }
+  // 清空观看历史按钮
+  const clearViewingHistoryBtn =
+    getElement('clearViewingHistoryBtn') || getElement('clearViewingHistoryButton');
+  if (clearViewingHistoryBtn) {
+    clearViewingHistoryBtn.addEventListener('click', clearViewingHistory);
+  }
 
-    // 关闭模态框按钮
-    const closeModalButton = getElement('closeModalButton');
-    if (closeModalButton) {
-        closeModalButton.addEventListener('click', closeModal);
-    }
+  // 关闭模态框按钮
+  const closeModalButton = getElement('closeModalButton');
+  if (closeModalButton) {
+    closeModalButton.addEventListener('click', closeModal);
+  }
 
-    // 搜索历史标签点击事件委托
-    const recentSearches = getElement('recentSearches');
-    if (recentSearches) {
-        recentSearches.addEventListener('click', handleSearchTagClick);
-    }
+  // 搜索历史标签点击事件委托
+  const recentSearches = getElement('recentSearches');
+  if (recentSearches) {
+    recentSearches.addEventListener('click', handleSearchTagClick);
+  }
 
-    // 观看历史列表点击事件委托
-    const historyList = getElement('historyList');
-    if (historyList) {
-        historyList.addEventListener('click', handleHistoryListClick);
-    }
+  // 观看历史列表点击事件委托
+  const historyList = getElement('historyList');
+  if (historyList) {
+    historyList.addEventListener('click', handleHistoryListClick);
+  }
 
-    // 初始化其他可能的事件监听器
-    initializeAdditionalListeners();
+  // 初始化其他可能的事件监听器
+  initializeAdditionalListeners();
 }
 
 /**
  * 初始化其他可能的事件监听器
  */
 function initializeAdditionalListeners() {
-    const apiSelectButtons = document.querySelectorAll('[data-action="selectAllAPIs"]');
-    if (apiSelectButtons.length > 0) {
-        const apiSelectHandler = function () {
-            const selectAll = this.dataset.value === 'true';
-            if (typeof window.selectAllAPIs === 'function') {
-                window.selectAllAPIs(selectAll);
-            }
-        };
+  const apiSelectButtons = document.querySelectorAll('[data-action="selectAllAPIs"]');
+  if (apiSelectButtons.length > 0) {
+    const apiSelectHandler = function () {
+      const selectAll = this.dataset.value === 'true';
+      if (typeof window.selectAllAPIs === 'function') {
+        window.selectAllAPIs(selectAll);
+      }
+    };
 
-        apiSelectButtons.forEach(button => {
-            button.addEventListener('click', apiSelectHandler);
-        });
-    }
+    apiSelectButtons.forEach((button) => {
+      button.addEventListener('click', apiSelectHandler);
+    });
+  }
 
-    // 自定义API管理
-    const addCustomApiButton = document.querySelector('[data-action="showAddCustomApiForm"]');
-    if (addCustomApiButton && typeof window.showAddCustomApiForm === 'function') {
-        addCustomApiButton.addEventListener('click', window.showAddCustomApiForm);
-    }
+  // 自定义API管理
+  const addCustomApiButton = document.querySelector('[data-action="showAddCustomApiForm"]');
+  if (addCustomApiButton && typeof window.showAddCustomApiForm === 'function') {
+    addCustomApiButton.addEventListener('click', window.showAddCustomApiForm);
+  }
 }
 
 /**
  * 设置面板自动关闭功能
  */
 function setupPanelAutoClose() {
-    // ✅ 移除旧的监听器（如果存在）
-    if (window._panelAutoCloseHandler) {
-        document.removeEventListener('click', window._panelAutoCloseHandler);
+  // ✅ 移除旧的监听器（如果存在）
+  if (window._panelAutoCloseHandler) {
+    document.removeEventListener('click', window._panelAutoCloseHandler);
+  }
+
+  // ✅ 创建新的处理函数
+  window._panelAutoCloseHandler = function (event) {
+    const settingsButton = document.getElementById('settingsButton');
+    const historyButton = document.getElementById('historyButton');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const historyPanel = document.getElementById('historyPanel');
+
+    // ✅ 检查点击是否在按钮或面板内部
+    // 使用可选链操作符以防元素不存在
+    const clickedInsideSettings =
+      settingsButton?.contains(event.target) || settingsPanel?.contains(event.target);
+    const clickedInsideHistory =
+      historyButton?.contains(event.target) || historyPanel?.contains(event.target);
+
+    // ✅ 如果点击在设置或历史相关元素内，不做任何处理
+    if (clickedInsideSettings || clickedInsideHistory) {
+      return;
     }
 
-    // ✅ 创建新的处理函数
-    window._panelAutoCloseHandler = function (event) {
-        const settingsButton = document.getElementById('settingsButton');
-        const historyButton = document.getElementById('historyButton');
-        const settingsPanel = document.getElementById('settingsPanel');
-        const historyPanel = document.getElementById('historyPanel');
+    // ✅ 关闭设置面板
+    if (settingsPanel && settingsPanel.classList.contains('show')) {
+      settingsPanel.classList.remove('show');
+      settingsPanel.setAttribute('aria-hidden', 'true');
+      console.log('Auto-closing settings panel'); // 调试日志
+    }
 
-        // ✅ 检查点击是否在按钮或面板内部
-        // 使用可选链操作符以防元素不存在
-        const clickedInsideSettings = settingsButton?.contains(event.target) || settingsPanel?.contains(event.target);
-        const clickedInsideHistory = historyButton?.contains(event.target) || historyPanel?.contains(event.target);
+    // ✅ 关闭历史面板
+    if (historyPanel && historyPanel.classList.contains('show')) {
+      historyPanel.classList.remove('show');
+      historyPanel.setAttribute('aria-hidden', 'true');
+      console.log('Auto-closing history panel'); // 调试日志
+    }
+  };
 
-        // ✅ 如果点击在设置或历史相关元素内，不做任何处理
-        if (clickedInsideSettings || clickedInsideHistory) {
-            return;
-        }
-
-        // ✅ 关闭设置面板
-        if (settingsPanel && settingsPanel.classList.contains('show')) {
-            settingsPanel.classList.remove('show');
-            settingsPanel.setAttribute('aria-hidden', 'true');
-            console.log('Auto-closing settings panel'); // 调试日志
-        }
-
-        // ✅ 关闭历史面板
-        if (historyPanel && historyPanel.classList.contains('show')) {
-            historyPanel.classList.remove('show');
-            historyPanel.setAttribute('aria-hidden', 'true');
-            console.log('Auto-closing history panel'); // 调试日志
-        }
-    };
-
-    // ✅ 添加新的监听器
-    document.addEventListener('click', window._panelAutoCloseHandler);
+  // ✅ 添加新的监听器
+  document.addEventListener('click', window._panelAutoCloseHandler);
 }
 
 /**
  * 删除单条观看历史
  */
 function deleteHistoryItem(internalId) {
-    try {
-        let history = getViewingHistory();
-        const updatedHistory = history.filter(item => item.internalShowIdentifier !== internalId);
+  try {
+    let history = getViewingHistory();
+    const updatedHistory = history.filter((item) => item.internalShowIdentifier !== internalId);
 
-        if (history.length !== updatedHistory.length) {
-            localStorage.setItem('viewingHistory', JSON.stringify(updatedHistory));
-            if (typeof renderViewingHistory === 'function') renderViewingHistory();
-            showToast('已删除该条记录', 'success');
-        } else {
-            showToast('未找到要删除的记录', 'warning');
-        }
-    } catch (e) {
-        console.error('删除观看历史失败:', e);
-        showToast('删除历史记录失败', 'error');
+    if (history.length !== updatedHistory.length) {
+      localStorage.setItem('viewingHistory', JSON.stringify(updatedHistory));
+      if (typeof renderViewingHistory === 'function') renderViewingHistory();
+      showToast('已删除该条记录', 'success');
+    } else {
+      showToast('未找到要删除的记录', 'warning');
     }
+  } catch (e) {
+    console.error('删除观看历史失败:', e);
+    showToast('删除历史记录失败', 'error');
+  }
 }
 
 // 统一生命周期初始化
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOMContentLoaded - ui.js'); // 调试日志
-    attachEventListeners();
-    renderSearchHistory();
-    setupPanelAutoClose();
+  console.log('DOMContentLoaded - ui.js'); // 调试日志
+  attachEventListeners();
+  renderSearchHistory();
+  setupPanelAutoClose();
 });
 
 // 导出所有公共接口到全局（适应 Astro 静态脚本模式）

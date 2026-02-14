@@ -5,260 +5,305 @@ const CACHE_TTL = parseInt(import.meta.env.CACHE_TTL || '86400', 10);
 const MAX_RECURSION = parseInt(import.meta.env.MAX_RECURSION || '5', 10);
 
 let USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15'
+  'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
 ];
 
 function logDebug(message: string) {
-    if (DEBUG_ENABLED) {
-        console.log(`[Proxy Log] ${message}`);
-    }
+  if (DEBUG_ENABLED) {
+    console.log(`[Proxy Log] ${message}`);
+  }
 }
 
 function getBaseUrl(urlStr: string): string {
-    if (!urlStr) return '';
-    try {
-        const parsedUrl = new URL(urlStr);
-        const pathSegments = parsedUrl.pathname.split('/').filter(Boolean);
-        if (pathSegments.length <= 1) {
-            return `${parsedUrl.origin}/`;
-        }
-        pathSegments.pop();
-        return `${parsedUrl.origin}/${pathSegments.join('/')}/`;
-    } catch (e) {
-        const lastSlashIndex = urlStr.lastIndexOf('/');
-        if (lastSlashIndex > urlStr.indexOf('://') + 2) {
-            return urlStr.substring(0, lastSlashIndex + 1);
-        }
-        return urlStr + '/';
+  if (!urlStr) return '';
+  try {
+    const parsedUrl = new URL(urlStr);
+    const pathSegments = parsedUrl.pathname.split('/').filter(Boolean);
+    if (pathSegments.length <= 1) {
+      return `${parsedUrl.origin}/`;
     }
+    pathSegments.pop();
+    return `${parsedUrl.origin}/${pathSegments.join('/')}/`;
+  } catch (e) {
+    const lastSlashIndex = urlStr.lastIndexOf('/');
+    if (lastSlashIndex > urlStr.indexOf('://') + 2) {
+      return urlStr.substring(0, lastSlashIndex + 1);
+    }
+    return urlStr + '/';
+  }
 }
 
 function resolveUrl(baseUrl: string, relativeUrl: string): string {
-    if (!relativeUrl) return '';
-    if (relativeUrl.match(/^https?:\/\/.+/i)) return relativeUrl;
-    if (!baseUrl) return relativeUrl;
+  if (!relativeUrl) return '';
+  if (relativeUrl.match(/^https?:\/\/.+/i)) return relativeUrl;
+  if (!baseUrl) return relativeUrl;
 
-    try {
-        return new URL(relativeUrl, baseUrl).toString();
-    } catch (e) {
-        if (relativeUrl.startsWith('/')) {
-            try {
-                const baseOrigin = new URL(baseUrl).origin;
-                return `${baseOrigin}${relativeUrl}`;
-            } catch { return relativeUrl; }
-        } else {
-            return `${baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1)}${relativeUrl}`;
-        }
+  try {
+    return new URL(relativeUrl, baseUrl).toString();
+  } catch (e) {
+    if (relativeUrl.startsWith('/')) {
+      try {
+        const baseOrigin = new URL(baseUrl).origin;
+        return `${baseOrigin}${relativeUrl}`;
+      } catch {
+        return relativeUrl;
+      }
+    } else {
+      return `${baseUrl.substring(0, baseUrl.lastIndexOf('/') + 1)}${relativeUrl}`;
     }
+  }
 }
 
 function rewriteUrlToProxy(targetUrl: string): string {
-    if (!targetUrl || typeof targetUrl !== 'string') return '';
-    return `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
+  if (!targetUrl || typeof targetUrl !== 'string') return '';
+  return `/api/proxy?url=${encodeURIComponent(targetUrl)}`;
 }
 
 function getRandomUserAgent(): string {
-    return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+  return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
 }
 
 async function fetchContentWithType(targetUrl: string, requestHeaders: Headers) {
-    const headers: Record<string, string> = {
-        'User-Agent': getRandomUserAgent(),
-        'Accept': requestHeaders.get('accept') || '*/*',
-        'Accept-Language': requestHeaders.get('accept-language') || 'zh-CN,zh;q=0.9,en;q=0.8',
-    };
+  const headers: Record<string, string> = {
+    'User-Agent': getRandomUserAgent(),
+    Accept: requestHeaders.get('accept') || '*/*',
+    'Accept-Language': requestHeaders.get('accept-language') || 'zh-CN,zh;q=0.9,en;q=0.8',
+  };
 
-    const referer = requestHeaders.get('referer');
-    if (referer) {
-        headers['Referer'] = referer;
-    } else {
-        try {
-            headers['Referer'] = new URL(targetUrl).origin;
-        } catch { }
-    }
-
-    logDebug(`Fetching: ${targetUrl}`);
-
+  const referer = requestHeaders.get('referer');
+  if (referer) {
+    headers['Referer'] = referer;
+  } else {
     try {
-        const response = await fetch(targetUrl, { headers, redirect: 'follow' });
-        if (!response.ok) {
-            const errorBody = await response.text().catch(() => '');
-            const err = new Error(`HTTP Error ${response.status}: ${response.statusText}. URL: ${targetUrl}. Body: ${errorBody.substring(0, 200)}`) as any;
-            err.status = response.status;
-            throw err;
-        }
+      headers['Referer'] = new URL(targetUrl).origin;
+    } catch {}
+  }
 
-        const contentType = response.headers.get('content-type') || '';
-        const isM3u8 = contentType.includes('mpegurl') || contentType.includes('x-mpegurl') || targetUrl.includes('.m3u8');
+  logDebug(`Fetching: ${targetUrl}`);
 
-        // 如果是 M3U8，则处理文本；否则（如 .ts 或图片）直接返回 ArrayBuffer
-        if (isM3u8) {
-            const content = await response.text();
-            return { content, contentType, responseHeaders: response.headers, isBinary: false };
-        } else {
-            const content = await response.arrayBuffer();
-            return { content, contentType, responseHeaders: response.headers, isBinary: true };
-        }
-    } catch (error) {
-        throw new Error(`Fetch failed for ${targetUrl}: ${error instanceof Error ? error.message : String(error)}`);
+  try {
+    const response = await fetch(targetUrl, { headers, redirect: 'follow' });
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => '');
+      const err = new Error(
+        `HTTP Error ${response.status}: ${response.statusText}. URL: ${targetUrl}. Body: ${errorBody.substring(0, 200)}`
+      ) as any;
+      err.status = response.status;
+      throw err;
     }
+
+    const contentType = response.headers.get('content-type') || '';
+    const isM3u8 =
+      contentType.includes('mpegurl') ||
+      contentType.includes('x-mpegurl') ||
+      targetUrl.includes('.m3u8');
+
+    // 如果是 M3U8，则处理文本；否则（如 .ts 或图片）直接返回 ArrayBuffer
+    if (isM3u8) {
+      const content = await response.text();
+      return { content, contentType, responseHeaders: response.headers, isBinary: false };
+    } else {
+      const content = await response.arrayBuffer();
+      return { content, contentType, responseHeaders: response.headers, isBinary: true };
+    }
+  } catch (error) {
+    throw new Error(
+      `Fetch failed for ${targetUrl}: ${error instanceof Error ? error.message : String(error)}`
+    );
+  }
 }
 
 function isM3u8Content(content: string | ArrayBuffer, contentType: string): boolean {
-    if (typeof content !== 'string') return false;
-    if (contentType && (contentType.includes('application/vnd.apple.mpegurl') || contentType.includes('application/x-mpegurl') || contentType.includes('audio/mpegurl'))) {
-        return true;
-    }
-    return !!(content && content.trim().startsWith('#EXTM3U'));
+  if (typeof content !== 'string') return false;
+  if (
+    contentType &&
+    (contentType.includes('application/vnd.apple.mpegurl') ||
+      contentType.includes('application/x-mpegurl') ||
+      contentType.includes('audio/mpegurl'))
+  ) {
+    return true;
+  }
+  return !!(content && content.trim().startsWith('#EXTM3U'));
 }
 
 function processKeyLine(line: string, baseUrl: string): string {
-    return line.replace(/URI\s*=\s*"([^"]+)"/, (match, uri) => {
-        const absoluteUri = resolveUrl(baseUrl, uri);
-        return `URI="${rewriteUrlToProxy(absoluteUri)}"`;
-    });
+  return line.replace(/URI\s*=\s*"([^"]+)"/, (match, uri) => {
+    const absoluteUri = resolveUrl(baseUrl, uri);
+    return `URI="${rewriteUrlToProxy(absoluteUri)}"`;
+  });
 }
 
 function processMapLine(line: string, baseUrl: string): string {
-    return line.replace(/URI\s*=\s*"([^"]+)"/, (match, uri) => {
-        const absoluteUri = resolveUrl(baseUrl, uri);
-        return `URI="${rewriteUrlToProxy(absoluteUri)}"`;
-    });
+  return line.replace(/URI\s*=\s*"([^"]+)"/, (match, uri) => {
+    const absoluteUri = resolveUrl(baseUrl, uri);
+    return `URI="${rewriteUrlToProxy(absoluteUri)}"`;
+  });
 }
 
 function processMediaPlaylist(url: string, content: string): string {
-    const baseUrl = getBaseUrl(url);
-    const lines = content.split(/\r?\n/);
-    const output: string[] = [];
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-        if (line.startsWith('#EXT-X-KEY')) { output.push(processKeyLine(line, baseUrl)); continue; }
-        if (line.startsWith('#EXT-X-MAP')) { output.push(processMapLine(line, baseUrl)); continue; }
-        if (line.startsWith('#EXTINF')) { output.push(line); continue; }
-        if (!line.startsWith('#')) {
-            const absoluteUrl = resolveUrl(baseUrl, line);
-            output.push(rewriteUrlToProxy(absoluteUrl)); continue;
-        }
-        output.push(line);
+  const baseUrl = getBaseUrl(url);
+  const lines = content.split(/\r?\n/);
+  const output: string[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    if (line.startsWith('#EXT-X-KEY')) {
+      output.push(processKeyLine(line, baseUrl));
+      continue;
     }
-    return output.join('\n');
+    if (line.startsWith('#EXT-X-MAP')) {
+      output.push(processMapLine(line, baseUrl));
+      continue;
+    }
+    if (line.startsWith('#EXTINF')) {
+      output.push(line);
+      continue;
+    }
+    if (!line.startsWith('#')) {
+      const absoluteUrl = resolveUrl(baseUrl, line);
+      output.push(rewriteUrlToProxy(absoluteUrl));
+      continue;
+    }
+    output.push(line);
+  }
+  return output.join('\n');
 }
 
-async function processM3u8Content(targetUrl: string, content: string, recursionDepth = 0): Promise<string> {
-    if (content.includes('#EXT-X-STREAM-INF') || content.includes('#EXT-X-MEDIA:')) {
-        return await processMasterPlaylist(targetUrl, content, recursionDepth);
-    }
-    return processMediaPlaylist(targetUrl, content);
+async function processM3u8Content(
+  targetUrl: string,
+  content: string,
+  recursionDepth = 0
+): Promise<string> {
+  if (content.includes('#EXT-X-STREAM-INF') || content.includes('#EXT-X-MEDIA:')) {
+    return await processMasterPlaylist(targetUrl, content, recursionDepth);
+  }
+  return processMediaPlaylist(targetUrl, content);
 }
 
-async function processMasterPlaylist(url: string, content: string, recursionDepth: number): Promise<string> {
-    if (recursionDepth > MAX_RECURSION) {
-        throw new Error(`Max recursion depth reached (${MAX_RECURSION}) for: ${url}`);
-    }
-    const baseUrl = getBaseUrl(url);
-    const lines = content.split(/\r?\n/);
-    let highestBandwidth = -1;
-    let bestVariantUrl = '';
+async function processMasterPlaylist(
+  url: string,
+  content: string,
+  recursionDepth: number
+): Promise<string> {
+  if (recursionDepth > MAX_RECURSION) {
+    throw new Error(`Max recursion depth reached (${MAX_RECURSION}) for: ${url}`);
+  }
+  const baseUrl = getBaseUrl(url);
+  const lines = content.split(/\r?\n/);
+  let highestBandwidth = -1;
+  let bestVariantUrl = '';
 
+  for (let i = 0; i < lines.length; i++) {
+    if (lines[i].startsWith('#EXT-X-STREAM-INF')) {
+      const bandwidthMatch = lines[i].match(/BANDWIDTH=(\d+)/);
+      const currentBandwidth = bandwidthMatch ? parseInt(bandwidthMatch[1], 10) : 0;
+      let variantUriLine = '';
+      for (let j = i + 1; j < lines.length; j++) {
+        const line = lines[j].trim();
+        if (line && !line.startsWith('#')) {
+          variantUriLine = line;
+          i = j;
+          break;
+        }
+      }
+      if (variantUriLine && currentBandwidth >= highestBandwidth) {
+        highestBandwidth = currentBandwidth;
+        bestVariantUrl = resolveUrl(baseUrl, variantUriLine);
+      }
+    }
+  }
+  if (!bestVariantUrl) {
     for (let i = 0; i < lines.length; i++) {
-        if (lines[i].startsWith('#EXT-X-STREAM-INF')) {
-            const bandwidthMatch = lines[i].match(/BANDWIDTH=(\d+)/);
-            const currentBandwidth = bandwidthMatch ? parseInt(bandwidthMatch[1], 10) : 0;
-            let variantUriLine = '';
-            for (let j = i + 1; j < lines.length; j++) {
-                const line = lines[j].trim();
-                if (line && !line.startsWith('#')) { variantUriLine = line; i = j; break; }
-            }
-            if (variantUriLine && currentBandwidth >= highestBandwidth) {
-                highestBandwidth = currentBandwidth;
-                bestVariantUrl = resolveUrl(baseUrl, variantUriLine);
-            }
-        }
+      const line = lines[i].trim();
+      if (line && !line.startsWith('#') && line.match(/\.m3u8($|\?.*)/i)) {
+        bestVariantUrl = resolveUrl(baseUrl, line);
+        break;
+      }
     }
-    if (!bestVariantUrl) {
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (line && !line.startsWith('#') && line.match(/\.m3u8($|\?.*)/i)) {
-                bestVariantUrl = resolveUrl(baseUrl, line);
-                break;
-            }
-        }
-    }
-    if (!bestVariantUrl) {
-        return processMediaPlaylist(url, content);
-    }
+  }
+  if (!bestVariantUrl) {
+    return processMediaPlaylist(url, content);
+  }
 
-    const fetchResult = await fetchContentWithType(bestVariantUrl, new Headers());
-    const variantContent = fetchResult.content as string;
-    const variantContentType = fetchResult.contentType;
+  const fetchResult = await fetchContentWithType(bestVariantUrl, new Headers());
+  const variantContent = fetchResult.content as string;
+  const variantContentType = fetchResult.contentType;
 
-    if (!isM3u8Content(variantContent, variantContentType)) {
-        return processMediaPlaylist(bestVariantUrl, variantContent);
-    }
+  if (!isM3u8Content(variantContent, variantContentType)) {
+    return processMediaPlaylist(bestVariantUrl, variantContent);
+  }
 
-    return await processM3u8Content(bestVariantUrl, variantContent, recursionDepth + 1);
+  return await processM3u8Content(bestVariantUrl, variantContent, recursionDepth + 1);
 }
 
 export const GET: APIRoute = async ({ request, url }) => {
-    const targetUrl = url.searchParams.get('url');
+  const targetUrl = url.searchParams.get('url');
 
-    if (!targetUrl) {
-        return new Response('Target URL is required.', { status: 400 });
-    }
+  if (!targetUrl) {
+    return new Response('Target URL is required.', { status: 400 });
+  }
 
-    try {
-        const { content, contentType, responseHeaders, isBinary } = await fetchContentWithType(targetUrl, request.headers);
+  try {
+    const { content, contentType, responseHeaders, isBinary } = await fetchContentWithType(
+      targetUrl,
+      request.headers
+    );
 
-        const returnHeaders = new Headers();
-        returnHeaders.set('Access-Control-Allow-Origin', '*');
-        returnHeaders.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-        returnHeaders.set('Access-Control-Allow-Headers', '*');
-        returnHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL}`);
+    const returnHeaders = new Headers();
+    returnHeaders.set('Access-Control-Allow-Origin', '*');
+    returnHeaders.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    returnHeaders.set('Access-Control-Allow-Headers', '*');
+    returnHeaders.set('Cache-Control', `public, max-age=${CACHE_TTL}`);
 
-        if (!isBinary && isM3u8Content(content as string, contentType)) {
-            const processedM3u8 = await processM3u8Content(targetUrl, content as string);
-            returnHeaders.set('Content-Type', 'application/vnd.apple.mpegurl;charset=utf-8');
-            return new Response(processedM3u8, { status: 200, headers: returnHeaders });
-        } else {
-            responseHeaders.forEach((value, key) => {
-                const lowerKey = key.toLowerCase();
-                if (!lowerKey.startsWith('access-control-') &&
-                    lowerKey !== 'content-encoding' &&
-                    lowerKey !== 'content-length') {
-                    returnHeaders.set(key, value);
-                }
-            });
-            returnHeaders.set('Content-Type', contentType || (isBinary ? 'application/octet-stream' : 'text/plain'));
-            return new Response(content, { status: 200, headers: returnHeaders });
+    if (!isBinary && isM3u8Content(content as string, contentType)) {
+      const processedM3u8 = await processM3u8Content(targetUrl, content as string);
+      returnHeaders.set('Content-Type', 'application/vnd.apple.mpegurl;charset=utf-8');
+      return new Response(processedM3u8, { status: 200, headers: returnHeaders });
+    } else {
+      responseHeaders.forEach((value, key) => {
+        const lowerKey = key.toLowerCase();
+        if (
+          !lowerKey.startsWith('access-control-') &&
+          lowerKey !== 'content-encoding' &&
+          lowerKey !== 'content-length'
+        ) {
+          returnHeaders.set(key, value);
         }
-
-    } catch (error) {
-        console.error(`Proxy error for ${targetUrl}:`, error);
-        return new Response(JSON.stringify({
-            success: false,
-            error: `Proxy error: ${error instanceof Error ? error.message : String(error)}`,
-            targetUrl
-        }), {
-            status: (error as any).status || 500,
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-            }
-        });
+      });
+      returnHeaders.set(
+        'Content-Type',
+        contentType || (isBinary ? 'application/octet-stream' : 'text/plain')
+      );
+      return new Response(content, { status: 200, headers: returnHeaders });
     }
+  } catch (error) {
+    console.error(`Proxy error for ${targetUrl}:`, error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: `Proxy error: ${error instanceof Error ? error.message : String(error)}`,
+        targetUrl,
+      }),
+      {
+        status: (error as any).status || 500,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
+    );
+  }
 };
 
 export const OPTIONS: APIRoute = async () => {
-    return new Response(null, {
-        status: 204,
-        headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
-            'Access-Control-Allow-Headers': '*',
-            'Access-Control-Max-Age': '86400'
-        }
-    });
+  return new Response(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Max-Age': '86400',
+    },
+  });
 };
-

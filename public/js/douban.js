@@ -1,6 +1,6 @@
 // 用同一个 Overlay，反复插拔
 let globalLoadingOverlay = null;
-// 常量配置区域 
+// 常量配置区域
 const CONFIG = {
   // API相关
   TIMEOUT: 10000,
@@ -12,13 +12,13 @@ const CONFIG = {
   STORAGE_KEYS: {
     ENABLED: 'doubanEnabled',
     MOVIE_TAGS: 'userMovieTags',
-    TV_TAGS: 'userTvTags'
+    TV_TAGS: 'userTvTags',
   },
 
   // 媒体类型
   MEDIA_TYPES: {
     MOVIE: 'movie',
-    TV: 'tv'
+    TV: 'tv',
   },
 
   // 默认标签
@@ -28,7 +28,7 @@ const CONFIG = {
   CLASSES: {
     ACTIVE: 'bg-pink-600 text-white',
     INACTIVE: 'text-gray-300',
-    CARD: 'bg-[#111] hover:bg-[#222] transition-all duration-300 rounded-lg overflow-hidden flex flex-col transform hover:scale-105 shadow-md hover:shadow-lg'
+    CARD: 'bg-[#111] hover:bg-[#222] transition-all duration-300 rounded-lg overflow-hidden flex flex-col transform hover:scale-105 shadow-md hover:shadow-lg',
   },
 
   // 错误信息
@@ -39,16 +39,43 @@ const CONFIG = {
     TAG_EXISTS: '标签已存在',
     TAG_RESERVED: '热门标签不能删除',
     TAG_INVALID: '标签只能包含中文、英文、数字和空格',
-    TAG_TOO_LONG: '标签长度不能超过20个字符'
-  }
+    TAG_TOO_LONG: '标签长度不能超过20个字符',
+  },
 };
 
 const doubanDataCache = new Map();
 
-
 // 默认标签配置
-const defaultMovieTags = ['热门', '最新', '经典', '豆瓣高分', '冷门佳片', '华语', '欧美', '韩国', '日本', '动作', '喜剧', '爱情', '科幻', '悬疑', '恐怖', '治愈'];
-const defaultTvTags = ['热门', '美剧', '英剧', '韩剧', '日剧', '国产剧', '港剧', '日本动画', '综艺', '纪录片'];
+const defaultMovieTags = [
+  '热门',
+  '最新',
+  '经典',
+  '豆瓣高分',
+  '冷门佳片',
+  '华语',
+  '欧美',
+  '韩国',
+  '日本',
+  '动作',
+  '喜剧',
+  '爱情',
+  '科幻',
+  '悬疑',
+  '恐怖',
+  '治愈',
+];
+const defaultTvTags = [
+  '热门',
+  '美剧',
+  '英剧',
+  '韩剧',
+  '日剧',
+  '国产剧',
+  '港剧',
+  '日本动画',
+  '综艺',
+  '纪录片',
+];
 
 // 应用状态管理
 let movieTags = [];
@@ -75,9 +102,8 @@ const utils = {
      ↓↓↓ 如果项目里尚未定义 createLoadingOverlay，就把它也放进来 ↓↓↓
   ------------------------------------------------------------------ */
   createLoadingOverlay() {
-    const div = document.createElement("div");
-    div.className =
-      "absolute inset-0 bg-white/60 flex items-center justify-center";
+    const div = document.createElement('div');
+    div.className = 'absolute inset-0 bg-white/60 flex items-center justify-center';
     div.innerHTML = `<span class="animate-spin mr-2">⏳</span> Loading…`;
     return div;
   },
@@ -96,14 +122,17 @@ const utils = {
   // 安全文本处理 - 增强型XSS防护
   safeText(text) {
     if (!text) return '';
-    return String(text)
-      .replace(/[&<>"']/g, char => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#39;'
-      })[char]);
+    return String(text).replace(
+      /[&<>"']/g,
+      (char) =>
+        ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;',
+        })[char]
+    );
   },
 
   // 验证标签格式
@@ -140,7 +169,8 @@ const utils = {
   // 创建loading遮罩
   createLoadingOverlay() {
     const overlay = document.createElement('div');
-    overlay.className = 'absolute inset-0 bg-gray-100 bg-opacity-75 flex items-center justify-center z-10';
+    overlay.className =
+      'absolute inset-0 bg-gray-100 bg-opacity-75 flex items-center justify-center z-10';
     overlay.innerHTML = `
       <div class="flex items-center justify-center">
         <div class="w-6 h-6 border-2 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
@@ -170,8 +200,8 @@ const utils = {
         console.error(`Error writing to localStorage: ${key}`, e);
         return false;
       }
-    }
-  }
+    },
+  },
 };
 
 // 加载用户标签
@@ -190,14 +220,21 @@ function saveUserTags() {
   }
 }
 
-
 // 初始化豆瓣功能
 function initDouban() {
   // 初始化关键DOM元素缓存
-  ['doubanToggle', 'doubanArea', 'douban-movie-toggle', 'douban-tv-toggle',
-    'douban-tags', 'douban-refresh', 'douban-results', 'searchInput'].forEach(id => {
-      utils.getElement(id);
-    });
+  [
+    'doubanToggle',
+    'doubanArea',
+    'douban-movie-toggle',
+    'douban-tv-toggle',
+    'douban-tags',
+    'douban-refresh',
+    'douban-results',
+    'searchInput',
+  ].forEach((id) => {
+    utils.getElement(id);
+  });
 
   // 初始化关键UI元素
   initDoubanToggle();
@@ -218,7 +255,7 @@ function initDouban() {
   }, 100);
 }
 
-// 分离豆瓣开关初始化 
+// 分离豆瓣开关初始化
 function initDoubanToggle() {
   const doubanToggle = utils.getElement('doubanToggle');
   if (!doubanToggle) return;
@@ -236,21 +273,13 @@ function initDoubanToggle() {
   const toggleDot = toggleBg.nextElementSibling;
 
   if (isEnabled) {
-    toggleBg.classList.add('bg-pink-600');
-    toggleDot.classList.add('translate-x-6');
+    // toggleBg.classList.add('bg-pink-600');
+    // toggleDot.classList.add('translate-x-6');
   }
 
   doubanToggle.addEventListener('change', function (e) {
     const isChecked = e.target.checked;
     utils.storage.set(CONFIG.STORAGE_KEYS.ENABLED, isChecked);
-
-    if (isChecked) {
-      toggleBg.classList.add('bg-pink-600');
-      toggleDot.classList.add('translate-x-6');
-    } else {
-      toggleBg.classList.remove('bg-pink-600');
-      toggleDot.classList.remove('translate-x-6');
-    }
 
     updateDoubanVisibility();
   });
@@ -331,7 +360,12 @@ function fillAndSearchWithDouban(title) {
   const input = utils.getElement('searchInput');
 
   // 自动勾选豆瓣数据源的逻辑 (Source 1002-1008)
-  if (typeof APISourceManager !== 'undefined' && typeof API_SITES !== 'undefined' && API_SITES['dbzy']) { // 确保 APISourceManager 和 API_SITES 可用
+  if (
+    typeof APISourceManager !== 'undefined' &&
+    typeof API_SITES !== 'undefined' &&
+    API_SITES['dbzy']
+  ) {
+    // 确保 APISourceManager 和 API_SITES 可用
     const selectedAPIs = AppState.get('selectedAPIs') || []; // 从 AppState 获取
     if (!selectedAPIs.includes('dbzy')) {
       const doubanCheckbox = document.querySelector('input[id="api_dbzy"]');
@@ -339,7 +373,8 @@ function fillAndSearchWithDouban(title) {
         doubanCheckbox.checked = true;
         if (typeof APISourceManager.updateSelectedAPIs === 'function') {
           APISourceManager.updateSelectedAPIs(); // 更新选中的API
-        } else if (typeof updateSelectedAPIs === 'function') { // 兼容旧的全局函数
+        } else if (typeof updateSelectedAPIs === 'function') {
+          // 兼容旧的全局函数
           updateSelectedAPIs();
         }
         if (typeof showToast === 'function') showToast('已自动选择豆瓣资源API', 'info');
@@ -417,25 +452,26 @@ function renderDoubanTags() {
   const currentTags = doubanMovieTvCurrentSwitch === CONFIG.MEDIA_TYPES.MOVIE ? movieTags : tvTags;
   const fragment = document.createDocumentFragment();
 
-  const keyNow = currentTags.join('|');   // 数组内容
-  const activeNow = doubanCurrentTag;        // 当前选中
+  const keyNow = currentTags.join('|'); // 数组内容
+  const activeNow = doubanCurrentTag; // 当前选中
 
   // 如果上一次的键值与这次完全一样，则直接更新高亮样式并返回
   if (renderDoubanTags.prev.key === keyNow && renderDoubanTags.prev.active === activeNow) {
     // 只切换 active class，其他 DOM 不动
-    tagContainer.querySelectorAll('button').forEach(btn => {
+    tagContainer.querySelectorAll('button').forEach((btn) => {
       const isActive = btn.textContent === activeNow;
       btn.classList.toggle(CONFIG.CLASSES.ACTIVE.split(' ')[0], isActive); // bg-pink-600
       btn.classList.toggle('text-white', isActive);
     });
-    return;   // 跳过完整重绘
+    return; // 跳过完整重绘
   }
   // —— 走到这里说明标签列表或选中项发生了变化 —— //
   renderDoubanTags.prev = { key: keyNow, active: activeNow };
 
   // 添加标签管理按钮
   const manageBtn = document.createElement('button');
-  manageBtn.className = 'py-1.5 px-3.5 rounded text-sm font-medium transition-all duration-300 bg-[#1a1a1a] text-gray-300 hover:bg-pink-700 hover:text-white border border-[#333] hover:border-white';
+  manageBtn.className =
+    'py-1.5 px-3.5 rounded text-sm font-medium transition-all duration-300 bg-[#1a1a1a] text-gray-300 hover:bg-pink-700 hover:text-white border border-[#333] hover:border-white';
   manageBtn.innerHTML = `
     <span class="flex items-center">
       <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -448,10 +484,13 @@ function renderDoubanTags() {
   fragment.appendChild(manageBtn);
 
   // 添加标签按钮
-  currentTags.forEach(tag => {
+  currentTags.forEach((tag) => {
     const btn = document.createElement('button');
-    btn.className = `py-1.5 px-3.5 rounded text-sm font-medium transition-all duration-300 border ${tag === doubanCurrentTag ? CONFIG.CLASSES.ACTIVE : 'bg-[#1a1a1a] text-gray-300 hover:bg-pink-700 border-[#333] hover:border-white'
-      }`;
+    btn.className = `py-1.5 px-3.5 rounded text-sm font-medium transition-all duration-300 border ${
+      tag === doubanCurrentTag
+        ? CONFIG.CLASSES.ACTIVE
+        : 'bg-[#1a1a1a] text-gray-300 hover:bg-pink-700 border-[#333] hover:border-white'
+    }`;
     btn.textContent = tag;
 
     btn.onclick = utils.debounce(function () {
@@ -496,10 +535,11 @@ async function fetchDoubanData(url) {
   const fetchOptions = {
     signal: controller.signal,
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-      'Referer': 'https://movie.douban.com/',
-      'Accept': 'application/json, text/plain, */*',
-    }
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+      Referer: 'https://movie.douban.com/',
+      Accept: 'application/json, text/plain, */*',
+    },
   };
 
   try {
@@ -514,12 +554,12 @@ async function fetchDoubanData(url) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
 
-    const data = await response.json();      // ② 首次拿到数据
-    doubanDataCache.set(url, data);          //    存入缓存
+    const data = await response.json(); // ② 首次拿到数据
+    doubanDataCache.set(url, data); //    存入缓存
     return data;
   } catch (err) {
     clearTimeout(timeoutId);
-    console.error("豆瓣 API 请求失败：", err);
+    console.error('豆瓣 API 请求失败：', err);
 
     if (err.name === 'AbortError') {
       throw new Error(CONFIG.MESSAGES.TIMEOUT_ERROR);
@@ -537,13 +577,13 @@ async function fetchDoubanData(url) {
       const data = await fallbackResponse.json();
       if (data?.contents) {
         const parsed = JSON.parse(data.contents);
-        doubanDataCache.set(url, parsed);    // ③ 备用接口成功也写缓存
+        doubanDataCache.set(url, parsed); // ③ 备用接口成功也写缓存
         return parsed;
       }
 
-      throw new Error("无法获取有效数据");
+      throw new Error('无法获取有效数据');
     } catch (fallbackErr) {
-      console.error("豆瓣 API 备用请求也失败：", fallbackErr);
+      console.error('豆瓣 API 备用请求也失败：', fallbackErr);
       throw new Error(CONFIG.MESSAGES.API_ERROR);
     }
   }
@@ -551,13 +591,13 @@ async function fetchDoubanData(url) {
 
 // 渲染推荐内容
 async function renderRecommend(tag, pageLimit, pageStart) {
-  const container = utils.getElement("douban-results");
+  const container = utils.getElement('douban-results');
   if (!container) return;
 
   const loadingOverlay = utils.getLoadingOverlay();
   if (!container.contains(loadingOverlay)) {
-    container.classList.add("relative");      // 保证父元素定位
-    container.appendChild(loadingOverlay);    // 只插一次
+    container.classList.add('relative'); // 保证父元素定位
+    container.appendChild(loadingOverlay); // 只插一次
   }
 
   try {
@@ -565,7 +605,7 @@ async function renderRecommend(tag, pageLimit, pageStart) {
     const data = await fetchDoubanData(target);
     renderDoubanCards(data, container);
   } catch (error) {
-    console.error("获取豆瓣数据失败：", error);
+    console.error('获取豆瓣数据失败：', error);
     container.innerHTML = `
       <div class="col-span-full text-center py-8">
         <div class="text-red-400">❌ ${CONFIG.MESSAGES.API_ERROR}</div>
@@ -584,35 +624,36 @@ function renderDoubanCards(data, container) {
   const fragment = document.createDocumentFragment();
 
   if (!data?.subjects?.length) {
-    const emptyEl = document.createElement("div");
-    emptyEl.className = "col-span-full text-center py-8";
+    const emptyEl = document.createElement('div');
+    emptyEl.className = 'col-span-full text-center py-8';
     emptyEl.innerHTML = '<div class="text-pink-500">❌ 暂无数据，请尝试其他分类或刷新</div>';
     fragment.appendChild(emptyEl);
   } else {
-    data.subjects.forEach(item => {
+    data.subjects.forEach((item) => {
       const safeTitle = utils.safeText(item.title);
-      const safeRate = utils.safeText(item.rate || "暂无");
-      const safeUrl = item.url || "#";
-      const originalCoverUrl = item.cover || "";
-      const proxiedCoverUrl = typeof PROXY_URL !== 'undefined' ?
-        PROXY_URL + encodeURIComponent(originalCoverUrl) :
-        originalCoverUrl;
+      const safeRate = utils.safeText(item.rate || '暂无');
+      const safeUrl = item.url || '#';
+      const originalCoverUrl = item.cover || '';
+      const proxiedCoverUrl =
+        typeof PROXY_URL !== 'undefined'
+          ? PROXY_URL + encodeURIComponent(originalCoverUrl)
+          : originalCoverUrl;
 
-      const card = document.createElement("div");
+      const card = document.createElement('div');
       card.className = CONFIG.CLASSES.CARD;
 
       // 使用数据属性传递数据，而不是直接在onclick中使用
       card.setAttribute('data-title', safeTitle);
 
       card.innerHTML = `
-        <div class="relative w-full aspect-[2/3] overflow-hidden cursor-pointer douban-card-cover">
+        <div class="relative w-full aspect-2/3 overflow-hidden cursor-pointer douban-card-cover">
           <div class="w-full h-full bg-[#222] flex items-center justify-center">
             <div class="w-6 h-6 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
           </div>
           <img data-src="${originalCoverUrl}" alt="${safeTitle}"
               class="w-full h-full object-cover transition-transform duration-500 hover:scale-110 absolute top-0 left-0 opacity-0"
               loading="lazy" referrerpolicy="no-referrer">
-          <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent opacity-60"></div>
+          <div class="absolute inset-0 bg-linear-to-t from-black to-transparent opacity-60"></div>
           <div class="absolute bottom-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded-sm">
               <span class="text-yellow-400">★</span> ${safeRate}
           </div>
@@ -651,45 +692,50 @@ function renderDoubanCards(data, container) {
     });
   }
 
-  container.innerHTML = "";
+  container.innerHTML = '';
   container.appendChild(fragment);
 
   // 实现真正的懒加载
   initLazyLoading();
 }
 
-
 // 单例观察器
-const lazyImgObserver = ('IntersectionObserver' in window)
-  ? new IntersectionObserver((entries, obs) => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      const img = entry.target;
-      const src = img.getAttribute('data-src');
+const lazyImgObserver =
+  'IntersectionObserver' in window
+    ? new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            const img = entry.target;
+            const src = img.getAttribute('data-src');
 
-      img.onload = () => img.classList.remove('opacity-0');
-      img.onerror = () => {
-        img.onerror = null;
-        img.src = (typeof PROXY_URL !== 'undefined') ? PROXY_URL + encodeURIComponent(src)
-          : src;
-        img.classList.add('object-contain');
-        img.classList.remove('opacity-0');
-      };
-      img.src = src;
-      img.removeAttribute('data-src');
-      obs.unobserve(img);
-    });
-  }, { rootMargin: '50px' })   // 提前 50px 预加载
-  : null;
+            img.onload = () => img.classList.remove('opacity-0');
+            img.onerror = () => {
+              img.onerror = null;
+              img.src =
+                typeof PROXY_URL !== 'undefined' ? PROXY_URL + encodeURIComponent(src) : src;
+              img.classList.add('object-contain');
+              img.classList.remove('opacity-0');
+            };
+            img.src = src;
+            img.removeAttribute('data-src');
+            obs.unobserve(img);
+          });
+        },
+        { rootMargin: '50px' }
+      ) // 提前 50px 预加载
+    : null;
 
 function initLazyLoading() {
   const lazyImages = document.querySelectorAll('img[data-src]');
   if (lazyImgObserver) {
-    lazyImages.forEach(img => lazyImgObserver.observe(img));
-  } else {         // 不支持 IntersectionObserver
-    lazyImages.forEach(img => {
+    lazyImages.forEach((img) => lazyImgObserver.observe(img));
+  } else {
+    // 不支持 IntersectionObserver
+    lazyImages.forEach((img) => {
       const src = img.getAttribute('data-src');
-      img.src = src; img.removeAttribute('data-src');
+      img.src = src;
+      img.removeAttribute('data-src');
       img.classList.remove('opacity-0');
     });
   }
@@ -720,21 +766,27 @@ function showTagManageModal() {
           </button>
         </div>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-4" id="tagsGrid">
-          ${currentTags.length ? currentTags.map(tag => {
-    const canDelete = tag !== CONFIG.DEFAULT_TAG;
-    const safeTag = utils.safeText(tag);
-    return `
+          ${
+            currentTags.length
+              ? currentTags
+                  .map((tag) => {
+                    const canDelete = tag !== CONFIG.DEFAULT_TAG;
+                    const safeTag = utils.safeText(tag);
+                    return `
               <div class="bg-[#1a1a1a] text-gray-300 py-1.5 px-3 rounded text-sm font-medium flex justify-between items-center group">
                 <span>${safeTag}</span>
-                ${canDelete ?
-        `<button class="delete-tag-btn text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
-                    data-tag="${safeTag}">✕</button>` :
-        `<span class="text-gray-500 text-xs italic opacity-0 group-hover:opacity-100">必需</span>`
-      }
+                ${
+                  canDelete
+                    ? `<button class="delete-tag-btn text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                    data-tag="${safeTag}">✕</button>`
+                    : `<span class="text-gray-500 text-xs italic opacity-0 group-hover:opacity-100">必需</span>`
+                }
               </div>
             `;
-  }).join('') :
-      `<div class="col-span-full text-center py-4 text-gray-500">无标签，请添加或恢复默认</div>`}
+                  })
+                  .join('')
+              : `<div class="col-span-full text-center py-4 text-gray-500">无标签，请添加或恢复默认</div>`
+          }
         </div>
       </div>
       <div class="border-t border-gray-700 pt-4">
@@ -810,7 +862,7 @@ function addTag(tag) {
   const isMovie = doubanMovieTvCurrentSwitch === CONFIG.MEDIA_TYPES.MOVIE;
   const currentTags = isMovie ? movieTags : tvTags;
 
-  if (currentTags.some(existingTag => existingTag.toLowerCase() === safeTag.toLowerCase())) {
+  if (currentTags.some((existingTag) => existingTag.toLowerCase() === safeTag.toLowerCase())) {
     showToast(CONFIG.MESSAGES.TAG_EXISTS, 'warning');
     return;
   }
@@ -882,9 +934,9 @@ function reloadDoubanIfNeeded() {
 
   // 检查：如果豆瓣功能已开启，并且其内容容器确实是空的
   if (isEnabled && doubanResultsContainer && doubanResultsContainer.children.length === 0) {
-      console.log('[Douban] Returning home, reloading Douban Hot content...');
-      // 使用模块内部的状态变量，加载当前选中的热门内容
-      renderRecommend(doubanCurrentTag, doubanPageSize, 0);
+    console.log('[Douban] Returning home, reloading Douban Hot content...');
+    // 使用模块内部的状态变量，加载当前选中的热门内容
+    renderRecommend(doubanCurrentTag, doubanPageSize, 0);
   }
 }
 window.reloadDoubanIfNeeded = reloadDoubanIfNeeded;

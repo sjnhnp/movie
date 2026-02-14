@@ -7,7 +7,7 @@ permissions:
 on:
   # 定时任务：每天凌晨4点（UTC+8 时间 12点）执行一次
   schedule:
-    - cron: "0 4 * * *"
+    - cron: '0 4 * * *'
   # 允许手动触发
   workflow_dispatch:
 
@@ -25,7 +25,7 @@ jobs:
         with:
           # 使用 personal access token (PAT) 而不是 GITHUB_TOKEN
           # 这样可以触发下游的 CI/CD 流程（例如 Docker 镜像构建）
-          token: ${{ secrets.PAT }} 
+          token: ${{ secrets.PAT }}
 
       # 步骤 2: 执行同步操作
       - name: Sync upstream changes

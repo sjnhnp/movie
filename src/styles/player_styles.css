@@ -13,7 +13,6 @@
   position: relative;
 }
 
-
 /* 确保 Vidstack 播放器和其内部 video 元素正确缩放 */
 #player,
 media-player {
@@ -55,7 +54,7 @@ media-player {
 .loading-spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid rgba(255, 255, 255, .3);
+  border: 4px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
   border-top-color: #fff;
   animation: spin 1s ease-in-out infinite;
@@ -122,7 +121,7 @@ media-player {
 
 .slider:before {
   position: absolute;
-  content: "";
+  content: '';
   height: 18px;
   width: 18px;
   left: 3px;
@@ -139,25 +138,25 @@ media-player {
 }
 
 /* 选中状态 */
-input:checked+.slider {
+input:checked + .slider {
   background: #404040;
   border-color: transparent;
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 /* 选中状态的滑块位置 */
-input:checked+.slider:before {
+input:checked + .slider:before {
   transform: translateX(22px);
   background: #ffffff;
 }
 
 /* 选中状态的悬停效果 */
-input:checked+.slider:hover {
+input:checked + .slider:hover {
   background: #505050;
 }
 
 /* 禁用状态 */
-input:disabled+.slider {
+input:disabled + .slider {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -168,17 +167,17 @@ input:disabled+.slider {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, .8);
+  background: rgba(0, 0, 0, 0.8);
   color: #fff;
   padding: 1rem 2rem;
-  border-radius: .5rem;
+  border-radius: 0.5rem;
   font-size: 1.5rem;
   display: none;
   align-items: center;
-  gap: .5rem;
+  gap: 0.5rem;
   z-index: 1000;
   opacity: 0;
-  transition: opacity .3s;
+  transition: opacity 0.3s;
 }
 
 .shortcut-hint.show {
@@ -348,7 +347,6 @@ media-player:focus-within #custom-right-controls {
   /* 调整图标高度，使其更小 */
   stroke-width: 2;
 }
-
 
 /* 在网页全屏模式下，右侧控制条始终显示 
 .web-fullscreen-active #custom-right-controls {
@@ -520,7 +518,6 @@ media-player:focus-within #custom-right-controls {
 
 /* 响应式调整 */
 @media (max-width: 768px) {
-
   #prev-episode,
   #next-episode {
     padding: 0.375rem 0.5rem;
@@ -568,12 +565,12 @@ media-player:focus-within #custom-right-controls {
 }
 
 /* 选中状态下的文本标签 */
-.switch input:checked~.control-label {
+.switch input:checked ~ .control-label {
   color: #ffffff;
 }
 
 /* 容器样式优化 */
-.player-control-bar>div {
+.player-control-bar > div {
   display: flex;
   align-items: center;
   padding: 0.35rem 0.5rem;
@@ -581,13 +578,12 @@ media-player:focus-within #custom-right-controls {
   transition: background-color 0.3s ease;
 }
 
-.player-control-bar>div:hover {
+.player-control-bar > div:hover {
   background: rgba(255, 255, 255, 0.05);
 }
 
-
 /* 添加焦点状态 */
-.switch input:focus+.slider {
+.switch input:focus + .slider {
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
@@ -606,7 +602,7 @@ media-player:focus-within #custom-right-controls {
   }
 }
 
-.switch input:checked+.slider {
+.switch input:checked + .slider {
   animation: switchOn 0.2s ease-out;
 }
 
@@ -622,7 +618,7 @@ media-player:focus-within #custom-right-controls {
     height: 16px;
   }
 
-  input:checked+.slider:before {
+  input:checked + .slider:before {
     transform: translateX(18px);
   }
 
@@ -633,7 +629,7 @@ media-player:focus-within #custom-right-controls {
 
 /* 隐藏 "选集" 二字 */
 #episodes-container h2 {
-  display: none
+  display: none;
 }
 
 /* 现代简约控制条布局 */
@@ -745,7 +741,6 @@ media-player:focus-within #custom-right-controls {
 
 /* 移动端样式 - 只显示图标，统一大小 */
 @media (max-width: 768px) {
-
   /* 控制按钮容器包装器 */
   .player-control-bar-wrapper {
     width: 100%;
@@ -1091,7 +1086,7 @@ media-player:focus-within #custom-right-controls {
   min-width: 60px;
 }
 
-#skip-control-dropdown input[type="number"] {
+#skip-control-dropdown input[type='number'] {
   width: 100%;
   font-size: 0.875rem;
   padding: 8px 12px;
@@ -1103,14 +1098,14 @@ media-player:focus-within #custom-right-controls {
   transition: all 0.2s ease;
 }
 
-#skip-control-dropdown input[type="number"]:focus {
+#skip-control-dropdown input[type='number']:focus {
   outline: none;
   border-color: rgba(255, 255, 255, 0.3);
   background: rgba(255, 255, 255, 0.12);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
-#skip-control-dropdown input[type="number"]::placeholder {
+#skip-control-dropdown input[type='number']::placeholder {
   color: rgba(255, 255, 255, 0.5);
 }
 
@@ -1183,7 +1178,7 @@ media-player:focus-within #custom-right-controls {
     min-width: 55px;
   }
 
-  #skip-control-dropdown input[type="number"] {
+  #skip-control-dropdown input[type='number'] {
     padding: 7px 10px;
     font-size: 0.8125rem;
   }
@@ -1234,14 +1229,14 @@ media-player:focus-within #custom-right-controls {
 
   /* 如果按钮靠近右边缘，调整下拉菜单位置 */
   .line-switch-container:last-child #line-switch-dropdown,
-  .line-switch-container:nth-last-child(-n+2) #line-switch-dropdown {
+  .line-switch-container:nth-last-child(-n + 2) #line-switch-dropdown {
     right: 0;
     left: auto;
   }
 
   /* 如果按钮靠近左边缘，调整下拉菜单位置 */
   .line-switch-container:first-child #line-switch-dropdown,
-  .line-switch-container:nth-child(-n+2) #line-switch-dropdown {
+  .line-switch-container:nth-child(-n + 2) #line-switch-dropdown {
     left: 0;
     right: auto;
   }
@@ -1391,14 +1386,14 @@ media-player:focus-within #custom-right-controls {
 
   /* 如果按钮靠近右边缘，调整下拉菜单位置 */
   .play-settings-container:last-child #play-settings-dropdown,
-  .play-settings-container:nth-last-child(-n+2) #play-settings-dropdown {
+  .play-settings-container:nth-last-child(-n + 2) #play-settings-dropdown {
     right: 0;
     left: auto;
   }
 
   /* 如果按钮靠近左边缘，调整下拉菜单位置 */
   .play-settings-container:first-child #play-settings-dropdown,
-  .play-settings-container:nth-child(-n+2) #play-settings-dropdown {
+  .play-settings-container:nth-child(-n + 2) #play-settings-dropdown {
     left: 0;
     right: auto;
   }
@@ -1483,7 +1478,6 @@ header {
 
 /* ———————————— 仅在移动端 生效 ———————————— */
 @media (max-width: 900px) {
-
   /* 让容器随宽度按 16:9 比例撑高 */
   #player-region {
     width: 100%;
@@ -1519,10 +1513,8 @@ header {
   font-size: 18px;
   color: white;
   opacity: 0;
-  transition: opacity .3s ease-in-out;
+  transition: opacity 0.3s ease-in-out;
 }
-
-
 
 /* 最终综艺按钮专用样式 (播放页)  */
 
@@ -1616,8 +1608,6 @@ media-fullscreen-button {
 #clearSearchHistory:hover {
   background: rgba(255, 255, 255, 0.1);
 }
-
-
 
 /* 播放页搜索结果画质标签样式 */
 .quality-tag {
@@ -1892,7 +1882,6 @@ media-fullscreen-button {
   }
 }
 
-
 /* 播放页搜索弹窗移动端修复 */
 @media (max-width: 768px) {
   #searchPanel .flex.items-center.gap-4 {
@@ -1957,12 +1946,11 @@ media-fullscreen-button {
     /* 调整字体大小 */
   }
 
-  #searchPanel .relative.group .relative button[type="submit"] {
+  #searchPanel .relative.group .relative button[type='submit'] {
     width: 48px;
     /* 调整搜索按钮宽度 */
   }
 }
-
 
 /* ==================== 播放页搜索和历史面板样式 ==================== */
 

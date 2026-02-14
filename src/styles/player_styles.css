@@ -74,6 +74,11 @@ input[type=number] {
     height: 56.25vw;
     max-height: 50vh;
   }
+
+  /* 移动端侧边栏显示时，进一步减小播放器高度以避免遮挡 */
+  .player-page-wrapper:not(:has(#episode-sidebar.hidden-sidebar)) #player-region {
+    max-height: 35vh;
+  }
 }
 
 

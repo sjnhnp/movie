@@ -46,8 +46,24 @@ input[type=number] {
   background: transparent;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  padding: 2rem 0;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+/* 桌面端调整：增加顶部间隙但保持播放器位置 */
+@media (min-width: 1024px) {
+  .player-container {
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+  }
+}
+
+/* 移动端调整：减小顶部间隙，让播放器更靠近顶部 */
+@media (max-width: 768px) {
+  .player-container {
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+  }
 }
 
 /* 播放器区域 */
@@ -2260,7 +2276,7 @@ media-fullscreen-button {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 60vh;
+    height: 50vh;
     border-left: none;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     transform: translateY(100%);

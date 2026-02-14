@@ -34,6 +34,15 @@ input[type=number] {
   /* Hide scrollbar for main content */
 }
 
+/* Desktop layout: Side-by-side player and sidebar, vertically centered */
+@media (min-width: 1024px) {
+  .player-main-content {
+    flex-direction: row;
+    align-items: center;
+    /* Center player vertically */
+  }
+}
+
 .player-main-content::-webkit-scrollbar {
   display: none;
 }

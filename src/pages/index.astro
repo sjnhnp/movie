@@ -169,7 +169,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
         <div class="flex justify-between gap-3 mb-4">
           <button
             onclick="selectAllAPIs(true)"
-            class="flex-1 text-center px-3 py-1.5 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm rounded-lg font-medium transition-all duration-300"
+            class="flex-1 text-center px-3 py-1.5 bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white text-sm rounded-lg font-medium transition-all duration-300"
             type="button">全选</button
           >
           <button
@@ -215,7 +215,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
           </label>
           <button
             onclick="showAddCustomApiForm()"
-            class="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white w-8 h-8 rounded-xl flex items-center justify-center text-lg font-bold ml-3 transition-all duration-300 shadow-lg"
+            class="bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white w-8 h-8 rounded-xl flex items-center justify-center text-lg font-bold ml-3 transition-all duration-300 shadow-lg"
             aria-label="添加自定义API"
             type="button">+</button
           >
@@ -259,7 +259,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
           <div class="flex gap-3">
             <button
               onclick="addCustomApi()"
-              class="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300"
+              class="flex-1 bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300"
               type="button">添加</button
             >
             <button
@@ -439,7 +439,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
           >
             <div class="relative">
               <div
-                class="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"
+                class="absolute inset-0 bg-linear-to-r from-indigo-500 to-purple-600 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300"
               >
               </div>
               <div
@@ -475,7 +475,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
           <form id="searchForm" class="relative group z-10">
             <!-- 1. 动态对流光晕背景 (Glow Effect) -->
             <div
-              class="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-60 group-focus-within:opacity-80 transition-all duration-700 animate-pulse-slow"
+              class="absolute -inset-1 bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-2xl blur-xl opacity-30 group-hover:opacity-60 group-focus-within:opacity-80 transition-all duration-700 animate-pulse-slow"
               aria-hidden="true"
             >
             </div>
@@ -569,7 +569,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
 
       <!-- 豆瓣热门区 -->
       <section id="doubanArea" class="w-full my-8 hidden" aria-label="豆瓣热门">
-        <div class="mx-auto max-w-screen-xl px-2">
+        <div class="mx-auto max-w-7xl px-2">
           <div class="mb-4">
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center">
@@ -654,7 +654,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
           </h2>
           <button
             id="closeModalButton"
-            class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-2xl p-2.5 transition-all duration-300 flex-shrink-0"
+            class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-2xl p-2.5 transition-all duration-300 shrink-0"
             aria-label="关闭详情"
             type="button"
           >
@@ -674,7 +674,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
     <!-- 密码验证弹窗 -->
     <div
       id="passwordModal"
-      class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-[65] transition-opacity duration-300"
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-65 transition-opacity duration-300"
       role="dialog"
       aria-modal="true"
       aria-labelledby="passwordModalTitle"
@@ -688,7 +688,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
           <h2 id="passwordModalTitle" class="text-2xl font-bold gradient-text">访问验证</h2>
           <button
             id="closePasswordModalButton"
-            class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300 flex-shrink-0 hidden"
+            class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300 shrink-0 hidden"
             aria-label="关闭验证"
             type="button"
           >
@@ -728,7 +728,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
             />
             <button
               id="passwordSubmitBtn"
-              class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-3 rounded-xl font-medium transition-all duration-300 shadow-lg"
+              class="w-full bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-4 py-3 rounded-xl font-medium transition-all duration-300 shadow-lg"
               type="submit">验证</button
             >
           </form>
@@ -793,7 +793,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
         data-source-code=""
       >
         <div class="flex h-full">
-          <div class="w-24 md:w-32 relative flex-shrink-0 overflow-hidden">
+          <div class="w-24 md:w-32 relative shrink-0 overflow-hidden">
             <img
               src="https://via.placeholder.com/100x150/191919/555555?text=No+Image"
               alt="视频封面"
@@ -801,12 +801,12 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
               loading="lazy"
               onerror="this.onerror=null; this.src='https://via.placeholder.com/100x150/191919/555555?text=Error';"
             />
-            <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent"></div>
+            <div class="absolute inset-0 bg-linear-to-r from-black/60 to-transparent"></div>
           </div>
-          <div class="p-3 md:p-4 flex flex-col flex-grow min-w-0">
-            <div class="flex-grow">
+          <div class="p-3 md:p-4 flex flex-col grow min-w-0">
+            <div class="grow">
               <h3
-                class="result-title font-bold text-sm md:text-base mb-2 break-words line-clamp-2 text-white/90 group-hover:text-indigo-400 transition-colors"
+                class="result-title font-bold text-sm md:text-base mb-2 wrap-break-word line-clamp-2 text-white/90 group-hover:text-indigo-400 transition-colors"
                 title="视频标题"
               >
                 视频标题

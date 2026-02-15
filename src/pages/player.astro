@@ -48,60 +48,6 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
   </head>
   <body class="page-bg text-white font-sans min-h-screen">
     <div class="player-page-wrapper sidebar-hidden">
-      <!-- 历史记录面板 (放在最外层，fixed 定位) -->
-      <aside
-        id="historyPanel"
-        class="history-panel p-6"
-        aria-label="观看历史"
-        aria-hidden="true"
-        tabindex="-1"
-      >
-        <div class="flex justify-between items-center mb-8">
-          <h3 class="text-2xl font-bold gradient-text">观看历史</h3>
-          <button
-            id="closeHistoryPanelButton"
-            class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300"
-            aria-label="关闭历史"
-            type="button"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
-          </button>
-        </div>
-        <div id="historyList" class="pb-4" role="region" aria-live="polite">
-          <div class="text-center text-white/60 py-12">
-            <svg
-              class="w-16 h-16 mx-auto mb-4 text-white/30"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <p class="text-lg font-medium">暂无观看记录</p>
-            <p class="text-sm text-white/40 mt-2">开始观看视频后，历史记录会显示在这里</p>
-          </div>
-        </div>
-        <div class="mt-4 text-center sticky bottom-0 pb-2 pt-2">
-          <button
-            onclick="clearViewingHistory()"
-            class="clear-history-btn w-full transition-all duration-300"
-            type="button"
-          >
-            清空历史记录
-          </button>
-        </div>
-      </aside>
-
       <!-- 左侧主内容区域 -->
       <main class="player-main-content">
         <!-- Cinematic Header: 视听感官级顶栏 -->
@@ -593,84 +539,6 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
           </div>
         </div>
       </aside>
-
-      <!-- 快捷键和消息提示 -->
-      <div id="shortcut-hint" class="shortcut-hint" aria-live="polite" aria-atomic="true">
-        <span id="shortcut-key"></span>
-        <span id="shortcut-action"></span>
-      </div>
-      <div
-        id="message"
-        class="fixed top-4 right-4 p-4 rounded shadow-lg z-50 hidden"
-        aria-live="polite"
-      >
-      </div>
-
-      <!-- 详情模态框 -->
-      <div
-        id="modal"
-        class="fixed inset-0 bg-black/60 backdrop-blur-md hidden items-center justify-center transition-all duration-300 z-10002 p-4"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modalTitle"
-        aria-hidden="true"
-        tabindex="-1"
-      >
-        <div
-          class="bg-[#1a1a2e]/90 backdrop-blur-2xl border border-white/10 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden"
-        >
-          <div class="flex justify-between items-center p-6 border-b border-white/10 flex-none">
-            <h2 id="modalTitle" class="text-2xl md:text-3xl font-bold gradient-text truncate pr-4">
-            </h2>
-            <button
-              id="closeModalButton"
-              class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-2xl p-2.5 transition-all duration-300 shrink-0"
-              aria-label="关闭详情"
-              type="button"
-            >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
-          </div>
-          <div id="modalContent" class="overflow-y-auto flex-1 p-6 md:p-8 custom-scrollbar"></div>
-        </div>
-      </div>
-
-      <!-- 加载提示 -->
-      <div
-        id="loading"
-        class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-10003"
-      >
-        <div
-          class="bg-black/20 backdrop-blur-xl border border-white/10 p-8 rounded-2xl text-center"
-        >
-          <div class="loading-spinner mb-4"></div>
-          <p class="text-white text-lg">加载中...</p>
-        </div>
-      </div>
-
-      <!-- 记住进度弹窗 -->
-      <div
-        id="progress-restore-modal"
-        tabindex="-1"
-        aria-modal="true"
-        role="dialog"
-        style="display: none;"
-      >
-        <div class="progress-restore-card" role="document">
-          <div class="progress-modal-title">继续播放？</div>
-          <div class="progress-modal-content"><!-- JS填充 --></div>
-          <div class="progress-modal-actions">
-            <button class="progress-modal-btn cancel" id="progress-restore-cancel">取消</button>
-            <button class="progress-modal-btn confirm" id="progress-restore-confirm">确定</button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <template id="search-result-template">
@@ -941,6 +809,136 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
             <div id="searchResults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 历史记录面板 (放在最外层，fixed 定位) -->
+    <aside
+      id="historyPanel"
+      class="history-panel p-6"
+      aria-label="观看历史"
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      <div class="flex justify-between items-center mb-8">
+        <h3 class="text-2xl font-bold gradient-text">观看历史</h3>
+        <button
+          id="closeHistoryPanelButton"
+          class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300"
+          aria-label="关闭历史"
+          type="button"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div id="historyList" class="pb-4" role="region" aria-live="polite">
+        <div class="text-center text-white/60 py-12">
+          <svg
+            class="w-16 h-16 mx-auto mb-4 text-white/30"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-lg font-medium">暂无观看记录</p>
+          <p class="text-sm text-white/40 mt-2">开始观看视频后，历史记录会显示在这里</p>
+        </div>
+      </div>
+      <div class="mt-4 text-center sticky bottom-0 pb-2 pt-2">
+        <button
+          onclick="clearViewingHistory()"
+          class="clear-history-btn w-full transition-all duration-300"
+          type="button"
+        >
+          清空历史记录
+        </button>
+      </div>
+    </aside>
+
+    <!-- 快捷键和消息提示 -->
+    <div id="shortcut-hint" class="shortcut-hint" aria-live="polite" aria-atomic="true">
+      <span id="shortcut-key"></span>
+      <span id="shortcut-action"></span>
+    </div>
+    <div
+      id="message"
+      class="fixed top-4 right-4 p-4 rounded shadow-lg z-50 hidden"
+      aria-live="polite"
+    >
+    </div>
+
+    <!-- 详情模态框 -->
+    <div
+      id="modal"
+      class="fixed inset-0 bg-black/60 backdrop-blur-md hidden items-center justify-center transition-all duration-300 z-10002 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modalTitle"
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      <div
+        class="bg-[#1a1a2e]/90 backdrop-blur-2xl border border-white/10 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden"
+      >
+        <div class="flex justify-between items-center p-6 border-b border-white/10 flex-none">
+          <h2 id="modalTitle" class="text-2xl md:text-3xl font-bold gradient-text truncate pr-4">
+          </h2>
+          <button
+            id="closeModalButton"
+            class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-2xl p-2.5 transition-all duration-300 shrink-0"
+            aria-label="关闭详情"
+            type="button"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div id="modalContent" class="overflow-y-auto flex-1 p-6 md:p-8 custom-scrollbar"></div>
+      </div>
+    </div>
+
+    <!-- 加载提示 -->
+    <div
+      id="loading"
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center z-10003"
+    >
+      <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-8 rounded-2xl text-center">
+        <div class="loading-spinner mb-4"></div>
+        <p class="text-white text-lg">加载中...</p>
+      </div>
+    </div>
+
+    <!-- 记住进度弹窗 -->
+    <div
+      id="progress-restore-modal"
+      tabindex="-1"
+      aria-modal="true"
+      role="dialog"
+      style="display: none;"
+    >
+      <div class="progress-restore-card" role="document">
+        <div class="progress-modal-title">继续播放？</div>
+        <div class="progress-modal-content"><!-- JS填充 --></div>
+        <div class="progress-modal-actions">
+          <button class="progress-modal-btn cancel" id="progress-restore-cancel">取消</button>
+          <button class="progress-modal-btn confirm" id="progress-restore-confirm">确定</button>
         </div>
       </div>
     </div>

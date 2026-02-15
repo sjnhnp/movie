@@ -2371,14 +2371,24 @@ media-fullscreen-button {
   justify-content: center;
   align-items: flex-start;
   padding-top: 1.25rem;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  /* 关键：增加过渡效果，当右侧边距变化时（侧边栏打开）平滑缩放 */
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1), right 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 桌面端：当侧边栏显示时，将顶栏容器收缩，避免遮挡 */
+@media (min-width: 1025px) {
+  .player-page-wrapper:not(.sidebar-hidden) .cinematic-header-container {
+    right: 380px;
+    pointer-events: none;
+  }
 }
 
 .cinematic-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 96vw;
+  width: 95%;
+  /* 改为百分比，使其能随容器（即播放区域）自动缩放 */
   max-width: 1400px;
   height: 64px;
   background: rgba(10, 10, 18, 0.4);

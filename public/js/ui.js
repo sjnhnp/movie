@@ -200,39 +200,44 @@ const toastQueue = [];
 let isShowingToast = false;
 
 /**
- * 显示消息Toast（支持消息队列，背景色可变更）
+ * 显示消息Toast（已统一重定向到 showMessage）
  * @param {string} message 消息内容
  * @param {string} type 消息类型 (error|success|info|warning)
  */
-function showToast(message, type = 'error') {
-  toastQueue.push({ message, type });
-  if (!isShowingToast) showNextToast();
-}
+function showToast(message, type = 'info', duration = 3000) {
+  if (typeof showMessage === 'function') {
+    showMessage(message, type, duration);
+  } else {
+    // 降级处理：如果没有定义 showMessage (例如在非播放页)
+    console.log(`Toast [${type}]: ${message}`);
+    const toast = getElement('toast');
+    const toastMessage = getElement('toastMessage');
+    if (!toast || !toastMessage) return;
 
-/**
- * 显示下一条Toast消息
- */
-function showNextToast() {
-  if (!toastQueue.length) return (isShowingToast = false);
-  isShowingToast = true;
-  const { message, type } = toastQueue.shift();
-  const toast = getElement('toast');
-  const toastMessage = getElement('toastMessage');
-  if (!toast || !toastMessage) return;
+    const bgColors = {
+      error: 'bg-red-600/90',
+      success: 'bg-indigo-600/90',
+      info: 'bg-indigo-600/95',
+      warning: 'bg-amber-600/90',
+    };
+    const bg = bgColors[type] || bgColors.info;
 
-  // 设置样式
-  const bg = TOAST_BG_COLORS[type] || TOAST_BG_COLORS.error;
-  toast.className = `fixed top-4 left-1/2 -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${bg} text-white z-50`;
-  toastMessage.textContent = message;
+    // Fallback toast styling matching the blue top-right theme
+    toast.className = `fixed top-6 right-6 p-4 rounded-2xl shadow-2xl transition-all duration-500 ${bg} text-white z-[20000] pointer-events-none opacity-0 transform translate-x-10 backdrop-blur-xl border border-white/20 font-bold text-sm flex items-center gap-3`;
+    const icon = type === 'success' ? '✓' : (type === 'error' ? '✕' : (type === 'warning' ? '!' : 'i'));
+    toast.innerHTML = `<span class="flex items-center justify-center w-6 h-6 rounded-full bg-white/20 text-[10px]">${icon}</span><span>${message}</span>`;
 
-  toast.style.opacity = '1';
-  toast.style.transform = 'translateX(-50%) translateY(0)';
+    toast.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      toast.classList.add('opacity-100', 'translate-x-0');
+    });
 
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateX(-50%) translateY(-100%)';
-    setTimeout(showNextToast, 300);
-  }, 3000);
+    setTimeout(() => {
+      toast.classList.remove('opacity-100', 'translate-x-0');
+      toast.classList.add('opacity-0', 'translate-x-10');
+      setTimeout(() => toast.classList.add('hidden'), 300);
+    }, duration);
+  }
 }
 
 // ----------- Loading区域 --------------

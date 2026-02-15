@@ -1599,22 +1599,13 @@ header {
   }
 }
 
-/* 全屏播放器操作提示 */
-#toast {
+/* 全屏播放器操作提示 (已由 message 统一) */
+#message {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  /* 确保z-index足够高，高于播放器所有UI */
+  top: 24px;
+  right: 24px;
   z-index: 2147483647;
   pointer-events: none;
-  background: rgba(0, 0, 0, 0.7);
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 18px;
-  color: white;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
 }
 
 /* 最终综艺按钮专用样式 (播放页)  */
@@ -1938,10 +1929,6 @@ media-fullscreen-button {
   z-index: 10003 !important;
 }
 
-/* 确保Toast在最上层 */
-#toast {
-  z-index: 10004 !important;
-}
 
 @keyframes spin {
   to {

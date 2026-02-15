@@ -206,53 +206,45 @@ function hidePlayerOverlays() {
   }
 }
 
+// showToast is deprecated in favor of showMessage for consistent UI
 function showToast(message, type = 'info', duration = 3000) {
-  const toast = document.getElementById('toast');
-  const toastMessage = document.getElementById('toastMessage');
-  if (!toast || !toastMessage) return;
-
-  const bgColors = {
-    error: 'bg-red-500',
-    success: 'bg-green-500',
-    info: 'bg-blue-500',
-    warning: 'bg-yellow-500',
-  };
-  const bgColor = bgColors[type] || bgColors.info;
-
-  toast.className = `fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${bgColor} text-white z-[2147483647] pointer-events-none`;
-  toastMessage.textContent = message;
-
-  toast.style.opacity = '1';
-
-  setTimeout(() => {
-    toast.style.opacity = '0';
-  }, duration);
+  showMessage(message, type, duration);
 }
 
 function showMessage(text, type = 'info', duration = 3000) {
   const messageElement = document.getElementById('message');
-  if (!messageElement) {
-    return;
-  }
+  if (!messageElement) return;
 
-  let bgColorClass =
-    { error: 'bg-red-500', success: 'bg-green-500', warning: 'bg-yellow-500', info: 'bg-indigo-500' }[
-    type
-    ] || 'bg-indigo-500';
+  // 使用统一的深蓝精致配色 (对应图2的右上角蓝色)
+  const bgColors = {
+    error: 'bg-red-600/90',
+    success: 'bg-indigo-600/90',
+    info: 'bg-indigo-600/95',
+    warning: 'bg-amber-600/90'
+  };
 
-  messageElement.className = `fixed top-4 right-4 p-4 rounded-lg shadow-lg z-[10001] text-sm ${bgColorClass} text-white transition-all duration-300 opacity-0 transform translate-y-[-10px]`;
-  messageElement.textContent = text;
+  let bgColorClass = bgColors[type] || bgColors.info;
+
+  // 这里的样式建议采用玻璃拟态
+  messageElement.className = `fixed top-6 right-6 p-4 pr-6 rounded-2xl shadow-2xl z-[2147483647] text-sm font-bold ${bgColorClass} text-white backdrop-blur-xl border border-white/20 transition-all duration-500 opacity-0 transform translate-x-[20px] flex items-center gap-3`;
+
+  // 添加图标增强视觉
+  const icon = type === 'success' ? '✓' : (type === 'error' ? '✕' : (type === 'warning' ? '!' : 'i'));
+  messageElement.innerHTML = `<span class="flex items-center justify-center w-6 h-6 rounded-full bg-white/20 text-[10px]">${icon}</span><span>${text}</span>`;
+
   messageElement.classList.remove('hidden');
 
-  void messageElement.offsetWidth;
-  messageElement.classList.add('opacity-100', 'translate-y-0');
+  // 触发动画
+  requestAnimationFrame(() => {
+    messageElement.classList.add('opacity-100', 'translate-x-0');
+  });
 
   if (messageElement._messageTimeout) clearTimeout(messageElement._messageTimeout);
 
   messageElement._messageTimeout = setTimeout(() => {
-    messageElement.classList.remove('opacity-100', 'translate-y-0');
-    messageElement.classList.add('opacity-0', 'translate-y-[-10px]');
-    setTimeout(() => messageElement.classList.add('hidden'), 300);
+    messageElement.classList.remove('opacity-100', 'translate-x-0');
+    messageElement.classList.add('opacity-0', 'translate-x-[20px]');
+    setTimeout(() => messageElement.classList.add('hidden'), 500);
   }, duration);
 }
 
@@ -1046,7 +1038,7 @@ function clearCurrentVideoAllEpisodeProgresses() {
 function renderEpisodes() {
   const sidebarGrid = document.getElementById('sidebar-episode-grid');
   const episodeButtonsGrid = document.getElementById('episode-buttons-grid');
-  
+
   if (!sidebarGrid && !episodeButtonsGrid) return;
 
   if (!window.currentEpisodes || !window.currentEpisodes.length) {
@@ -2128,5 +2120,8 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
   window.location.href = playerUrl.toString();
 }
 
-// 导出 playFromHistory 到全局
+// 导出到全局以供 HTML onclick 使用
 window.playFromHistory = playFromHistory;
+window.copyLinks = copyLinks;
+window.showToast = showToast;
+window.showMessage = showMessage;

@@ -2908,7 +2908,7 @@ media-fullscreen-button {
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 1rem;
-  margin: 0;
+  margin: 0 0 0.75rem 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px 16px 0 0;
   background: rgba(255, 255, 255, 0.02);

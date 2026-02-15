@@ -2204,6 +2204,7 @@ media-fullscreen-button {
     opacity: 1;
     pointer-events: auto;
     overflow: visible;
+    z-index: 10000;
   }
 
   #episode-sidebar.show-mobile {

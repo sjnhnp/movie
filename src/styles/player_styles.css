@@ -3291,13 +3291,17 @@ media-fullscreen-button {
 /* --- 搜索与历史面板优化 --- */
 
 /* 1. 搜索面板：提升层级，居中显示 */
+/* 1. 搜索面板：不要直接设 display，用 :not(.hidden) 控制 */
 #searchPanel {
   z-index: 20001 !important;
-  /* 高于控制中心的 20000 和顶栏的 10005 */
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
+  align-items: flex-start !important;
+  justify-content: center !important;
   padding-top: 12vh;
+}
+
+/* 只在面板可见时才用 flex 布局 */
+#searchPanel:not(.hidden) {
+  display: flex !important;
 }
 
 /* 搜索面板内容区：居中 + 精致化 */

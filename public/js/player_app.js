@@ -2383,21 +2383,57 @@ function closeControlCenterPanel() {
 
 window.closeControlCenterPanel = closeControlCenterPanel;
 
-// 确保在初始化搜索历史脚本时调用（需要找到注入点，目前通过 window 暴露）
-// 如果你有单独的 initPlayerSearchHistory 实现文件，请去那里调用 closeControlCenterPanel()
-// 为了保险，我们在 document 层面监听通用的搜索/历史按钮点击
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('button');
-  if (!btn) return;
+// 修复搜索面板 aria-hidden 同步 + 自动关闭控制中心
+(function fixSearchAndHistoryPanels() {
+  const searchPanel = document.getElementById('searchPanel');
+  const closeBtn = document.getElementById('closeSearchPanelButton');
 
-  // 根据按钮的特征判断（这里假设id或class包含特定关键词，需要根据实际HTML调整）
-  // 假设搜索按钮有 id="search-button" 或 class 包含 search-trigger
-  if (btn.id === 'search-button' || btn.closest('#search-button') || btn.classList.contains('search-trigger')) {
-    closeControlCenterPanel();
+  if (searchPanel) {
+    // 监听 class 变化，同步 aria-hidden
+    const observer = new MutationObserver(() => {
+      const isHidden = searchPanel.classList.contains('hidden');
+      searchPanel.setAttribute('aria-hidden', isHidden ? 'true' : 'false');
+    });
+    observer.observe(searchPanel, { attributes: true, attributeFilter: ['class'] });
+
+    // 兜底：确保关闭按钮始终能用
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        searchPanel.classList.add('hidden');
+        searchPanel.classList.remove('flex');
+        searchPanel.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      });
+    }
+
+    // 点击遮罩层关闭
+    searchPanel.addEventListener('click', (e) => {
+      if (e.target === searchPanel) {
+        searchPanel.classList.add('hidden');
+        searchPanel.classList.remove('flex');
+        searchPanel.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }
+    });
   }
 
-  // 假设历史按钮有 id="history-button" 或 class 包含 history-trigger
-  if (btn.id === 'history-button' || btn.closest('#history-button') || btn.classList.contains('history-trigger')) {
-    closeControlCenterPanel();
-  }
-});
+  // 搜索/历史按钮点击时关闭控制中心
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('button, [role="button"]');
+    if (!btn) return;
+
+    const isSearchTrigger = btn.id === 'search-button' ||
+      btn.id === 'openSearchPanelButton' ||
+      btn.dataset.action === 'search' ||
+      btn.closest('[data-action="search"]');
+
+    const isHistoryTrigger = btn.id === 'history-button' ||
+      btn.id === 'openHistoryButton' ||
+      btn.dataset.action === 'history' ||
+      btn.closest('[data-action="history"]');
+
+    if (isSearchTrigger || isHistoryTrigger) {
+      closeControlCenterPanel();
+    }
+  });
+})();

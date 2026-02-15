@@ -2533,8 +2533,8 @@ media-fullscreen-button {
 }
 
 .pill-nav-btn {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2546,11 +2546,12 @@ media-fullscreen-button {
 .pill-nav-btn:hover {
   color: #fff;
   background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.05);
 }
 
 .pill-nav-btn svg {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.375rem;
+  height: 1.375rem;
 }
 
 .pill-divider {

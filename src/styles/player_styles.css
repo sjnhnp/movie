@@ -2387,12 +2387,12 @@ media-fullscreen-button {
   #episode-sidebar {
     width: 320px;
   }
-  
+
   .player-page-wrapper:not(.sidebar-hidden) .cinematic-header-container {
     width: calc(100vw - 320px);
     max-width: calc(100vw - 320px);
   }
-  
+
   .player-page-wrapper.sidebar-hidden .cinematic-header-container {
     width: 100vw;
     max-width: 100vw;
@@ -2404,12 +2404,12 @@ media-fullscreen-button {
   #episode-sidebar {
     width: 380px;
   }
-  
+
   .player-page-wrapper:not(.sidebar-hidden) .cinematic-header-container {
     width: calc(100vw - 380px);
     max-width: calc(100vw - 380px);
   }
-  
+
   .player-page-wrapper.sidebar-hidden .cinematic-header-container {
     width: 100vw;
     max-width: 100vw;
@@ -2907,7 +2907,7 @@ media-fullscreen-button {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 1rem;
+  padding: 0.5rem 1rem;
   margin: 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px 16px 0 0;
@@ -2997,4 +2997,3 @@ media-fullscreen-button {
     height: 14px;
   }
 }
-

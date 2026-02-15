@@ -102,8 +102,9 @@ input[type=number] {
     max-height: 60vh;
   }
 
-  /* 移动端侧边栏显示时，进一步减小播放器高度以避免遮挡 */
+  /* 修复：同理，768px 以下抽屉打开时也用 min() 约束宽度 */
   .player-page-wrapper:has(#episode-sidebar.show-mobile) #player-region {
+    width: min(100%, calc(40vh * 16 / 9)) !important;
     max-height: 40vh;
   }
 }
@@ -2971,8 +2972,9 @@ media-fullscreen-button {
     z-index: auto;
   }
 
-  /* 侧边栏默认显示时，播放器缩小避免被遮挡 */
+  /* 修复：抽屉打开时，宽度跟着受限高度走，消除左右空隙 */
   .player-page-wrapper:has(#episode-sidebar.show-mobile) #player-region {
+    width: min(100%, calc(35vh * 16 / 9)) !important;
     max-height: 35vh;
   }
 

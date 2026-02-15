@@ -559,6 +559,12 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
   updateBrowserHistory(playUrl);
 
   if (player) {
+    // ✅ 切源前清理旧 blob (防止内存泄漏)
+    const oldSrc = player.currentSrc || (player.src && player.src.src);
+    if (typeof oldSrc === 'string' && oldSrc.startsWith('blob:')) {
+      URL.revokeObjectURL(oldSrc);
+    }
+
     const processedUrl = await processVideoUrl(playUrl);
     player.src = { src: processedUrl, type: 'application/x-mpegurl' };
     // 在调用预加载前添加状态检查
@@ -992,6 +998,9 @@ function saveVideoSpecificProgress() {
       );
       allProgresses[currentUniversalId] = currentTime;
       localStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgresses));
+
+      // ✅ 进度更新后，清除渲染缓存，确保侧边栏刷新
+      window._cachedWatchProgress = null;
     } catch (e) {
       console.error('保存特定视频集数进度失败:', e);
     }
@@ -1084,23 +1093,46 @@ function renderEpisodes() {
   }
 
   // 获取观看历史以显示进度
+  // 获取观看历史以显示进度
   let watchHistory = {};
-  try {
-    const history = JSON.parse(localStorage.getItem('viewingHistory') || '[]');
-    // 过滤当前视频的历史记录
-    history.forEach(item => {
-      // 匹配标题和年份（如果都有）
-      if (item.title === currentVideoTitle) {
-        const epNum = item.episodeIndex + 1;
-        const progress = item.duration > 0 ? (item.playbackPosition / item.duration) * 100 : 0;
-        // 保留最高进度
-        if (!watchHistory[epNum] || progress > watchHistory[epNum]) {
-          watchHistory[epNum] = progress;
+
+  // 缓存机制：避免每次渲染都重读整个 localStorage (history可能很大)
+  const cacheKey = `${currentVideoTitle}_${currentVideoYear}_${currentEpisodeIndex}`;
+  if (window._cachedWatchProgressKey === cacheKey && window._cachedWatchProgress) {
+    watchHistory = window._cachedWatchProgress;
+  } else {
+    try {
+      // ✅ 优先用精确的单集进度数据
+      const allProgresses = JSON.parse(
+        localStorage.getItem('videoSpecificEpisodeProgresses') || '{}'
+      );
+      const history = JSON.parse(localStorage.getItem('viewingHistory') || '[]');
+
+      for (let i = 0; i < currentEpisodes.length; i++) {
+        const uid = generateUniversalId(currentVideoTitle, currentVideoYear, i);
+        const savedTime = allProgresses[uid];
+        // 如果有精确进度，优先使用
+        if (savedTime && savedTime > 0) {
+          // 需要 duration 来算百分比，从 viewingHistory 补充
+          // 注意：viewingHistory 里的 episodeIndex 是对应当前集数的
+          const match = history.find(h => h.title === currentVideoTitle && h.episodeIndex === i);
+          const duration = match?.duration || 0;
+          // 有进度但无时长，给个最低标记 10%
+          watchHistory[i + 1] = duration > 0 ? (savedTime / duration) * 100 : 10;
+        } else {
+          // 兜底：如果没有精确记录，尝试从历史记录里找 (旧数据兼容)
+          const match = history.find(h => h.title === currentVideoTitle && h.episodeIndex === i);
+          if (match && match.duration > 0) {
+            watchHistory[i + 1] = (match.playbackPosition / match.duration) * 100;
+          }
         }
       }
-    });
-  } catch (e) {
-    console.error('获取历史进度失败:', e);
+
+      window._cachedWatchProgress = watchHistory;
+      window._cachedWatchProgressKey = cacheKey;
+    } catch (e) {
+      console.error('获取历史进度失败:', e);
+    }
   }
 
   const RANGE_SIZE = 30;

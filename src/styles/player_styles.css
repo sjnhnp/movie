@@ -96,6 +96,34 @@ input[type=number] {
   max-height: 70vh;
 }
 
+/* ✅ 正确顺序：从大到小排列，让小屏规则覆盖大屏规则 */
+
+/* 1024px 先写 */
+@media (max-width: 1024px) {
+  .player-page-wrapper:has(#episode-sidebar.show-mobile) #player-region {
+    width: min(100%, calc(35vh * 16 / 9));
+    max-height: 35vh;
+  }
+}
+
+/* 900px 中间 */
+@media (max-width: 900px) {
+  #player-region {
+    width: 100% !important;
+    /* 删掉 max-height: none 和 height: auto，允许后续规则覆盖 */
+    aspect-ratio: 16/9;
+    background-color: transparent;
+  }
+
+  #player video,
+  media-player video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+  }
+}
+
+/* 768px 最后写，优先级最高 */
 @media (max-width: 768px) {
   #player-region {
     width: 100%;
@@ -109,21 +137,7 @@ input[type=number] {
   }
 }
 
-@media (max-width: 900px) {
-  #player-region {
-    width: 100% !important;
-    max-height: none;
-    aspect-ratio: 16/9;
-    background-color: transparent;
-  }
 
-  #player video,
-  media-player video {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: contain !important;
-  }
-}
 
 
 /* 确保 Vidstack 播放器和其内部 video 元素正确缩放 */
@@ -2362,11 +2376,16 @@ media-fullscreen-button {
   box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
   position: relative;
   /* 进度条末端光亮效果 */
-  min-width: 4px;
-  /* 确保即使极短也能看到一点 */
+  /* min-width: 4px; // 删掉，防止0进度显示 */
   border-radius: 0 2px 2px 0;
   /* 平滑末端 */
   transition: width 0.3s ease;
+}
+
+/* 零进度时完全隐藏 */
+.ep-progress-fill[style*="width: 0%"],
+.ep-progress-fill[style*="width: 0px"] {
+  display: none;
 }
 
 /* 添加一个高亮光点在进度条末端 */
@@ -2379,6 +2398,12 @@ media-fullscreen-button {
   width: 2px;
   background: rgba(255, 255, 255, 0.8);
   box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
+}
+
+/* 末端光点也只在有进度时显示 */
+.ep-progress-fill[style*="width: 0%"]::after,
+.ep-progress-fill[style*="width: 0px"]::after {
+  display: none;
 }
 
 /* 看完后进度条变淡 */

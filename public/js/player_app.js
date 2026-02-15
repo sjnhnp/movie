@@ -1159,7 +1159,7 @@ function initEpisodeSidebar() {
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const isMobile = window.innerWidth <= 1024;
-      
+
       if (isMobile) {
         sidebar.classList.toggle('hidden-sidebar');
         sidebar.classList.toggle('show-mobile');
@@ -1243,7 +1243,7 @@ function initEpisodeSidebar() {
     mainContent.addEventListener('click', () => {
       const isMobile = window.innerWidth <= 1024;
       const isSidebarOpen = sidebar.classList.contains('show-mobile');
-      
+
       if (isMobile && isSidebarOpen) {
         sidebar.classList.add('hidden-sidebar');
         sidebar.classList.remove('show-mobile');
@@ -1257,16 +1257,21 @@ function initEpisodeSidebar() {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
         const isMobile = window.innerWidth <= 1024;
-        
+
         if (isMobile) {
-          // 移动端：强制隐藏侧边栏，使用抽屉样式
-          wrapper.classList.add('sidebar-hidden');
-          sidebar.classList.add('hidden-sidebar');
-          sidebar.classList.remove('show-mobile');
+          // 移动端：默认显示剧集列表
+          sidebar.classList.remove('hidden-sidebar');
+          sidebar.classList.add('show-mobile');
+          if (wrapper) {
+            wrapper.classList.remove('sidebar-hidden');
+          }
         } else {
           // 桌面端：根据侧边栏状态调整布局
+          sidebar.classList.remove('show-mobile');
           const isSidebarHidden = sidebar.classList.contains('hidden-sidebar');
-          wrapper.classList.toggle('sidebar-hidden', isSidebarHidden);
+          if (wrapper) {
+            wrapper.classList.toggle('sidebar-hidden', isSidebarHidden);
+          }
         }
       }, 100);
     };

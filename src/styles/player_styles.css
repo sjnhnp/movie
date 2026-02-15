@@ -101,7 +101,7 @@ input[type=number] {
   }
 
   /* 移动端侧边栏显示时，进一步减小播放器高度以避免遮挡 */
-  .player-page-wrapper:not(:has(#episode-sidebar.hidden-sidebar)) #player-region {
+  .player-page-wrapper:has(#episode-sidebar.show-mobile) #player-region {
     max-height: 40vh;
   }
 }
@@ -2961,7 +2961,24 @@ media-fullscreen-button {
   height: 16px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
+
+  /* 顶栏始终显示，不随鼠标隐藏 */
+  .cinematic-header-container .cinematic-header {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+
+  /* 主内容区顶部留出空间，避免被固定顶栏遮挡 */
+  .player-main-content {
+    padding-top: 5.5rem;
+  }
+
+  /* 侧边栏默认显示时，播放器缩小避免被遮挡 */
+  .player-page-wrapper:has(#episode-sidebar.show-mobile) #player-region {
+    max-height: 35vh;
+  }
+
   .cinematic-header {
     height: 56px;
     border-radius: 16px;

@@ -77,10 +77,11 @@ input[type=number] {
 
 /* 播放器区域 */
 #player-region {
-  height: 85vh;
+  /* 关键：取"容器宽度"和"85vh对应的16:9宽度"中较小值 */
+  width: min(100%, calc(85vh * 16 / 9));
   aspect-ratio: 16 / 9;
-  width: auto;
-  max-width: 100%;
+  max-height: 85vh;
+  /* 删掉原来的 height: 85vh 和 width: auto */
   margin: 0 auto;
   position: relative;
   transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
@@ -91,12 +92,13 @@ input[type=number] {
 
 /* 侧边栏显示时的播放器适配 - 降低高度以适应更窄的容器 */
 .player-page-wrapper:not(:has(#episode-sidebar.hidden-sidebar)) #player-region {
-  height: 70vh;
+  width: min(100%, calc(70vh * 16 / 9));
+  max-height: 70vh;
 }
 
 @media (max-width: 768px) {
   #player-region {
-    height: 56.25vw;
+    width: 100%;
     max-height: 60vh;
   }
 
@@ -107,10 +109,9 @@ input[type=number] {
 }
 
 @media (max-width: 900px) {
-
   #player-region {
-    width: 100%;
-    height: auto !important;
+    width: 100% !important;
+    max-height: none;
     aspect-ratio: 16/9;
     background-color: transparent;
   }

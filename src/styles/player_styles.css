@@ -1682,7 +1682,7 @@ media-fullscreen-button {
 }
 
 /* 搜索主容器：只命中直接子级，避免污染内部卡片 */
-#searchPanel>.bg-black\/20 {
+#searchPanel .search-panel-container {
   width: 90%;
   max-width: 640px;
   margin: 0 auto;
@@ -1772,7 +1772,7 @@ media-fullscreen-button {
     padding-top: 8vh;
   }
 
-  #searchPanel>.bg-black\/20 {
+  #searchPanel .search-panel-container {
     width: 95%;
     border-radius: 20px !important;
     padding: 1.25rem !important;
@@ -1841,7 +1841,7 @@ media-fullscreen-button {
     padding-top: 5vh;
   }
 
-  #searchPanel>.bg-black\/20 {
+  #searchPanel .search-panel-container {
     width: 96%;
     border-radius: 16px !important;
     padding: 1rem !important;

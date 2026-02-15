@@ -183,6 +183,16 @@ function toggleHistory(e) {
       settingsPanel.setAttribute('aria-hidden', 'true');
     }
 
+    // ✅ 关闭控制中心面板 (修复不自动隐藏的问题)
+    const masterPanel = document.getElementById('master-control-panel');
+    const masterToggle = document.getElementById('master-control-toggle');
+    if (masterPanel && masterPanel.classList.contains('active')) {
+      masterPanel.classList.remove('active');
+    }
+    if (masterToggle && masterToggle.classList.contains('active')) {
+      masterToggle.classList.remove('active');
+    }
+
     // 打开历史面板
     historyPanel.classList.add('show');
     historyPanel.setAttribute('aria-hidden', 'false');

@@ -2,15 +2,18 @@
 import Layout from '../layouts/Layout.astro';
 import { createHash } from 'crypto';
 
-const getRuntimeEnv = (key: string) => {
-  if (typeof process !== 'undefined' && process.env[key]) {
-    return process.env[key];
-  }
-  return import.meta.env[key] || '';
-};
-
-const password = String(getRuntimeEnv('PASSWORD'));
-const settingsPassword = String(getRuntimeEnv('SETTINGS_PASSWORD'));
+// 优先从 runtime (process.env) 读取，适配 Docker/1Panel 等环境的运行时注入
+// 只有在 Node 环境不可用时才回退到 build-time 的 import.meta.env
+const password = String(
+  (typeof process !== 'undefined' ? process.env.PASSWORD : undefined) ||
+    import.meta.env.PASSWORD ||
+    ''
+);
+const settingsPassword = String(
+  (typeof process !== 'undefined' ? process.env.SETTINGS_PASSWORD : undefined) ||
+    import.meta.env.SETTINGS_PASSWORD ||
+    ''
+);
 
 const sha256 = (str: string) => (str ? createHash('sha256').update(str).digest('hex') : '');
 const passwordHash = sha256(password);

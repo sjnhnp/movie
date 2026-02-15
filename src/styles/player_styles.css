@@ -2857,6 +2857,51 @@ media-fullscreen-button {
   stroke-width: 2;
 }
 
+/* 修复：防止下拉菜单的通用 button 样式污染返回按钮 */
+#skip-control-dropdown .back-to-master,
+#line-switch-dropdown .back-to-master,
+#play-settings-dropdown .back-to-master,
+.dropdown-header .back-to-master {
+  width: 32px !important;
+  min-width: 32px !important;
+  max-width: 32px !important;
+  height: 32px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+#skip-control-dropdown .back-to-master:hover,
+#line-switch-dropdown .back-to-master:hover,
+#play-settings-dropdown .back-to-master:hover,
+.dropdown-header .back-to-master:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+  transform: translateX(-3px) scale(1.05) !important;
+}
+
+/* 修复：返回按钮内 SVG 图标放大到可见尺寸 */
+.back-to-master svg {
+  width: 20px !important;
+  height: 20px !important;
+  stroke-width: 2.5 !important;
+  flex-shrink: 0;
+}
+
+/* 修复：排除 .back-to-master 不受 dropdown 通用 button::before 伪元素影响 */
+#skip-control-dropdown .back-to-master::before,
+#line-switch-dropdown .back-to-master::before {
+  display: none !important;
+}
+
+
 /* 优化下拉菜单头部布局 */
 .dropdown-header {
   display: flex;

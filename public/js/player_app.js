@@ -1544,6 +1544,11 @@ function setupSkipControls() {
     localStorage.setItem(SKIP_OUTRO_KEY, outroTime);
     if (typeof showToast === 'function') showToast('跳过时间设置已保存', 'success');
     dropdown.classList.add('hidden');
+    // 关闭一级控制面板
+    const panel = document.getElementById('master-control-panel');
+    const panelToggle = document.getElementById('master-control-toggle');
+    if (panel) panel.classList.remove('active');
+    if (panelToggle) panelToggle.classList.remove('active');
   });
   resetBtn.addEventListener('click', () => {
     localStorage.removeItem(SKIP_INTRO_KEY);
@@ -1689,6 +1694,11 @@ function setupLineSwitching() {
       const target = e.target.closest('button[data-source-code]');
       if (target && !target.disabled) {
         dropdown.classList.add('hidden');
+        // 关闭一级控制面板，防止二级菜单隐藏后一级面板重新浮现
+        const panel = document.getElementById('master-control-panel');
+        const panelToggle = document.getElementById('master-control-toggle');
+        if (panel) panel.classList.remove('active');
+        if (panelToggle) panelToggle.classList.remove('active');
         switchLine(target.dataset.sourceCode, target.dataset.vodId);
       }
     });

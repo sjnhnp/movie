@@ -1170,6 +1170,66 @@ function initEpisodeSidebar() {
         }
       }
     });
+
+    // 点击外部区域自动隐藏侧边栏
+    document.addEventListener('click', (e) => {
+      const isMobile = window.innerWidth <= 1024;
+      if (!isMobile) {
+        if (!sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+          if (!sidebar.classList.contains('hidden-sidebar')) {
+            sidebar.classList.add('hidden-sidebar');
+            if (wrapper) {
+              wrapper.classList.add('sidebar-hidden');
+            }
+          }
+        }
+      }
+    });
+
+    // 鼠标悬停在右侧边缘时自动显示侧边栏
+    const edgeDetector = document.createElement('div');
+    edgeDetector.style.position = 'fixed';
+    edgeDetector.style.right = '0';
+    edgeDetector.style.top = '0';
+    edgeDetector.style.width = '10px';
+    edgeDetector.style.height = '100vh';
+    edgeDetector.style.zIndex = '9999';
+    edgeDetector.style.cursor = 'pointer';
+    document.body.appendChild(edgeDetector);
+
+    edgeDetector.addEventListener('mouseenter', () => {
+      const isMobile = window.innerWidth <= 1024;
+      if (!isMobile) {
+        if (sidebar.classList.contains('hidden-sidebar')) {
+          sidebar.classList.remove('hidden-sidebar');
+          if (wrapper) {
+            wrapper.classList.remove('sidebar-hidden');
+          }
+        }
+      }
+    });
+
+    // 鼠标离开侧边栏区域时自动隐藏
+    sidebar.addEventListener('mouseleave', () => {
+      const isMobile = window.innerWidth <= 1024;
+      if (!isMobile) {
+        sidebar.classList.add('hidden-sidebar');
+        if (wrapper) {
+          wrapper.classList.add('sidebar-hidden');
+        }
+      }
+    });
+
+    // 鼠标悬停在侧边栏上时保持显示
+    sidebar.addEventListener('mouseenter', () => {
+      const isMobile = window.innerWidth <= 1024;
+      if (!isMobile) {
+        sidebar.classList.remove('hidden-sidebar');
+        if (wrapper) {
+          wrapper.classList.remove('sidebar-hidden');
+        }
+      }
+    });
   }
 
   if (sortBtn) {

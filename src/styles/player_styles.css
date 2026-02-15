@@ -2634,8 +2634,7 @@ media-fullscreen-button {
   border-radius: 28px;
   padding: 1.25rem;
   box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.8);
-  z-index: 10006;
-  /* 关键：用 opacity & visibility 隐藏，不要用 hidden 类 */
+  z-index: 20000;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px) scale(0.96);
@@ -2986,6 +2985,14 @@ media-fullscreen-button {
 
   .narrow-window-nav {
     display: flex;
+  }
+
+  .control-center-panel {
+    position: fixed;
+    top: 70px;
+    right: 1rem;
+    left: 1rem;
+    width: auto;
   }
 }
 

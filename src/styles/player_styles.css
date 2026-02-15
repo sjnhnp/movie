@@ -2370,185 +2370,383 @@ media-fullscreen-button {
   border-radius: 4px;
 }
 
-/* --- Unified Master Command Island (Plan A) --- */
-.master-island-wrapper {
+/* --- Cinematic Header Bar: 电影级同步顶栏 --- */
+.cinematic-header-container {
   position: fixed;
-  top: 1.25rem;
-  /* 增加顶部间距，更优雅 */
+  top: 0;
   left: 0;
   right: 0;
+  height: 100px;
+  /* 扩展触发感应区 */
   z-index: 10005;
   pointer-events: none;
   display: flex;
   justify-content: center;
-  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  align-items: flex-start;
+  padding-top: 1.25rem;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.master-island {
+.cinematic-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: auto;
-  /* 自适应宽度 */
-  min-width: 600px;
-  max-width: 90vw;
-  background: rgba(20, 20, 30, 0.6);
-  /* 更深背景提高对比度 */
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  width: 96vw;
+  max-width: 1400px;
+  height: 64px;
+  background: rgba(10, 10, 18, 0.4);
+  /* 深色透明基底 */
+  backdrop-filter: blur(60px) saturate(180%);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
-    0 20px 60px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
-  border-radius: 26px;
-  padding: 0.5rem 0.8rem;
+    0 10px 40px -10px rgba(0, 0, 0, 0.5),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  border-radius: 22px;
+  padding: 0 1.5rem;
   pointer-events: auto;
   opacity: 0;
-  transform: translateY(-30px);
-  transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
+  transform: translateY(-20px);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* 绑定播放器悬停逻辑 */
-#player-region:hover .master-island,
-.master-island:hover {
+.cinematic-header-container.active .cinematic-header {
   opacity: 1;
   transform: translateY(0);
 }
 
-.island-section {
+/* 段落分区 */
+.header-section {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  height: 100%;
 }
 
 .section-left {
   flex: 1;
+  gap: 1.25rem;
+  justify-content: flex-start;
   min-width: 0;
-  padding-right: 1.5rem;
 }
 
 .section-center {
-  background: rgba(255, 255, 255, 0.04);
-  padding: 0.2rem 0.4rem;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex: 0 0 auto;
 }
 
 .section-right {
   flex: 1;
+  gap: 0.8rem;
   justify-content: flex-end;
-  padding-left: 1rem;
 }
 
-/* Dropdown direction fix: Open DOWNWARD for top island */
-.master-island .control-dropdown {
-  bottom: auto;
-  top: calc(100% + 12px);
-  /* 向下弹出 */
-  transform-origin: top center;
-  animation: dropdownFadeDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes dropdownFadeDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* Island Button Refinement */
-.island-btn {
+/* [1] 左区样式 */
+.header-back-btn {
+  width: 2.75rem;
+  height: 2.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 14px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.85);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
+  border-radius: 14px;
+  color: #fff;
+  transition: all 0.3s ease;
   flex-shrink: 0;
 }
 
-.island-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #fff;
-  transform: scale(1.1);
-}
-
-.island-btn:active {
-  transform: scale(0.95);
-}
-
-.island-btn svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-/* Nav specific icons */
-.nav-btn svg {
-  width: 1.4rem;
-  height: 1.4rem;
-  stroke-width: 2.5;
-}
-
-.island-divider {
-  width: 1px;
-  height: 1.25rem;
+.header-back-btn:hover {
   background: rgba(255, 255, 255, 0.12);
-  margin: 0 0.5rem;
+  transform: translateX(-2px);
 }
 
-/* Title and Meta in Island */
-.header-info {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  margin-left: 0.4rem;
-}
-
-.header-title {
-  font-size: 1.05rem;
+.header-main-title {
+  font-size: 1.15rem;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 320px;
+  letter-spacing: -0.01em;
 }
 
-.header-meta {
-  font-size: 0.65rem;
+/* [2] 中区：状态导航胶囊 */
+.status-pill {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.035);
+  height: 44px;
+  padding: 0 0.5rem;
+  border-radius: 100px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.02);
+}
+
+.pill-nav-btn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: rgba(255, 255, 255, 0.4);
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  margin-top: -1px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
 }
 
-/* Hide when locked - Logic can be added later via JS if needed */
-/* .player-locked .master-island { opacity: 0; pointer-events: none; } */
+.pill-nav-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.pill-nav-btn svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.pill-divider {
+  width: 1px;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 0.4rem;
+}
+
+.pill-content {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0 0.6rem;
+  white-space: nowrap;
+}
+
+.status-label-live {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #818cf8;
+  /* 浅靛蓝色 - 还原图中的正在播放 */
+  letter-spacing: 0.02em;
+}
+
+.status-meta-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+  /* 还原图中的浅灰色 */
+}
+
+/* [3] 右区：工具中心 */
+.header-tool-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 14px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.header-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.header-tool-btn svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.sidebar-trigger-btn {
+  background: rgba(99, 102, 241, 0.1);
+  color: #a5b4fc;
+}
+
+.btn-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  background: #6366f1;
+  border-radius: 50%;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.8);
+}
+
+/* 控制中心面板 (Option 1) */
+.control-center-anchor {
+  position: relative;
+}
+
+.control-center-panel {
+  position: absolute;
+  top: calc(100% + 18px);
+  right: -60px;
+  width: 320px;
+  background: rgba(18, 18, 26, 0.9);
+  backdrop-filter: blur(40px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 28px;
+  padding: 1.25rem;
+  box-shadow:
+    0 30px 60px -15px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  z-index: 10006;
+  opacity: 0;
+  transform: translateY(-10px) scale(0.96);
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.control-center-panel.active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* 面板内部布局 */
+.panel-grid-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.panel-large-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 84px;
+  border-radius: 20px;
+  gap: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.25s ease;
+}
+
+.panel-large-btn:hover {
+  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.panel-large-btn svg {
+  width: 1.6rem;
+  height: 1.6rem;
+  color: #fff;
+}
+
+.panel-large-btn span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.panel-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  margin: 1.2rem 0;
+}
+
+.panel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.panel-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.panel-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.item-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.item-icon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.item-label {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-left: 0.4rem;
+}
+
+.item-arrow svg {
+  width: 1rem;
+  height: 1rem;
+  opacity: 0.3;
+}
+
+.panel-footer-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.footer-mini-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.footer-mini-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.footer-mini-btn svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* 复用下拉菜单样式优化 (解决遮挡) */
+.control-dropdown {
+  z-index: 10008 !important;
+  top: calc(100% + 12px) !important;
+  background: rgba(20, 20, 28, 0.98) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8) !important;
+  border-radius: 20px !important;
+}
 
 @media (max-width: 1024px) {
-  .master-island {
-    min-width: 500px;
-    padding: 0.4rem 0.6rem;
+  .cinematic-header {
+    width: 98vw;
+  }
+
+  .header-main-title {
+    max-width: 200px;
   }
 }
 
 @media (max-width: 768px) {
-  .master-island {
-    min-width: 90%;
-    padding: 0.4rem;
+  .section-center {
+    display: none;
   }
 
-  .section-center {
+  .status-pill {
     display: none;
   }
 }

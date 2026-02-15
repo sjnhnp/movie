@@ -212,230 +212,264 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
           </div>
         </div>
 
-        <div class="master-island-wrapper">
-          <div id="video-master-overlay" class="master-island">
-            <!-- 左侧：返回 & 标题信息 -->
-            <div class="island-section section-left">
-              <a href="/" class="island-btn hover:bg-white/10" aria-label="返回首页">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
+        <!-- Cinematic Header: 视听感官级顶栏 -->
+        <div id="cinematic-header-wrapper" class="cinematic-header-container">
+          <div class="cinematic-header">
+            <!-- [1] 左区：身份识别 -->
+            <div class="header-section section-left">
+              <a href="/" class="header-back-btn" aria-label="返回首页">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                  ><path
                     stroke-linecap="round"
                     stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
+                    stroke-width="2.5"
+                    d="M15 19l-7-7 7-7"></path></svg
+                >
               </a>
-              <div class="header-info">
-                <h1 id="player-current-episode-title" class="header-title">正在加载...</h1>
-                <p id="player-video-meta" class="header-meta">
-                  <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></span>
-                  正在播放
-                </p>
-              </div>
+              <h1 id="player-current-episode-title" class="header-main-title">正在加载...</h1>
             </div>
 
-            <!-- 中间：剧集导航 -->
-            <div class="island-section section-center">
-              <button id="prev-episode" class="island-btn nav-btn" title="前一集">
-                <svg fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"></path>
-                </svg>
-              </button>
-              <button id="next-episode" class="island-btn nav-btn" title="后一集">
-                <svg fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 18l8.5-6L6 6zM16 6h2v12h-2z"></path>
-                </svg>
-              </button>
-            </div>
+            <!-- [2] 中区：核心状态导航胶囊 -->
+            <div class="header-section section-center">
+              <div class="status-pill">
+                <button id="prev-episode" class="pill-nav-btn" title="前一集">
+                  <svg fill="currentColor" viewBox="0 0 24 24"
+                    ><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"></path></svg
+                  >
+                </button>
 
-            <!-- 右侧：功能按钮组 -->
-            <div class="island-section section-right">
-              <button id="historyButton" class="island-btn" title="观看历史">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-              </button>
-              <button id="searchButton" class="island-btn" title="搜索">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-              </button>
-              <div class="island-divider"></div>
-              <div class="control-btn-container line-switch-container">
-                <button id="line-switch-button" class="island-btn" title="切换线路">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                  </svg>
-                </button>
-                <div id="line-switch-dropdown" class="control-dropdown hidden"></div>
-              </div>
-              <div class="control-btn-container skip-control-container">
-                <button id="skip-control-button" class="island-btn" title="智能跳过">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                    <path d="M12 2a10 10 0 1 0 10 10" stroke-dasharray="4 4"></path>
-                  </svg>
-                </button>
-                <div id="skip-control-dropdown" class="control-dropdown hidden p-4 w-64">
-                  <div class="text-sm font-bold mb-3 border-b border-white/10 pb-2">设置</div>
-                  <div class="space-y-4">
-                    <div>
-                      <label class="block text-xs text-white/40 mb-1.5 uppercase tracking-tighter"
-                        >跳过片头 (秒)</label
-                      >
-                      <input
-                        type="number"
-                        id="skip-intro-input"
-                        class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-colors"
-                        placeholder="例如: 90"
-                      />
-                    </div>
-                    <div>
-                      <label class="block text-xs text-white/40 mb-1.5 uppercase tracking-tighter"
-                        >跳过片尾 (秒)</label
-                      >
-                      <input
-                        type="number"
-                        id="skip-outro-input"
-                        class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-colors"
-                        placeholder="例如: 120"
-                      />
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 pt-2">
-                      <button
-                        id="apply-skip-settings"
-                        class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold h-10 rounded-xl transition-all shadow-lg active:scale-95"
-                        >应用</button
-                      >
-                      <button
-                        id="reset-skip-settings"
-                        class="bg-white/5 hover:bg-white/10 text-white/60 text-xs font-bold h-10 rounded-xl transition-all"
-                        >重置</button
-                      >
-                    </div>
-                  </div>
+                <div class="pill-divider"></div>
+
+                <div class="pill-content">
+                  <span class="status-label-live">正在播放</span>
+                  <span class="status-meta-text" id="player-status-text">第 3 / 25 集</span>
                 </div>
+
+                <div class="pill-divider"></div>
+
+                <button id="next-episode" class="pill-nav-btn" title="后一集">
+                  <svg fill="currentColor" viewBox="0 0 24 24"
+                    ><path d="M6 18l8.5-6L6 6zM16 6h2v12h-2z"></path></svg
+                  >
+                </button>
               </div>
-              <div class="control-btn-container play-settings-container">
-                <button id="play-settings-button" class="island-btn" title="显示设定">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            </div>
+
+            <!-- [3] 右区：方案一 聚合中心 -->
+            <div class="header-section section-right">
+              <!-- 控制中心触发器 -->
+              <div class="control-center-anchor">
+                <button id="master-control-toggle" class="header-tool-btn" title="控制中心">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="3"></circle>
                     <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+                      d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"
                     ></path>
                   </svg>
                 </button>
-                <div id="play-settings-dropdown" class="control-dropdown hidden p-5 w-72">
-                  <div class="text-sm font-bold mb-4 border-b border-white/10 pb-2">偏好设置</div>
-                  <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs text-white/70">自动连播</span>
-                      <label class="switch"
-                        ><input
-                          type="checkbox"
-                          id="autoplay-next"
-                          checked
-                          aria-label="自动播放"
-                        /><span class="slider"></span></label
+
+                <!-- 二级大菜单：模块化控制中心 -->
+                <div id="master-control-panel" class="control-center-panel hidden">
+                  <!-- 第一排：巨型功能块 -->
+                  <div class="panel-grid-top">
+                    <button id="searchButton" class="panel-large-btn bg-indigo-600/20">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        ><path stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        ></path></svg
                       >
-                    </div>
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs text-white/70">记住进度</span>
-                      <label class="switch"
-                        ><input
-                          type="checkbox"
-                          id="remember-episode-progress-toggle"
-                          checked
-                          aria-label="记住进度"
-                        /><span class="slider"></span></label
+                      <span>全站搜索</span>
+                    </button>
+                    <button id="historyButton" class="panel-large-btn bg-white/5">
+                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        ><path stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path></svg
                       >
-                    </div>
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs text-white/70">广告过滤</span>
-                      <label class="switch"
-                        ><input
-                          type="checkbox"
-                          id="adFilterToggle"
-                          aria-label="分片 广告过滤"
-                        /><span class="slider"></span></label
-                      >
-                    </div>
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs text-white/70">预加载</span>
-                      <div class="flex items-center gap-2">
-                        <label class="switch"
-                          ><input
-                            type="checkbox"
-                            id="preloadingToggle"
-                            aria-label="播放预加载"
-                          /><span class="slider"></span></label
-                        >
-                        <input
-                          type="number"
-                          min="1"
-                          max="10"
-                          step="1"
-                          id="preloadCountInput"
-                          class="w-16 bg-black/40 border border-white/10 rounded-lg px-3 py-1 text-sm focus:border-indigo-500 transition-colors"
-                          placeholder="1"
-                        />
+                      <span>观看历史</span>
+                    </button>
+                  </div>
+
+                  <div class="panel-divider"></div>
+
+                  <!-- 第二排：核心播放设置 -->
+                  <div class="panel-list">
+                    <div class="panel-item" id="line-switch-button">
+                      <div class="item-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                          ><path
+                            stroke-width="2"
+                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                      </div>
+                      <div class="item-label">切换当前线路</div>
+                      <div class="item-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          ><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg>
                       </div>
                     </div>
-                    <div class="flex items-center justify-between">
-                      <span class="text-xs text-white/70">播放速率</span>
-                      <select
-                        id="playback-speed-select"
-                        class="bg-black/40 text-white/70 rounded-lg px-3 py-1 text-sm border border-white/10 focus:border-indigo-500 transition-colors"
-                      >
-                        <option value="0.5">0.5x</option><option value="0.75">0.75x</option><option
-                          value="1"
-                          selected>1x</option
-                        ><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option
-                          value="2">2x</option
-                        >
-                      </select>
+                    <div class="panel-item" id="skip-control-button">
+                      <div class="item-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                          ><path stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                          ></path></svg>
+                      </div>
+                      <div class="item-label">智能跳过设置</div>
+                      <div class="item-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          ><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg>
+                      </div>
                     </div>
+                    <div class="panel-item" id="play-settings-button">
+                      <div class="item-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                          ><path
+                            stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37A1.724 1.724 0 0021 12c0 1.756-1.756 2.924-1.756 3.35a1.724 1.724 0 00-1.065 2.572c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                          ></path></svg>
+                      </div>
+                      <div class="item-label">偏好与属性</div>
+                      <div class="item-arrow">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          ><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="panel-divider"></div>
+
+                  <!-- 第三排：辅助功能 -->
+                  <div class="panel-footer-row">
+                    <button id="lock-button" class="footer-mini-btn" title="锁定画面">
+                      <svg id="lock-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        ><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path
+                          d="M7 11V7a5 5 0 0110 0v4"></path></svg
+                      >
+                      <span>锁定</span>
+                    </button>
+                    <button onclick="copyLinks()" class="footer-mini-btn" title="分享剧集">
+                      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+                        ><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path
+                          d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg
+                      >
+                      <span>分享</span>
+                    </button>
                   </div>
                 </div>
               </div>
-              <button id="lock-button" class="island-btn" title="锁定屏幕">
-                <svg id="lock-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-              </button>
-              <button onclick="copyLinks()" class="island-btn" title="复制链接">
+
+              <!-- 选集列表触发器 -->
+              <button
+                id="sidebar-toggle"
+                class="header-tool-btn sidebar-trigger-btn"
+                title="选集列表"
+              >
                 <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  <path d="M4 6h16M4 12h16m-7 6h7"></path>
                 </svg>
+                <div class="btn-dot"></div>
               </button>
-              <div class="island-divider"></div>
-              <button id="sidebar-toggle" class="island-btn" title="选集列表">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M4 6h16M4 12h16m-7 6h7"></path>
-                </svg>
-              </button>
+            </div>
+          </div>
+
+          <!-- 复用现有逻辑的弹出容器 (绝对定位) -->
+          <div id="line-switch-dropdown" class="control-dropdown hidden"></div>
+          <div id="skip-control-dropdown" class="control-dropdown hidden p-4 w-64">
+            <div class="text-sm font-bold mb-3 border-b border-white/10 pb-2">智能跳过</div>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs text-white/40 mb-1.5 uppercase tracking-tighter"
+                  >跳过片头 (秒)</label
+                >
+                <input
+                  type="number"
+                  id="skip-intro-input"
+                  class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-colors"
+                  placeholder="例如: 90"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-white/40 mb-1.5 uppercase tracking-tighter"
+                  >跳过片尾 (秒)</label
+                >
+                <input
+                  type="number"
+                  id="skip-outro-input"
+                  class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-colors"
+                  placeholder="例如: 120"
+                />
+              </div>
+              <div class="grid grid-cols-2 gap-3 pt-2">
+                <button
+                  id="apply-skip-settings"
+                  class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold h-10 rounded-xl transition-all shadow-lg active:scale-95"
+                  >应用</button
+                >
+                <button
+                  id="reset-skip-settings"
+                  class="bg-white/5 hover:bg-white/10 text-white/60 text-xs font-bold h-10 rounded-xl transition-all"
+                  >重置</button
+                >
+              </div>
+            </div>
+          </div>
+          <div id="play-settings-dropdown" class="control-dropdown hidden p-5 w-72">
+            <div class="text-sm font-bold mb-4 border-b border-white/10 pb-2">偏好设置</div>
+            <div class="space-y-4">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-white/70">自动连播</span>
+                <label class="switch"
+                  ><input type="checkbox" id="autoplay-next" checked aria-label="自动播放" /><span
+                    class="slider"></span></label
+                >
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-white/70">记住进度</span>
+                <label class="switch"
+                  ><input
+                    type="checkbox"
+                    id="remember-episode-progress-toggle"
+                    checked
+                    aria-label="记住进度"
+                  /><span class="slider"></span></label
+                >
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-white/70">广告过滤</span>
+                <label class="switch"
+                  ><input type="checkbox" id="adFilterToggle" aria-label="分片 广告过滤" /><span
+                    class="slider"></span></label
+                >
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-white/70">预加载</span>
+                <div class="flex items-center gap-2">
+                  <label class="switch"
+                    ><input type="checkbox" id="preloadingToggle" aria-label="播放预加载" /><span
+                      class="slider"></span></label
+                  >
+                  <input
+                    type="number"
+                    min="1"
+                    max="10"
+                    step="1"
+                    id="preloadCountInput"
+                    class="w-16 bg-black/40 border border-white/10 rounded-lg px-3 py-1 text-sm focus:border-indigo-500 transition-colors"
+                    placeholder="1"
+                  />
+                </div>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-white/70">播放速率</span>
+                <select
+                  id="playback-speed-select"
+                  class="bg-black/40 text-white/70 rounded-lg px-3 py-1 text-sm border border-white/10 focus:border-indigo-500 transition-colors"
+                >
+                  <option value="0.5">0.5x</option><option value="0.75">0.75x</option><option
+                    value="1"
+                    selected>1x</option
+                  ><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option
+                    value="2">2x</option
+                  >
+                </select>
+              </div>
             </div>
           </div>
         </div>
@@ -459,6 +493,53 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
             </div>
           </div>
         </div>
+
+        <!-- 联动控制逻辑脚本 -->
+        <script is:inline>
+          document.addEventListener('DOMContentLoaded', () => {
+            const header = document.getElementById('cinematic-header-wrapper');
+            const player = document.getElementById('player');
+            const panelToggle = document.getElementById('master-control-toggle');
+            const panel = document.getElementById('master-control-panel');
+
+            // 1. 同步显隐逻辑
+            // 监听 Vidstack 的 controls-change 事件 (如果存在) 或简单鼠标逻辑
+            let hideTimeout;
+            const showHeader = () => {
+              header.classList.add('active');
+              clearTimeout(hideTimeout);
+            };
+            const hideHeader = () => {
+              // 如果控制中心面板打开，则不隐藏顶栏
+              if (panel.classList.contains('active')) return;
+              hideTimeout = setTimeout(() => {
+                header.classList.remove('active');
+              }, 3000);
+            };
+
+            // 绑定到播放器容器的鼠标活动
+            const playerRegion = document.getElementById('player-region');
+            playerRegion.addEventListener('mousemove', showHeader);
+            playerRegion.addEventListener('mouseleave', hideHeader);
+            header.addEventListener('mouseenter', showHeader);
+            header.addEventListener('mouseleave', hideHeader);
+
+            // 2. 控制中心面板点击切换
+            panelToggle.addEventListener('click', (e) => {
+              e.stopPropagation();
+              panel.classList.toggle('active');
+              panelToggle.classList.toggle('active');
+            });
+
+            // 点击外部关闭面板
+            document.addEventListener('click', (e) => {
+              if (!panel.contains(e.target) && e.target !== panelToggle) {
+                panel.classList.remove('active');
+                panelToggle.classList.remove('active');
+              }
+            });
+          });
+        </script>
 
         <!-- 右侧选集侧边栏 -->
         <aside id="episode-sidebar" class="hidden-sidebar">

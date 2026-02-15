@@ -2523,13 +2523,12 @@ media-fullscreen-button {
 .status-pill {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.04);
+  background: transparent;
   height: 44px;
   padding: 0 0.5rem;
   border-radius: 100px;
-  /* 精显黄框：琥珀色微光边框 */
-  border: 1px solid rgba(251, 191, 36, 0.3);
-  box-shadow: 0 0 12px rgba(251, 191, 36, 0.1);
+  border: none;
+  box-shadow: none;
 }
 
 .pill-nav-btn {

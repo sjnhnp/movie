@@ -1311,7 +1311,10 @@ function updateEpisodeInfo() {
 function updateButtonStates() {
   const prevButton = document.getElementById('prev-episode');
   const nextButton = document.getElementById('next-episode');
+  const narrowPrevButton = document.getElementById('narrow-prev-episode');
+  const narrowNextButton = document.getElementById('narrow-next-episode');
   const totalEpisodes = window.currentEpisodes ? window.currentEpisodes.length : 0;
+
   if (prevButton) {
     prevButton.disabled = window.currentEpisodeIndex <= 0;
     prevButton.classList.toggle('opacity-50', prevButton.disabled);
@@ -1321,6 +1324,18 @@ function updateButtonStates() {
     nextButton.disabled = window.currentEpisodeIndex >= totalEpisodes - 1;
     nextButton.classList.toggle('opacity-50', nextButton.disabled);
     nextButton.classList.toggle('cursor-not-allowed', nextButton.disabled);
+  }
+
+  // 同时也更新窄窗口模式下的按钮
+  if (narrowPrevButton) {
+    narrowPrevButton.disabled = window.currentEpisodeIndex <= 0;
+    narrowPrevButton.classList.toggle('opacity-30', narrowPrevButton.disabled);
+    narrowPrevButton.classList.toggle('cursor-not-allowed', narrowPrevButton.disabled);
+  }
+  if (narrowNextButton) {
+    narrowNextButton.disabled = window.currentEpisodeIndex >= totalEpisodes - 1;
+    narrowNextButton.classList.toggle('opacity-30', narrowNextButton.disabled);
+    narrowNextButton.classList.toggle('cursor-not-allowed', narrowNextButton.disabled);
   }
 }
 
@@ -1332,11 +1347,22 @@ function toggleEpisodeOrder() {
 }
 
 function updateOrderButton() {
-  const icon = document.getElementById('order-icon');
-  if (!icon) return;
-  icon.innerHTML = episodesReversed
-    ? '<polyline points="18 15 12 9 6 15"></polyline>'
-    : '<polyline points="6 9 12 15 18 9"></polyline>';
+  const sidebarSortBtn = document.getElementById('sort-episodes');
+  if (sidebarSortBtn) {
+    const icon = sidebarSortBtn.querySelector('svg');
+    if (icon) {
+      icon.style.transform = episodesReversed ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+  }
+
+  // 同时更新模板或模态框中的图标
+  const templateIcons = document.querySelectorAll('[data-field="order-icon"]');
+  templateIcons.forEach(icon => {
+    // 模板中的 SVG 路径逻辑
+    icon.innerHTML = episodesReversed
+      ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v12m0 0l-4-4m4 4l4-4m6 0V4m0 0l4 4m-4-4l-4 4"></path>'
+      : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>';
+  });
 }
 
 function copyLinks() {

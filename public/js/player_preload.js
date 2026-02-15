@@ -250,7 +250,7 @@
             nextBtn.addEventListener('touchstart', nextButtonTouchListener, { passive: true });
           }
           */
-    const episodesListContainer = document.getElementById('episode-grid');
+    const episodesListContainer = document.getElementById('episode-grid') || document.getElementById('sidebar-episode-grid');
     if (episodesListContainer) {
       episodeGridClickListener = (e) => {
         const btn = e.target.closest('button[data-index]');
@@ -289,7 +289,7 @@
             nextButtonTouchListener = null;
         }
         */
-    const episodesListContainer = document.getElementById('episode-grid');
+    const episodesListContainer = document.getElementById('episode-grid') || document.getElementById('sidebar-episode-grid');
     if (episodesListContainer && episodeGridClickListener) {
       episodesListContainer.removeEventListener('click', episodeGridClickListener);
       episodeGridClickListener = null;

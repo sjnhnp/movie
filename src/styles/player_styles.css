@@ -539,24 +539,19 @@ media-player .vds-controls-group {
 /* 统一播放控制按钮样式（现代简约风格） */
 #prev-episode,
 #next-episode {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  color: rgba(255, 255, 255, 0.9);
-  border-radius: 10px;
-  /* 稍微减小圆角 */
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  backdrop-filter: none;
+  color: rgba(255, 255, 255, 0.4);
+  border-radius: 12px;
+  border: 1px solid transparent;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  /* 减小间距 */
   font-weight: 500;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  /* 减小阴影 */
-  padding: 0.5rem 0.75rem;
-  /* 减小padding */
+  box-shadow: none;
+  padding: 0.5rem;
   font-size: 0.875rem;
-  /* 减小字体 */
 }
 
 #prev-episode:hover:not(:disabled),
@@ -2538,7 +2533,9 @@ media-fullscreen-button {
   align-items: center;
   justify-content: center;
   color: rgba(255, 255, 255, 0.4);
-  border-radius: 50%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 12px;
   transition: all 0.25s ease;
 }
 

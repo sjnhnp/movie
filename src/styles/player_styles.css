@@ -2590,6 +2590,15 @@ media-fullscreen-button {
   pointer-events: auto;
 }
 
+/* 关键修复：当有二级子菜单打开时，彻底隐藏一级面板，防止遮挡与肉眼无法辨识 */
+.control-center-anchor:has(.control-dropdown:not(.hidden)) .control-center-panel {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transform: translateY(5px) scale(0.95);
+  filter: blur(10px);
+}
+
 /* 面板内部布局 */
 .panel-grid-top {
   display: grid;
@@ -2710,11 +2719,11 @@ media-fullscreen-button {
 .control-center-anchor .control-dropdown {
   top: calc(100% + 18px) !important;
   bottom: auto !important;
-  right: 0 !important;
-  z-index: 10008 !important;
+  right: -10px !important;
+  z-index: 20000 !important;
   background: rgba(20, 20, 28, 0.98) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 40px 100px rgba(0, 0, 0, 0.9) !important;
   border-radius: 20px !important;
   transform-origin: top right !important;
   /* 从右上角展开 */

@@ -1683,8 +1683,7 @@ media-fullscreen-button {
 
 /* 搜索主容器：只命中直接子级，避免污染内部卡片 */
 #searchPanel .search-panel-container {
-  width: 90%;
-  max-width: 640px;
+  /* width & max-width 控制权交回 HTML 类名 (w-[95%] max-w-5xl) */
   margin: 0 auto;
   background: rgba(15, 15, 25, 0.92) !important;
   backdrop-filter: blur(40px) saturate(180%) !important;

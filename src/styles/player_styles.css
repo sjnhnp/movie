@@ -2887,6 +2887,35 @@ media-fullscreen-button {
   /* 极窄处仅保留返回箭头 */
 }
 
+.narrow-window-nav {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  margin-left: 12px;
+}
+
+.header-nav-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  transition: all 0.25s ease;
+}
+
+.header-nav-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.05);
+}
+
+.header-nav-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
 @media (max-width: 768px) {
   .cinematic-header {
     height: 56px;
@@ -2896,19 +2925,31 @@ media-fullscreen-button {
   .status-pill {
     display: none;
   }
+
+  .narrow-window-nav {
+    display: flex;
+  }
 }
 
 @media (max-width: 640px) {
-  .section-left {
-    flex: 2;
-  }
-
-  .section-center {
+  .header-main-title {
     display: none;
   }
 
-  /* Hide complicated nav on mobile */
-  .header-meta {
-    display: none;
+  .narrow-window-nav {
+    margin-left: 8px;
   }
 }
+
+@media (max-width: 480px) {
+  .header-nav-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .header-nav-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+

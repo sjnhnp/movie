@@ -2218,9 +2218,37 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
   window.location.href = playerUrl.toString();
 }
 
+// 初始化窄窗口模式下的上下集按钮
+function initNarrowWindowNavigation() {
+  const narrowPrevButton = document.getElementById('narrow-prev-episode');
+  const narrowNextButton = document.getElementById('narrow-next-episode');
+
+  if (narrowPrevButton) {
+    narrowPrevButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playPreviousEpisode();
+    });
+  }
+
+  if (narrowNextButton) {
+    narrowNextButton.addEventListener('click', (e) => {
+      e.stopPropagation();
+      playNextEpisode();
+    });
+  }
+}
+
+// 页面加载完成后初始化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNarrowWindowNavigation);
+} else {
+  initNarrowWindowNavigation();
+}
+
 // 导出到全局以供 HTML onclick 使用
 window.playFromHistory = playFromHistory;
 window.copyLinks = copyLinks;
 window.showToast = showToast;
 window.showMessage = showMessage;
 window.closeAllDropdowns = closeAllDropdowns;
+window.initNarrowWindowNavigation = initNarrowWindowNavigation;

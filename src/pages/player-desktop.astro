@@ -224,8 +224,23 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                     stroke-linejoin="round"
                     stroke-width="2.5"
                     d="M15 19l-7-7 7-7"></path></svg
-                >
+                  >
               </a>
+              
+              <!-- 窄窗口模式下的上下集按钮 -->
+              <div class="narrow-window-nav">
+                <button id="narrow-prev-episode" class="header-nav-btn" title="前一集">
+                  <svg fill="currentColor" viewBox="0 0 24 24"
+                    ><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"></path></svg
+                  >
+                </button>
+                <button id="narrow-next-episode" class="header-nav-btn" title="后一集">
+                  <svg fill="currentColor" viewBox="0 0 24 24"
+                    ><path d="M6 18l8.5-6L6 6zM16 6h2v12h-2z"></path></svg
+                  >
+                </button>
+              </div>
+              
               <h1 id="player-current-episode-title" class="header-main-title">正在加载...</h1>
             </div>
 

@@ -1137,6 +1137,9 @@ function renderEpisodes() {
       cell.dataset.index = i;
       cell.title = epName;
 
+      // 优化进度条显示：如果有进度但极小（如前几分钟），确保进度条可见（至少 6%）
+      const displayProgress = progress > 0 ? Math.max(progress, 6) : 0;
+
       cell.innerHTML = `
         <span class="ep-num">${epNum}</span>
         <span class="ep-title">${epName}</span>
@@ -1145,7 +1148,7 @@ function renderEpisodes() {
                 stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <div class="ep-progress-track">
-          <div class="ep-progress-fill" style="width: ${progress}%"></div>
+          <div class="ep-progress-fill" style="width: ${displayProgress}%"></div>
         </div>
       `;
 

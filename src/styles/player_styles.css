@@ -2349,17 +2349,36 @@ media-fullscreen-button {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.06);
+  height: 4px;
+  /* 增加高度更易见 */
+  background: rgba(255, 255, 255, 0.08);
   overflow: hidden;
   border-radius: 0 0 12px 12px;
 }
 
 .ep-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #6366f1, #8b5cf6);
-  border-radius: 0 0 12px 12px;
+  background: linear-gradient(90deg, #6366f1, #a855f7);
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.4);
+  position: relative;
+  /* 进度条末端光亮效果 */
+  min-width: 4px;
+  /* 确保即使极短也能看到一点 */
+  border-radius: 0 2px 2px 0;
+  /* 平滑末端 */
   transition: width 0.3s ease;
+}
+
+/* 添加一个高亮光点在进度条末端 */
+.ep-progress-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.6);
 }
 
 /* 看完后进度条变淡 */

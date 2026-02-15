@@ -3,12 +3,19 @@ import '../styles/global.css';
 import '../styles/player_styles.css';
 
 import { createHash } from 'crypto';
-const password = import.meta.env.PASSWORD || '';
-const settingsPassword = import.meta.env.SETTINGS_PASSWORD || '';
+const getRuntimeEnv = (key: string) => {
+  if (typeof process !== 'undefined' && process.env[key]) {
+    return process.env[key];
+  }
+  return import.meta.env[key] || '';
+};
 
-const sha256 = (str: string) => createHash('sha256').update(str).digest('hex');
-const passwordHash = password ? sha256(password) : '';
-const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
+const password = String(getRuntimeEnv('PASSWORD'));
+const settingsPassword = String(getRuntimeEnv('SETTINGS_PASSWORD'));
+
+const sha256 = (str: string) => (str ? createHash('sha256').update(str).digest('hex') : '');
+const passwordHash = sha256(password);
+const settingsPasswordHash = sha256(settingsPassword);
 ---
 
 <!doctype html>

@@ -1202,12 +1202,9 @@ function updateEpisodeInfo() {
       episodeTitle.textContent = currentVideoTitle;
     }
 
-    if (videoMeta) {
-      videoMeta.innerHTML = `
-        <span class="text-indigo-400">正在播放</span>
-        <span class="mx-2 opacity-20">|</span>
-        ${totalEpisodes > 1 ? `第 ${currentEpisodeIndex + 1} / ${totalEpisodes} 集` : '单集视频'}
-      `;
+    const statusText = document.getElementById('player-status-text');
+    if (statusText) {
+      statusText.textContent = totalEpisodes > 1 ? `第 ${currentEpisodeIndex + 1} / ${totalEpisodes} 集` : '单集视频';
     }
   }
 

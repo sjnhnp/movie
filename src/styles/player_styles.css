@@ -332,9 +332,9 @@ media-player {
 
 /* 选中状态 */
 input:checked+.slider {
-  background: #404040;
+  background: #6366f1;
   border-color: transparent;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.4);
 }
 
 /* 选中状态的滑块位置 */
@@ -345,7 +345,7 @@ input:checked+.slider:before {
 
 /* 选中状态的悬停效果 */
 input:checked+.slider:hover {
-  background: #505050;
+  background: #818cf8;
 }
 
 /* 禁用状态 */

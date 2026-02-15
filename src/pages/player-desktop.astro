@@ -363,7 +363,20 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                 <!-- 复用现有逻辑的弹出容器 (绝对定位) -->
                 <div id="line-switch-dropdown" class="control-dropdown hidden"></div>
                 <div id="skip-control-dropdown" class="control-dropdown hidden p-4 w-64">
-                  <div class="text-sm font-bold mb-3 border-b border-white/10 pb-2">智能跳过</div>
+                  <div class="dropdown-header">
+                    <button class="back-to-master" onclick="closeAllDropdowns()" title="返回主面板">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        class="w-4 h-4"
+                      >
+                        <path d="M15 18l-6-6 6-6"></path>
+                      </svg>
+                    </button>
+                    <span class="text-sm font-bold">智能跳过</span>
+                  </div>
                   <div class="space-y-4">
                     <div>
                       <label class="block text-xs text-white/40 mb-1.5 uppercase tracking-tighter"
@@ -402,7 +415,20 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                   </div>
                 </div>
                 <div id="play-settings-dropdown" class="control-dropdown hidden p-5 w-72">
-                  <div class="text-sm font-bold mb-4 border-b border-white/10 pb-2">偏好设置</div>
+                  <div class="dropdown-header">
+                    <button class="back-to-master" onclick="closeAllDropdowns()" title="返回主面板">
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        class="w-4 h-4"
+                      >
+                        <path d="M15 18l-6-6 6-6"></path>
+                      </svg>
+                    </button>
+                    <span class="text-sm font-bold">偏好设置</span>
+                  </div>
                   <div class="space-y-4">
                     <div class="flex items-center justify-between">
                       <span class="text-xs text-white/70">自动连播</span>
@@ -523,9 +549,17 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
               header.classList.add('active');
             };
             const hideHeader = () => {
-              // 鼠标离开区域直接隐藏，除非面板打开
+              // 鼠标离开区域直接隐藏
               if (!panel.classList.contains('active')) {
                 header.classList.remove('active');
+              } else {
+                // 如果面板是打开的，且鼠标真的离开了感应区，则强制关闭
+                header.classList.remove('active');
+                panel.classList.remove('active');
+                panelToggle.classList.remove('active');
+                if (typeof closeAllDropdowns === 'function') {
+                  closeAllDropdowns();
+                }
               }
             };
 
@@ -540,6 +574,23 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
             // 控制中心面板切换
             panelToggle.addEventListener('click', (e) => {
               e.stopPropagation();
+
+              // 检查是否有二级菜单打开
+              const anySubMenuOpen = !!document.querySelector(
+                '.control-center-anchor .control-dropdown:not(.hidden)'
+              );
+
+              if (anySubMenuOpen) {
+                // 如果有子菜单打开，关闭所有子菜单，重新显示主面板
+                if (typeof closeAllDropdowns === 'function') {
+                  closeAllDropdowns();
+                }
+                // 确保主面板此时是 active 状态
+                panel.classList.add('active');
+                panelToggle.classList.add('active');
+                return;
+              }
+
               const isNowActive = panel.classList.toggle('active');
               panelToggle.classList.toggle('active', isNowActive);
             });
@@ -555,6 +606,12 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
               ) {
                 panel.classList.remove('active');
                 panelToggle.classList.remove('active');
+
+                // 关键修复：点击外部时，同时清空并关闭所有二级菜单
+                if (typeof closeAllDropdowns === 'function') {
+                  closeAllDropdowns();
+                }
+
                 // 如果鼠标不在区域内，关闭面板后立即随之隐藏顶栏
                 if (!playerRegion.matches(':hover') && !header.matches(':hover')) {
                   header.classList.remove('active');

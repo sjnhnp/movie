@@ -1464,7 +1464,18 @@ function setupLineSwitching() {
     if (isHidden) {
       closeAllDropdowns();
     }
-    dropdown.innerHTML = '';
+    dropdown.innerHTML = `
+      <div class="dropdown-header">
+        <button class="back-to-master" onclick="closeAllDropdowns()" title="返回主面板">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="w-4 h-4">
+            <path d="M15 18l-6-6 6-6"></path>
+          </svg>
+        </button>
+        <span class="text-sm font-bold">切换线路</span>
+      </div>
+      <div id="line-list-container" class="space-y-1"></div>
+    `;
+    const listContainer = dropdown.querySelector('#line-list-container');
 
     const currentId = vodIdForPlayer;
 
@@ -1536,10 +1547,10 @@ function setupLineSwitching() {
         } else {
           item.classList.add('text-gray-300');
         }
-        dropdown.appendChild(item);
+        listContainer.appendChild(item);
       });
     } else {
-      dropdown.innerHTML = `<div class="text-center text-sm text-gray-500 py-2">无其他可用线路</div>`;
+      listContainer.innerHTML = `<div class="text-center text-sm text-gray-500 py-2">无其他可用线路</div>`;
     }
     if (isHidden) {
       dropdown.classList.remove('hidden');
@@ -2122,3 +2133,4 @@ window.playFromHistory = playFromHistory;
 window.copyLinks = copyLinks;
 window.showToast = showToast;
 window.showMessage = showMessage;
+window.closeAllDropdowns = closeAllDropdowns;

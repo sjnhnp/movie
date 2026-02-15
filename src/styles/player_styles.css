@@ -3304,9 +3304,8 @@ media-fullscreen-button {
   display: flex !important;
 }
 
-/* 搜索面板内容区：居中 + 精致化 */
-#searchPanel>div,
-#searchPanel .bg-black\/20 {
+/* 搜索面板内容区：只命中直接子级的主容器，不污染搜索结果卡片 */
+#searchPanel>.bg-black\/20 {
   width: 90%;
   max-width: 640px;
   margin: 0 auto;
@@ -3349,8 +3348,7 @@ media-fullscreen-button {
     padding-top: 8vh;
   }
 
-  #searchPanel>div,
-  #searchPanel .bg-black\/20 {
+  #searchPanel>.bg-black\/20 {
     width: 95%;
     border-radius: 20px !important;
     padding: 1.25rem !important;
@@ -3362,8 +3360,7 @@ media-fullscreen-button {
     padding-top: 5vh;
   }
 
-  #searchPanel>div,
-  #searchPanel .bg-black\/20 {
+  #searchPanel>.bg-black\/20 {
     width: 96%;
     border-radius: 16px !important;
     padding: 1rem !important;

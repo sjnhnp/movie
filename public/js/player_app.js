@@ -2419,7 +2419,8 @@ window.closeControlCenterPanel = closeControlCenterPanel;
 
   // 搜索/历史按钮点击时关闭控制中心
   document.addEventListener('click', (e) => {
-    const btn = e.target.closest('button, [role="button"]');
+    // 扩大匹配范围：包括 panel-item、panel-large-btn 等非 button 的可点击元素
+    const btn = e.target.closest('button, [role="button"], .panel-item, .panel-large-btn, .header-tool-btn, [data-action]');
     if (!btn) return;
 
     const isSearchTrigger = btn.id === 'search-button' ||

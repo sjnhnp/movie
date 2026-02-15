@@ -2706,14 +2706,31 @@ media-fullscreen-button {
   width: 1rem;
 }
 
-/* 复用下拉菜单样式优化 (解决遮挡) */
-.control-dropdown {
+/* 复用下拉菜单样式优化 (解决遮挡与位置偏移) */
+.control-center-anchor .control-dropdown {
+  top: calc(100% + 18px) !important;
+  bottom: auto !important;
+  right: 0 !important;
   z-index: 10008 !important;
-  top: calc(100% + 12px) !important;
   background: rgba(20, 20, 28, 0.98) !important;
   border: 1px solid rgba(255, 255, 255, 0.1) !important;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8) !important;
   border-radius: 20px !important;
+  transform-origin: top right !important;
+  /* 从右上角展开 */
+  animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* 响应式断点精修 */

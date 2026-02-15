@@ -359,6 +359,120 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                     </button>
                   </div>
                 </div>
+
+                <!-- 复用现有逻辑的弹出容器 (绝对定位) -->
+                <div id="line-switch-dropdown" class="control-dropdown hidden"></div>
+                <div id="skip-control-dropdown" class="control-dropdown hidden p-4 w-64">
+                  <div class="text-sm font-bold mb-3 border-b border-white/10 pb-2">智能跳过</div>
+                  <div class="space-y-4">
+                    <div>
+                      <label class="block text-xs text-white/40 mb-1.5 uppercase tracking-tighter"
+                        >跳过片头 (秒)</label
+                      >
+                      <input
+                        type="number"
+                        id="skip-intro-input"
+                        class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-colors"
+                        placeholder="例如: 90"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-white/40 mb-1.5 uppercase tracking-tighter"
+                        >跳过片尾 (秒)</label
+                      >
+                      <input
+                        type="number"
+                        id="skip-outro-input"
+                        class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-colors"
+                        placeholder="例如: 120"
+                      />
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 pt-2">
+                      <button
+                        id="apply-skip-settings"
+                        class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold h-10 rounded-xl transition-all shadow-lg active:scale-95"
+                        >应用</button
+                      >
+                      <button
+                        id="reset-skip-settings"
+                        class="bg-white/5 hover:bg-white/10 text-white/60 text-xs font-bold h-10 rounded-xl transition-all"
+                        >重置</button
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div id="play-settings-dropdown" class="control-dropdown hidden p-5 w-72">
+                  <div class="text-sm font-bold mb-4 border-b border-white/10 pb-2">偏好设置</div>
+                  <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs text-white/70">自动连播</span>
+                      <label class="switch"
+                        ><input
+                          type="checkbox"
+                          id="autoplay-next"
+                          checked
+                          aria-label="自动播放"
+                        /><span class="slider"></span></label
+                      >
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs text-white/70">记住进度</span>
+                      <label class="switch"
+                        ><input
+                          type="checkbox"
+                          id="remember-episode-progress-toggle"
+                          checked
+                          aria-label="记住进度"
+                        /><span class="slider"></span></label
+                      >
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs text-white/70">广告过滤</span>
+                      <label class="switch"
+                        ><input
+                          type="checkbox"
+                          id="adFilterToggle"
+                          aria-label="分片 广告过滤"
+                        /><span class="slider"></span></label
+                      >
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs text-white/70">预加载</span>
+                      <div class="flex items-center gap-2">
+                        <label class="switch"
+                          ><input
+                            type="checkbox"
+                            id="preloadingToggle"
+                            aria-label="播放预加载"
+                          /><span class="slider"></span></label
+                        >
+                        <input
+                          type="number"
+                          min="1"
+                          max="10"
+                          step="1"
+                          id="preloadCountInput"
+                          class="w-16 bg-black/40 border border-white/10 rounded-lg px-3 py-1 text-sm focus:border-indigo-500 transition-colors"
+                          placeholder="1"
+                        />
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs text-white/70">播放速率</span>
+                      <select
+                        id="playback-speed-select"
+                        class="bg-black/40 text-white/70 rounded-lg px-3 py-1 text-sm border border-white/10 focus:border-indigo-500 transition-colors"
+                      >
+                        <option value="0.5">0.5x</option><option value="0.75">0.75x</option><option
+                          value="1"
+                          selected>1x</option
+                        ><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option
+                          value="2">2x</option
+                        >
+                      </select>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <!-- 选集列表触发器 -->
@@ -372,110 +486,6 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                 </svg>
                 <div class="btn-dot"></div>
               </button>
-            </div>
-          </div>
-
-          <!-- 复用现有逻辑的弹出容器 (绝对定位) -->
-          <div id="line-switch-dropdown" class="control-dropdown hidden"></div>
-          <div id="skip-control-dropdown" class="control-dropdown hidden p-4 w-64">
-            <div class="text-sm font-bold mb-3 border-b border-white/10 pb-2">智能跳过</div>
-            <div class="space-y-4">
-              <div>
-                <label class="block text-xs text-white/40 mb-1.5 uppercase tracking-tighter"
-                  >跳过片头 (秒)</label
-                >
-                <input
-                  type="number"
-                  id="skip-intro-input"
-                  class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-colors"
-                  placeholder="例如: 90"
-                />
-              </div>
-              <div>
-                <label class="block text-xs text-white/40 mb-1.5 uppercase tracking-tighter"
-                  >跳过片尾 (秒)</label
-                >
-                <input
-                  type="number"
-                  id="skip-outro-input"
-                  class="w-full bg-black/40 border border-white/10 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 transition-colors"
-                  placeholder="例如: 120"
-                />
-              </div>
-              <div class="grid grid-cols-2 gap-3 pt-2">
-                <button
-                  id="apply-skip-settings"
-                  class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold h-10 rounded-xl transition-all shadow-lg active:scale-95"
-                  >应用</button
-                >
-                <button
-                  id="reset-skip-settings"
-                  class="bg-white/5 hover:bg-white/10 text-white/60 text-xs font-bold h-10 rounded-xl transition-all"
-                  >重置</button
-                >
-              </div>
-            </div>
-          </div>
-          <div id="play-settings-dropdown" class="control-dropdown hidden p-5 w-72">
-            <div class="text-sm font-bold mb-4 border-b border-white/10 pb-2">偏好设置</div>
-            <div class="space-y-4">
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-white/70">自动连播</span>
-                <label class="switch"
-                  ><input type="checkbox" id="autoplay-next" checked aria-label="自动播放" /><span
-                    class="slider"></span></label
-                >
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-white/70">记住进度</span>
-                <label class="switch"
-                  ><input
-                    type="checkbox"
-                    id="remember-episode-progress-toggle"
-                    checked
-                    aria-label="记住进度"
-                  /><span class="slider"></span></label
-                >
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-white/70">广告过滤</span>
-                <label class="switch"
-                  ><input type="checkbox" id="adFilterToggle" aria-label="分片 广告过滤" /><span
-                    class="slider"></span></label
-                >
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-white/70">预加载</span>
-                <div class="flex items-center gap-2">
-                  <label class="switch"
-                    ><input type="checkbox" id="preloadingToggle" aria-label="播放预加载" /><span
-                      class="slider"></span></label
-                  >
-                  <input
-                    type="number"
-                    min="1"
-                    max="10"
-                    step="1"
-                    id="preloadCountInput"
-                    class="w-16 bg-black/40 border border-white/10 rounded-lg px-3 py-1 text-sm focus:border-indigo-500 transition-colors"
-                    placeholder="1"
-                  />
-                </div>
-              </div>
-              <div class="flex items-center justify-between">
-                <span class="text-xs text-white/70">播放速率</span>
-                <select
-                  id="playback-speed-select"
-                  class="bg-black/40 text-white/70 rounded-lg px-3 py-1 text-sm border border-white/10 focus:border-indigo-500 transition-colors"
-                >
-                  <option value="0.5">0.5x</option><option value="0.75">0.75x</option><option
-                    value="1"
-                    selected>1x</option
-                  ><option value="1.25">1.25x</option><option value="1.5">1.5x</option><option
-                    value="2">2x</option
-                  >
-                </select>
-              </div>
             </div>
           </div>
         </div>
@@ -534,12 +544,14 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
               panelToggle.classList.toggle('active', isNowActive);
             });
 
-            // 点击外部关闭
+            // 点击外部关闭: 增加对二级菜单及其容器的检测
             document.addEventListener('click', (e) => {
+              const anchor = document.querySelector('.control-center-anchor');
               if (
+                panel &&
                 panel.classList.contains('active') &&
-                !panel.contains(e.target) &&
-                !panelToggle.contains(e.target)
+                anchor &&
+                !anchor.contains(e.target)
               ) {
                 panel.classList.remove('active');
                 panelToggle.classList.remove('active');

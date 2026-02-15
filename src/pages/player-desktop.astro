@@ -545,22 +545,19 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
             const playerRegion = document.getElementById('player-region');
 
             // 显隐逻辑更新
+            let hideTimeout = null;
             const showHeader = () => {
+              if (hideTimeout) clearTimeout(hideTimeout);
               header.classList.add('active');
             };
             const hideHeader = () => {
-              // 鼠标离开区域直接隐藏
-              if (!panel.classList.contains('active')) {
+              if (hideTimeout) clearTimeout(hideTimeout);
+              // 如果面板是打开的，绝对不要自动隐藏，除非手动关闭或点击外部
+              if (panel.classList.contains('active')) return;
+
+              hideTimeout = setTimeout(() => {
                 header.classList.remove('active');
-              } else {
-                // 如果面板是打开的，且鼠标真的离开了感应区，则强制关闭
-                header.classList.remove('active');
-                panel.classList.remove('active');
-                panelToggle.classList.remove('active');
-                if (typeof closeAllDropdowns === 'function') {
-                  closeAllDropdowns();
-                }
-              }
+              }, 300); // 增加小缓冲
             };
 
             // 监听视频区域
@@ -570,6 +567,10 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
             // 顶栏自身悬停保持
             header.addEventListener('mouseenter', showHeader);
             header.addEventListener('mouseleave', hideHeader);
+
+            // 面板自身悬停也保持显示，防止“缝隙”导致意外消失
+            panel.addEventListener('mouseenter', showHeader);
+            panel.addEventListener('mouseleave', hideHeader);
 
             // 控制中心面板切换
             panelToggle.addEventListener('click', (e) => {

@@ -2593,6 +2593,17 @@ media-fullscreen-button {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* 物理桥接区：消除图标与面板之间的 18px 缝隙，防止鼠标滑下时意外隐藏 */
+.control-center-panel::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: transparent;
+}
+
 .control-center-panel.active {
   opacity: 1;
   visibility: visible;
@@ -2738,6 +2749,14 @@ media-fullscreen-button {
   transform-origin: top right !important;
   /* 从右上角展开 */
   animation: slideInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  pointer-events: auto !important;
+  display: block;
+  /* 强制显示为块级元素以便动画生效 */
+}
+
+.control-center-anchor .control-dropdown.hidden {
+  display: none !important;
+  pointer-events: none !important;
 }
 
 @keyframes slideInDown {

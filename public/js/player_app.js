@@ -1036,112 +1036,112 @@ function clearCurrentVideoAllEpisodeProgresses() {
 }
 
 function renderEpisodes() {
-  const sidebarGrid = document.getElementById('sidebar-episode-grid');
-  const episodeButtonsGrid = document.getElementById('episode-buttons-grid');
+  const gridEl = document.getElementById('ep-grid');
+  const tabsEl = document.getElementById('ep-range-tabs');
+  const countEl = document.getElementById('sidebar-ep-count');
 
-  if (!sidebarGrid && !episodeButtonsGrid) return;
+  if (!gridEl || !countEl) return;
 
   if (!window.currentEpisodes || !window.currentEpisodes.length) {
-    if (sidebarGrid) {
-      sidebarGrid.innerHTML = '<div class="text-center text-white/20 py-10 italic">暂无集数信息</div>';
-    }
-    if (episodeButtonsGrid) {
-      episodeButtonsGrid.innerHTML = '<div class="text-center text-white/20 py-10 italic">暂无集数信息</div>';
-    }
+    gridEl.innerHTML = '<div class="text-center text-white/20 py-10 italic w-full">暂无集数信息</div>';
+    countEl.textContent = '共 0 集';
     return;
   }
 
-  const varietyShowTypes = ['综艺', '脱口秀', '真人秀'];
-  const isVarietyShow = varietyShowTypes.some(
-    (type) => currentVideoTypeName && currentVideoTypeName.includes(type)
-  );
+  const total = currentEpisodes.length;
+  countEl.textContent = `共 ${total} 集`;
 
-  const orderedEpisodes = episodesReversed ? [...currentEpisodes].reverse() : [...currentEpisodes];
-  const originalEpisodeNames = JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
-
-  if (sidebarGrid) {
-    sidebarGrid.innerHTML = '';
-  }
-  if (episodeButtonsGrid) {
-    episodeButtonsGrid.innerHTML = '';
-  }
-
-  orderedEpisodes.forEach((episodeData, index) => {
-    const originalIndex = episodesReversed ? currentEpisodes.length - 1 - index : index;
-    const isActive = originalIndex === currentEpisodeIndex;
-
-    if (sidebarGrid) {
-      const btn = document.createElement('button');
-      btn.className = `sidebar-episode-btn ${isActive ? 'active' : ''}`;
-      btn.dataset.index = originalIndex;
-
-      const parts = (episodeData || '').split('$');
-      const episodeName = parts.length > 1 ? parts[0].trim() : '';
-      const originalName = originalEpisodeNames[originalIndex] || '';
-
-      const titleSpan = document.createElement('span');
-      titleSpan.className = 'flex items-center gap-4 overflow-hidden';
-
-      const indexBox = document.createElement('div');
-      indexBox.className = `w-8 h-8 flex items-center justify-center rounded-lg text-xs font-bold transition-all ${isActive ? 'bg-white/20 text-white' : 'bg-white/5 text-white/40 border border-white/5'
-        }`;
-      indexBox.textContent = originalIndex + 1;
-
-      const nameSpan = document.createElement('span');
-      nameSpan.className = `truncate font-medium ${isActive ? 'text-white' : 'text-white/70'}`;
-      nameSpan.textContent = isVarietyShow ? (originalName || episodeName || `第${originalIndex + 1}集`) : (originalName || `第 ${originalIndex + 1} 集`);
-
-      titleSpan.appendChild(indexBox);
-      titleSpan.appendChild(nameSpan);
-      btn.appendChild(titleSpan);
-
-      if (isActive) {
-        const indicator = document.createElement('div');
-        indicator.className = 'playing-indicator';
-        indicator.innerHTML = '<span></span><span></span><span></span>';
-        btn.appendChild(indicator);
+  // 获取观看历史以显示进度
+  let watchHistory = {};
+  try {
+    const history = JSON.parse(localStorage.getItem('viewingHistory') || '[]');
+    // 过滤当前视频的历史记录
+    history.forEach(item => {
+      // 匹配标题和年份（如果都有）
+      if (item.title === currentVideoTitle) {
+        const epNum = item.episodeIndex + 1;
+        const progress = item.duration > 0 ? (item.playbackPosition / item.duration) * 100 : 0;
+        // 保留最高进度
+        if (!watchHistory[epNum] || progress > watchHistory[epNum]) {
+          watchHistory[epNum] = progress;
+        }
       }
-
-      sidebarGrid.appendChild(btn);
-    }
-
-    if (episodeButtonsGrid) {
-      const btn = document.createElement('button');
-      btn.className = isActive ? 'episode-active' : '';
-      btn.dataset.index = originalIndex;
-      btn.textContent = originalIndex + 1;
-      episodeButtonsGrid.appendChild(btn);
-    }
-  });
-
-  if (sidebarGrid) {
-    if (!sidebarGrid._sListenerBound) {
-      sidebarGrid.addEventListener('click', (evt) => {
-        const target = evt.target.closest('button[data-index]');
-        if (target) playEpisode(+target.dataset.index);
-      });
-      sidebarGrid._sListenerBound = true;
-    }
-
-    setTimeout(() => {
-      const activeBtn = sidebarGrid.querySelector('.sidebar-episode-btn.active');
-      if (activeBtn) activeBtn.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    }, 100);
+    });
+  } catch (e) {
+    console.error('获取历史进度失败:', e);
   }
 
-  if (episodeButtonsGrid) {
-    if (!episodeButtonsGrid._sListenerBound) {
-      episodeButtonsGrid.addEventListener('click', (evt) => {
-        const target = evt.target.closest('button[data-index]');
-        if (target) playEpisode(+target.dataset.index);
+  const RANGE_SIZE = 30;
+
+  // 内部辅助渲染函数
+  const renderRangeGrid = (start, end) => {
+    gridEl.innerHTML = '';
+
+    // 处理排序
+    const indices = [];
+    for (let i = start; i < end; i++) indices.push(i);
+    if (episodesReversed) indices.sort((a, b) => b - a);
+
+    indices.forEach(i => {
+      const epNum = i + 1;
+      const progress = watchHistory[epNum] || 0;
+      const isWatched = progress >= 90;
+      const isPlaying = i === currentEpisodeIndex;
+
+      const cell = document.createElement('button');
+      cell.className = `ep-cell${isPlaying ? ' playing' : ''}${isWatched && !isPlaying ? ' watched' : ''}`;
+      cell.dataset.index = i;
+      cell.title = `第 ${epNum} 集`;
+
+      cell.innerHTML = `
+        <span class="ep-num">${epNum}</span>
+        <svg class="ep-check" viewBox="0 0 16 16">
+          <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor"
+                stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="ep-progress-track">
+          <div class="ep-progress-fill" style="width: ${progress}%"></div>
+        </div>
+      `;
+
+      cell.addEventListener('click', () => playEpisode(i));
+      gridEl.appendChild(cell);
+    });
+
+    // 自动滚动到正在播放的集
+    setTimeout(() => {
+      const playingCell = gridEl.querySelector('.ep-cell.playing');
+      if (playingCell) {
+        playingCell.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
+  // 处理分段 Tabs
+  tabsEl.innerHTML = '';
+  if (total > RANGE_SIZE) {
+    const rangeCount = Math.ceil(total / RANGE_SIZE);
+    const currentRangeIdx = Math.floor(currentEpisodeIndex / RANGE_SIZE);
+
+    for (let i = 0; i < rangeCount; i++) {
+      const start = i * RANGE_SIZE;
+      const end = Math.min(start + RANGE_SIZE, total);
+      const tab = document.createElement('button');
+      tab.className = `range-tab${i === currentRangeIdx ? ' active' : ''}`;
+      tab.textContent = `${start + 1}-${end}`;
+      tab.addEventListener('click', () => {
+        tabsEl.querySelectorAll('.range-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderRangeGrid(start, end);
       });
-      episodeButtonsGrid._sListenerBound = true;
+      tabsEl.appendChild(tab);
     }
 
-    setTimeout(() => {
-      const activeBtn = episodeButtonsGrid.querySelector('.episode-active');
-      if (activeBtn) activeBtn.scrollIntoView({ block: 'center', behavior: 'smooth' });
-    }, 100);
+    // 初始渲染当前范围
+    renderRangeGrid(currentRangeIdx * RANGE_SIZE, Math.min((currentRangeIdx + 1) * RANGE_SIZE, total));
+  } else {
+    // 集数少，直接渲染全部
+    renderRangeGrid(0, total);
   }
 
   updateEpisodeInfo();
@@ -1282,7 +1282,7 @@ function initEpisodeSidebar() {
 }
 
 function updateEpisodeInfo() {
-  const sidebarCount = document.getElementById('player-sidebar-count');
+  const sidebarCount = document.getElementById('sidebar-ep-count');
   const episodeTitle = document.getElementById('player-current-episode-title');
   const videoMeta = document.getElementById('player-video-meta');
 
@@ -1304,7 +1304,7 @@ function updateEpisodeInfo() {
   }
 
   if (sidebarCount) {
-    sidebarCount.textContent = `${totalEpisodes}集`;
+    sidebarCount.textContent = `共 ${totalEpisodes} 集`;
   }
 }
 

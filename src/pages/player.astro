@@ -641,37 +641,27 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
       <!-- 右侧选集侧边栏 -->
       <aside id="episode-sidebar" class="hidden-sidebar">
         <div class="sidebar-header">
-          <div class="flex justify-between items-center">
-            <div class="flex items-center gap-3">
-              <h3 class="text-xl font-black flex items-center gap-2">
-                <span class="w-1.5 h-6 bg-indigo-500 rounded-full"></span>
-                选集列表
-              </h3>
-              <span
-                id="player-sidebar-count"
-                class="text-xs font-medium bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/20"
-                >0集</span
-              >
+          <div class="sidebar-title-row">
+            <div class="flex items-center gap-2">
+              <h3 class="sidebar-title">选集</h3>
+              <span class="sidebar-ep-count" id="sidebar-ep-count">共 0 集</span>
             </div>
-            <div class="flex items-center gap-1">
-              <button
-                id="sort-episodes"
-                class="p-2.5 hover:bg-white/10 rounded-xl text-white/40 hover:text-white transition-all"
-                title="反转顺序"
-              >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  ><path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg
-                >
-              </button>
-            </div>
+            <button id="sort-episodes" class="sort-ep-btn" title="反转顺序">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path>
+              </svg>
+            </button>
           </div>
+          <div class="ep-range-tabs" id="ep-range-tabs"></div>
         </div>
-        <div class="sidebar-content custom-scrollbar" id="sidebar-episode-grid">
-          <!-- 剧集按钮将在此动态生成 -->
+        <div class="sidebar-content custom-scrollbar">
+          <div class="ep-grid" id="ep-grid">
+            <!-- 剧集方块将在此动态生成 -->
+          </div>
         </div>
       </aside>
 
@@ -690,7 +680,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
       <!-- 详情模态框 -->
       <div
         id="modal"
-        class="fixed inset-0 bg-black/60 backdrop-blur-md hidden flex items-center justify-center transition-all duration-300 z-10002 p-4"
+        class="fixed inset-0 bg-black/60 backdrop-blur-md hidden items-center justify-center transition-all duration-300 z-10002 p-4"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modalTitle"

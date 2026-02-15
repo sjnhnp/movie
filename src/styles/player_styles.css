@@ -2201,6 +2201,9 @@ media-fullscreen-button {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     transform: translateY(100%);
     margin-right: 0;
+    opacity: 1;
+    pointer-events: auto;
+    overflow: visible;
   }
 
   #episode-sidebar.show-mobile {
@@ -2208,9 +2211,9 @@ media-fullscreen-button {
   }
 
   #episode-sidebar.hidden-sidebar {
-    width: 0;
-    min-width: 0;
-    opacity: 0;
+    margin-right: 0;
+    width: 100%;
+    opacity: 1;
     pointer-events: none;
     border-left-width: 0;
     overflow: hidden;
@@ -2376,8 +2379,31 @@ media-fullscreen-button {
   transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* 桌面端：当侧边栏显示时，将顶栏容器收缩，避免遮挡 */
-@media (min-width: 1025px) {
+/* 响应式侧边栏和顶栏布局 */
+
+/* 1025px 到 1200px 之间的屏幕 */
+@media (min-width: 1025px) and (max-width: 1200px) {
+  #episode-sidebar {
+    width: 320px;
+  }
+  
+  .player-page-wrapper:not(.sidebar-hidden) .cinematic-header-container {
+    width: calc(100vw - 320px);
+    max-width: calc(100vw - 320px);
+  }
+  
+  .player-page-wrapper.sidebar-hidden .cinematic-header-container {
+    width: 100vw;
+    max-width: 100vw;
+  }
+}
+
+/* 1200px 以上的屏幕 */
+@media (min-width: 1201px) {
+  #episode-sidebar {
+    width: 380px;
+  }
+  
   .player-page-wrapper:not(.sidebar-hidden) .cinematic-header-container {
     width: calc(100vw - 380px);
     max-width: calc(100vw - 380px);
@@ -2399,15 +2425,6 @@ media-fullscreen-button {
   .section-left,
   .section-right {
     flex: 1 1 25%;
-  }
-  
-  .player-page-wrapper:not(.sidebar-hidden) .cinematic-header-container {
-    width: calc(100vw - 320px);
-    max-width: calc(100vw - 320px);
-  }
-  
-  #episode-sidebar {
-    width: 320px;
   }
 }
 

@@ -1158,11 +1158,16 @@ function initEpisodeSidebar() {
   if (toggleBtn && sidebar) {
     toggleBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isHidden = sidebar.classList.toggle('hidden-sidebar');
-      sidebar.classList.toggle('show-mobile');
-
-      if (wrapper) {
-        wrapper.classList.toggle('sidebar-hidden', isHidden);
+      const isMobile = window.innerWidth <= 1024;
+      
+      if (isMobile) {
+        sidebar.classList.toggle('hidden-sidebar');
+        sidebar.classList.toggle('show-mobile');
+      } else {
+        const isHidden = sidebar.classList.toggle('hidden-sidebar');
+        if (wrapper) {
+          wrapper.classList.toggle('sidebar-hidden', isHidden);
+        }
       }
     });
   }
@@ -1176,7 +1181,10 @@ function initEpisodeSidebar() {
 
   if (mainContent && sidebar) {
     mainContent.addEventListener('click', () => {
-      if (window.innerWidth <= 1024 && !sidebar.classList.contains('hidden-sidebar')) {
+      const isMobile = window.innerWidth <= 1024;
+      const isSidebarOpen = sidebar.classList.contains('show-mobile');
+      
+      if (isMobile && isSidebarOpen) {
         sidebar.classList.add('hidden-sidebar');
         sidebar.classList.remove('show-mobile');
       }
@@ -1188,13 +1196,17 @@ function initEpisodeSidebar() {
     const handleResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
-        const isDesktop = window.innerWidth > 1024;
-        const isSidebarHidden = sidebar.classList.contains('hidden-sidebar');
-
-        if (isDesktop) {
-          wrapper.classList.toggle('sidebar-hidden', isSidebarHidden);
-        } else {
+        const isMobile = window.innerWidth <= 1024;
+        
+        if (isMobile) {
+          // 移动端：强制隐藏侧边栏，使用抽屉样式
           wrapper.classList.add('sidebar-hidden');
+          sidebar.classList.add('hidden-sidebar');
+          sidebar.classList.remove('show-mobile');
+        } else {
+          // 桌面端：根据侧边栏状态调整布局
+          const isSidebarHidden = sidebar.classList.contains('hidden-sidebar');
+          wrapper.classList.toggle('sidebar-hidden', isSidebarHidden);
         }
       }, 100);
     };

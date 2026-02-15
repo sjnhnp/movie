@@ -23,14 +23,14 @@
 
 ### Cloudflare Pages (推荐)
 
-1.  **Fork 本仓库** 到您的 GitHub。
-2.  登录 Cloudflare Dashboard，进入 **Workers & Pages** -> **Create Application** -> **Pages** -> **Connect to Git**。
-3.  选择您的仓库，配置如下：
+1. **Fork 本仓库** 到您的 GitHub。
+2. 登录 Cloudflare Dashboard，进入 **Workers & Pages** -> **Create Application** -> **Pages** -> **Connect to Git**。
+3. 选择您的仓库，配置如下：
     - **Production branch**: `astro-migration` (或合并后的 `main`)
     - **Framework preset**: `Astro`
     - **Build command**: `npm run build:cf`
     - **Output directory**: `dist`
-4.  **环境变量设置** (Environment Variables):
+4. **环境变量设置** (Environment Variables):
     - 进入 **Settings** -> **Environment variables**，添加：
       - `NODE_VERSION`: `20` (建议显式指定)
       - `PASSWORD`: (可选) 全站访问密码
@@ -53,12 +53,17 @@ docker run -d \
   ghcr.io/your-username/movie:astro
 ```
 
-## 配置修改
+## 配置修改 (Configuration)
 
-虽然主要逻辑迁移到了 Astro，仍可以通过修改 `public/js/config.js` 等文件进行前端配置：
+虽然主要逻辑迁移到了 Astro，大部分前端配置依然有效。您可以参考旧版文档进行深入定制：
+
+👉 **[查看旧版配置指南 (README_legacy.md)](./README_legacy.md)**
+
+几个常用的配置项：
 
 - **`public/js/config.js`**: 设置默认 API、广告过滤默认值等。
 - **`public/js/douban.js`**: 豆瓣推荐开关。
+- **`public/js/player_config.js`**: 播放器解析规则与 UI 自定义。
 
 ## 许可证 (License)
 

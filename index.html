@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目升级提醒 | Project Upgrade Notice</title>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --card: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 40%);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 90%;
+            padding: 40px;
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #fff;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-top: 8px;
+        }
+
+        .content {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+        }
+
+        .step-title {
+            color: #818cf8;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        code {
+            background: #000;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: #38bdf8;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+
+        .guide-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 640px) {
+            .guide-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 20px;
+            }
+        }
+
+        .guide-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .label {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .value {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 12px;
+            color: #475569;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <span class="icon">🚀</span>
+            <h1>项目架构已重大升级 | Framework Upgrade</h1>
+            <p class="subtitle">本项目已从传统的 HTML 迁移至 Astro 5 + Tailwind v4 架构</p>
+        </div>
+
+        <div class="content">
+            <div class="step-title">
+                <span>⚠️</span>
+                <span>需要手动更新部署配置 | Manual Update Required</span>
+            </div>
+
+            <!-- Features Summary -->
+            <div style="margin-bottom: 25px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 20px;">
+                <h3 style="color: #34d399; font-size: 16px; margin-bottom: 12px;">🌟 新版特性 (Features)</h3>
+                <ul style="font-size: 13px; color: #cbd5e1; padding-left: 20px; list-style-type: circle;">
+                    <li><strong>架构升级：</strong> 基于 Astro 5 服务端渲染，性能显著提升</li>
+                    <li><strong>全站搜索：</strong> 极致流畅的全屏搜索系统，支持多数据源集成</li>
+                    <li><strong>极致设计：</strong> 采用 Tailwind v4，支持毛玻璃特效与细腻动画</li>
+                    <li><strong>安全加固：</strong> 完善的密码访问控制系统</li>
+                </ul>
+            </div>
+
+            <!-- Tabs/Categories -->
+            <div class="platform-section">
+                <h3 style="color: #f87171; font-size: 16px; margin-bottom: 10px;">☁️ 云平台 (Cloudflare/Vercel/Netlify)
+                </h3>
+                <div class="guide-grid">
+                    <div class="guide-item" style="grid-column: span 2;">
+                        <span class="label">Cloudflare Pages (Recommended)</span>
+                        <div class="value" style="font-size: 13px;">
+                            Build Command: <code>npm run build:cf</code><br>
+                            Build Directory: <code>dist</code><br>
+                            Environment Variables: <br>
+                            - <code>NODE_VERSION</code>: <code>20</code><br>
+                            - <code>PASSWORD</code>: (可选) 全站访问密码
+                        </div>
+                    </div>
+                    <div class="guide-item">
+                        <span class="label">Vercel</span>
+                        <div class="value" style="font-size: 12px;">
+                            Build: <code>npm run build:vercel</code><br>
+                            Dir: <code>dist</code>
+                        </div>
+                    </div>
+                    <div class="guide-item">
+                        <span class="label">Netlify</span>
+                        <div class="value" style="font-size: 12px;">
+                            Build: <code>npm run build:netlify</code><br>
+                            Dir: <code>dist</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="platform-section" style="margin-top: 25px;">
+                <h3 style="color: #60a5fa; font-size: 16px; margin-bottom: 10px;">🐳 Docker 用户</h3>
+                <div class="guide-item">
+                    <p style="margin: 0; font-size: 13px;">根目录已提供新版 <code>Dockerfile</code>。运行以下命令更新：</p>
+                    <code
+                        style="display: block; margin-top: 10px; font-size: 12px;">docker build -t movie-v2 .<br>docker run -d -p 8080:8080 movie-v2</code>
+                </div>
+            </div>
+
+            <div
+                style="margin-top: 20px; padding: 15px; background: rgba(245, 158, 11, 0.1); border-radius: 12px; border-left: 4px solid #f59e0b;">
+                <p style="margin: 0; font-size: 13px; color: #fbbf24;">
+                    <strong>注意：</strong>配置完成后，请重新触发一次构建以启用新架构。
+                </p>
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="https://dash.cloudflare.com/" target="_blank" class="btn">前往 Cloudflare 控制台</a>
+        </div>
+
+        <div class="footer">
+            如果您在迁移过程中遇到问题，请查阅项目的最新 README.md。
+        </div>
+    </div>
+</body>
+
+</html>

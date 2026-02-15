@@ -1239,7 +1239,7 @@ function updateEpisodeInfo() {
   }
 
   if (sidebarCount) {
-    sidebarCount.textContent = `${totalEpisodes} EPISODES`;
+    sidebarCount.textContent = `${totalEpisodes}集`;
   }
 }
 

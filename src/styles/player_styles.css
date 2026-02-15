@@ -2825,37 +2825,56 @@ media-fullscreen-button {
 }
 
 /* 菜单头部与返回按钮 */
-.dropdown-header {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  padding-bottom: 0.85rem;
-  margin-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
 
 .back-to-master {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: rgba(255, 255, 255, 0.5);
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 32px;
+  height: 32px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
+  min-width: 32px;
+  max-width: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .back-to-master:hover {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
-  transform: translateX(-2px);
+  transform: translateX(-3px) scale(1.05);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .back-to-master svg {
-  width: 1rem;
-  height: 1rem;
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
+}
+
+/* 优化下拉菜单头部布局 */
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  margin: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px 16px 0 0;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.dropdown-header span {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  text-align: left;
+  margin: 0;
 }
 
 /* 响应式断点精修 */

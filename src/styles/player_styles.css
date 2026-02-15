@@ -2967,6 +2967,7 @@ media-fullscreen-button {
   /* 主内容区顶部留出空间，避免被固定顶栏遮挡 */
   .player-main-content {
     padding-top: 5.5rem;
+    z-index: auto;
   }
 
   /* 侧边栏默认显示时，播放器缩小避免被遮挡 */
@@ -2985,14 +2986,6 @@ media-fullscreen-button {
 
   .narrow-window-nav {
     display: flex;
-  }
-
-  .control-center-panel {
-    position: fixed;
-    top: 70px;
-    right: 1rem;
-    left: 1rem;
-    width: auto;
   }
 }
 

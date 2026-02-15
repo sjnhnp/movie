@@ -2373,3 +2373,31 @@ window.showToast = showToast;
 window.showMessage = showMessage;
 window.closeAllDropdowns = closeAllDropdowns;
 window.initNarrowWindowNavigation = initNarrowWindowNavigation;
+// 关闭控制中心面板 - 工具函数
+function closeControlCenterPanel() {
+  const panel = document.getElementById('master-control-panel');
+  const toggle = document.getElementById('master-control-toggle');
+  if (panel) panel.classList.remove('active');
+  if (toggle) toggle.classList.remove('active');
+}
+
+window.closeControlCenterPanel = closeControlCenterPanel;
+
+// 确保在初始化搜索历史脚本时调用（需要找到注入点，目前通过 window 暴露）
+// 如果你有单独的 initPlayerSearchHistory 实现文件，请去那里调用 closeControlCenterPanel()
+// 为了保险，我们在 document 层面监听通用的搜索/历史按钮点击
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('button');
+  if (!btn) return;
+
+  // 根据按钮的特征判断（这里假设id或class包含特定关键词，需要根据实际HTML调整）
+  // 假设搜索按钮有 id="search-button" 或 class 包含 search-trigger
+  if (btn.id === 'search-button' || btn.closest('#search-button') || btn.classList.contains('search-trigger')) {
+    closeControlCenterPanel();
+  }
+
+  // 假设历史按钮有 id="history-button" 或 class 包含 history-trigger
+  if (btn.id === 'history-button' || btn.closest('#history-button') || btn.classList.contains('history-trigger')) {
+    closeControlCenterPanel();
+  }
+});

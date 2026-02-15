@@ -1669,14 +1669,19 @@ media-fullscreen-button {
 
 /* 搜索面板层级与显示逻辑 */
 #searchPanel {
+  position: fixed !important;
+  inset: 0 !important;
   z-index: 20001 !important;
-  backdrop-filter: blur(20px);
-  align-items: flex-start !important;
-  justify-content: center !important;
-  padding-top: 12vh;
+  backdrop-filter: blur(25px) saturate(150%);
+  -webkit-backdrop-filter: blur(25px) saturate(150%);
+  display: none; /* 由 hidden 类控制 */
+  align-items: flex-start !important; /* 保持顶部对齐 */
+  justify-content: center !important; /* 水平居中 */
+  padding-top: 8vh; /* 适当降低顶部间距 */
+  overflow-y: auto; /* 允许内容过多时滚动 */
 }
 
-/* 仅可见时启用 flex，避免和 hidden 冲突 */
+/* 仅可见时启用 flex，确保居中生效 */
 #searchPanel:not(.hidden) {
   display: flex !important;
 }

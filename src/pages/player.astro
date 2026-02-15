@@ -104,114 +104,6 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
 
       <!-- 左侧主内容区域 -->
       <main class="player-main-content">
-        <!-- 搜索面板 -->
-        <div
-          id="searchPanel"
-          class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center transition-opacity duration-300 z-10001"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="searchPanelTitle"
-          aria-hidden="true"
-          tabindex="-1"
-        >
-          <div
-            class="search-panel-container bg-black/20 backdrop-blur-xl border border-white/10 p-6 rounded-2xl w-[95%] max-w-5xl max-h-[90vh] flex flex-col shadow-2xl"
-          >
-            <!-- 顶部区域：搜索框和关闭按钮 -->
-            <div class="flex-none mb-4">
-              <div class="flex items-center gap-4 relative">
-                <!-- 搜索框 -->
-                <div class="flex-1 pr-12">
-                  <!-- 为关闭按钮预留空间 -->
-                  <form id="searchForm">
-                    <div class="relative group">
-                      <div
-                        class="absolute -inset-1.5 bg-linear-to-r from-indigo-500 to-purple-600 rounded-full blur-xl opacity-30 group-hover:opacity-60 transition-all duration-500"
-                        aria-hidden="true"
-                      >
-                      </div>
-
-                      <div
-                        class="relative flex items-stretch h-14 bg-black/40 backdrop-blur-md border border-white/10 rounded-full overflow-hidden shadow-2xl"
-                      >
-                        <input
-                          type="text"
-                          id="searchInput"
-                          class="flex-1 bg-transparent text-white pl-7 pr-4 py-0 focus:outline-none placeholder-white/50 text-lg"
-                          placeholder="搜索你想看的..."
-                          autocomplete="off"
-                          aria-label="视频搜索框"
-                        />
-
-                        <button
-                          type="submit"
-                          class="w-14 shrink-0 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300"
-                          aria-label="搜索按钮"
-                        >
-                          <svg
-                            class="w-6 h-6"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                          </svg>
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-
-                <!-- 关闭按钮 -->
-                <button
-                  id="closeSearchPanelButton"
-                  class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300 shrink-0 absolute right-0"
-                  aria-label="关闭搜索"
-                  type="button"
-                >
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M6 18L18 6M6 6l12 12"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <!-- 搜索历史区域 -->
-            <div class="flex-none mb-4">
-              <div class="flex flex-col gap-2">
-                <div class="flex justify-between items-center">
-                  <span class="text-white/70 text-sm font-medium whitespace-nowrap">最近搜索：</span
-                  >
-                  <button
-                    id="clearSearchHistory"
-                    class="text-white/50 hover:text-white/80 text-xs whitespace-nowrap transition-colors"
-                  >
-                    清除
-                  </button>
-                </div>
-                <div id="recentSearches" class="flex flex-wrap gap-2"></div>
-              </div>
-            </div>
-
-            <!-- 搜索结果区域 -->
-            <div class="overflow-auto flex-1 min-h-0 bg-white/5 rounded-xl p-4 md:p-6">
-              <div id="searchFeedbackArea" class="w-full text-center mb-4 hidden"></div>
-              <div id="searchResultsArea" class="w-full hidden">
-                <div id="searchResults" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Cinematic Header: 视听感官级顶栏 -->
         <div id="cinematic-header-wrapper" class="cinematic-header-container">
           <div class="cinematic-header">
@@ -944,6 +836,114 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
         </div>
       </div>
     </template>
+
+    <!-- 搜索面板 -->
+    <div
+      id="searchPanel"
+      class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center transition-opacity duration-300 z-10001"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="searchPanelTitle"
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      <div
+        class="search-panel-container bg-black/20 backdrop-blur-xl border border-white/10 p-6 rounded-2xl w-[95%] max-w-5xl max-h-[90vh] flex flex-col shadow-2xl"
+      >
+        <!-- 顶部区域：搜索框和关闭按钮 -->
+        <div class="flex-none mb-4">
+          <div class="flex items-center gap-4 relative">
+            <!-- 搜索框 -->
+            <div class="flex-1 pr-12">
+              <!-- 为关闭按钮预留空间 -->
+              <form id="searchForm">
+                <div class="relative group">
+                  <div
+                    class="absolute -inset-1.5 bg-linear-to-r from-indigo-500 to-purple-600 rounded-full blur-xl opacity-30 group-hover:opacity-60 transition-all duration-500"
+                    aria-hidden="true"
+                  >
+                  </div>
+
+                  <div
+                    class="relative flex items-stretch h-14 bg-black/40 backdrop-blur-md border border-white/10 rounded-full overflow-hidden shadow-2xl"
+                  >
+                    <input
+                      type="text"
+                      id="searchInput"
+                      class="flex-1 bg-transparent text-white pl-7 pr-4 py-0 focus:outline-none placeholder-white/50 text-lg"
+                      placeholder="搜索你想看的..."
+                      autocomplete="off"
+                      aria-label="视频搜索框"
+                    />
+
+                    <button
+                      type="submit"
+                      class="w-14 shrink-0 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-all duration-300"
+                      aria-label="搜索按钮"
+                    >
+                      <svg
+                        class="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- 关闭按钮 -->
+            <button
+              id="closeSearchPanelButton"
+              class="text-white/60 hover:text-white bg-white/10 hover:bg-white/20 rounded-xl p-2 transition-all duration-300 shrink-0 absolute right-0"
+              aria-label="关闭搜索"
+              type="button"
+            >
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- 搜索历史区域 -->
+        <div class="flex-none mb-4">
+          <div class="flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+              <span class="text-white/70 text-sm font-medium whitespace-nowrap">最近搜索：</span>
+              <button
+                id="clearSearchHistory"
+                class="text-white/50 hover:text-white/80 text-xs whitespace-nowrap transition-colors"
+              >
+                清除
+              </button>
+            </div>
+            <div id="recentSearches" class="flex flex-wrap gap-2"></div>
+          </div>
+        </div>
+
+        <!-- 搜索结果区域 -->
+        <div class="overflow-auto flex-1 min-h-0 bg-white/5 rounded-xl p-4 md:p-6">
+          <div id="searchFeedbackArea" class="w-full text-center mb-4 hidden"></div>
+          <div id="searchResultsArea" class="w-full hidden">
+            <div id="searchResults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script is:inline src="/js/player_search_history.js" defer></script>
     <script type="module" src="/js/player_app.js"></script>

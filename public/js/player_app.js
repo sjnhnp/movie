@@ -1039,6 +1039,7 @@ function renderEpisodes() {
   const gridEl = document.getElementById('ep-grid');
   const tabsEl = document.getElementById('ep-range-tabs');
   const countEl = document.getElementById('sidebar-ep-count');
+  const viewToggleBtn = document.getElementById('view-toggle-episodes');
 
   if (!gridEl || !countEl) return;
 
@@ -1050,6 +1051,37 @@ function renderEpisodes() {
 
   const total = currentEpisodes.length;
   countEl.textContent = `共 ${total} 集`;
+
+  // --- 智能视图逻辑 ---
+  const varietyShowTypes = ['综艺', '脱口秀', '真人秀'];
+  const isVariety = varietyShowTypes.some(t => currentVideoTypeName?.includes(t));
+
+  // 优先级：用户手动设置 > 综艺自动适配 > 默认网格
+  let currentMode = localStorage.getItem('playerEpViewMode');
+  if (!currentMode) {
+    currentMode = isVariety ? 'list' : 'grid';
+  }
+
+  gridEl.classList.toggle('list-mode', currentMode === 'list');
+
+  // 更新切换按钮图标
+  const gridIcon = document.getElementById('view-grid-icon');
+  const listIcon = document.getElementById('view-list-icon');
+  if (gridIcon && listIcon) {
+    gridIcon.classList.toggle('hidden', currentMode === 'grid');
+    listIcon.classList.toggle('hidden', currentMode === 'list');
+  }
+
+  // 绑定切换事件
+  if (viewToggleBtn && !viewToggleBtn._listenerBound) {
+    viewToggleBtn.addEventListener('click', () => {
+      const isCurrentlyList = gridEl.classList.contains('list-mode');
+      const newMode = isCurrentlyList ? 'grid' : 'list';
+      localStorage.setItem('playerEpViewMode', newMode);
+      renderEpisodes(); // 重新渲染
+    });
+    viewToggleBtn._listenerBound = true;
+  }
 
   // 获取观看历史以显示进度
   let watchHistory = {};
@@ -1072,6 +1104,7 @@ function renderEpisodes() {
   }
 
   const RANGE_SIZE = 30;
+  const originalEpisodeNames = JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
 
   // 内部辅助渲染函数
   const renderRangeGrid = (start, end) => {
@@ -1087,17 +1120,29 @@ function renderEpisodes() {
       const progress = watchHistory[epNum] || 0;
       const isWatched = progress >= 90;
       const isPlaying = i === currentEpisodeIndex;
+      let epName = '';
+      if (originalEpisodeNames && originalEpisodeNames[i]) {
+        epName = originalEpisodeNames[i];
+      } else {
+        const epData = currentEpisodes[i] || '';
+        if (typeof epData === 'string' && epData.includes('$')) {
+          epName = epData.split('$')[0].trim();
+        } else {
+          epName = `第 ${epNum} 集`;
+        }
+      }
 
       const cell = document.createElement('button');
       cell.className = `ep-cell${isPlaying ? ' playing' : ''}${isWatched && !isPlaying ? ' watched' : ''}`;
       cell.dataset.index = i;
-      cell.title = `第 ${epNum} 集`;
+      cell.title = epName;
 
       cell.innerHTML = `
         <span class="ep-num">${epNum}</span>
+        <span class="ep-title">${epName}</span>
         <svg class="ep-check" viewBox="0 0 16 16">
           <path d="M3.5 8.5L6.5 11.5L12.5 4.5" stroke="currentColor"
-                stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <div class="ep-progress-track">
           <div class="ep-progress-fill" style="width: ${progress}%"></div>

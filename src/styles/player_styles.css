@@ -2124,8 +2124,8 @@ media-fullscreen-button {
   font-weight: 500;
 }
 
-/* 排序按钮专用样式 */
-.sort-ep-btn {
+/* 侧边栏小工具按钮通用样式 */
+.sidebar-tool-btn-mini {
   padding: 6px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2138,10 +2138,14 @@ media-fullscreen-button {
   justify-content: center;
 }
 
-.sort-ep-btn:hover {
+.sidebar-tool-btn-mini:hover {
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
   border-color: rgba(255, 255, 255, 0.2);
+}
+
+.sidebar-tool-btn-mini svg {
+  transition: transform 0.3s ease;
 }
 
 /* ---- 分段选择器 ---- */
@@ -2203,6 +2207,18 @@ media-fullscreen-button {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
   gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+/* 列表模式：变双列或单列胶囊 */
+.ep-grid.list-mode {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+}
+
+@media (max-width: 640px) {
+  .ep-grid.list-mode {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* ---- 单个集数方块 ---- */
@@ -2221,6 +2237,16 @@ media-fullscreen-button {
   -webkit-user-select: none;
   user-select: none;
   color: rgba(255, 255, 255, 0.7);
+  padding: 4px;
+}
+
+/* 列表模式下的方块变长条 */
+.list-mode .ep-cell {
+  aspect-ratio: auto !important;
+  height: 44px;
+  justify-content: flex-start;
+  padding: 0 12px;
+  gap: 12px;
 }
 
 .ep-num {
@@ -2229,6 +2255,29 @@ media-fullscreen-button {
   color: inherit;
   z-index: 1;
   transition: color 0.25s ease;
+  flex-shrink: 0;
+}
+
+.ep-title {
+  display: none;
+  /* 默认隐藏 */
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  text-align: left;
+}
+
+.list-mode .ep-title {
+  display: block;
+  /* 列表模式下显示 */
+}
+
+.ep-cell:hover .ep-title {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 /* 悬停 */

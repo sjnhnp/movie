@@ -2373,10 +2373,10 @@ media-fullscreen-button {
 /* --- Unified Master Command Island (Plan A) --- */
 .master-island-wrapper {
   position: fixed;
-  top: 0;
+  top: 1.25rem;
+  /* 增加顶部间距，更优雅 */
   left: 0;
   right: 0;
-  padding: clamp(1rem, 2vw, 1.5rem);
   z-index: 10005;
   pointer-events: none;
   display: flex;
@@ -2388,23 +2388,29 @@ media-fullscreen-button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
-  max-width: 1200px;
-  background: rgba(15, 15, 25, 0.45);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
-  border-radius: 24px;
-  padding: 0.6rem 1rem;
+  width: auto;
+  /* 自适应宽度 */
+  min-width: 600px;
+  max-width: 90vw;
+  background: rgba(20, 20, 30, 0.6);
+  /* 更深背景提高对比度 */
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+  border-radius: 26px;
+  padding: 0.5rem 0.8rem;
   pointer-events: auto;
   opacity: 0;
-  transform: translateY(-20px);
-  transition: all 0.4s cubic-bezier(0.2, 1, 0.3, 1);
+  transform: translateY(-30px);
+  transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
 }
 
-/* Hover logical trigger from parent container */
-.player-page-wrapper:hover .master-island {
+/* 绑定播放器悬停逻辑 */
+#player-region:hover .master-island,
+.master-island:hover {
   opacity: 1;
   transform: translateY(0);
 }
@@ -2418,20 +2424,41 @@ media-fullscreen-button {
 .section-left {
   flex: 1;
   min-width: 0;
-  justify-content: flex-start;
+  padding-right: 1.5rem;
 }
 
 .section-center {
-  background: rgba(255, 255, 255, 0.03);
-  padding: 0.25rem 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.2rem 0.4rem;
   border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .section-right {
   flex: 1;
   justify-content: flex-end;
+  padding-left: 1rem;
+}
+
+/* Dropdown direction fix: Open DOWNWARD for top island */
+.master-island .control-dropdown {
+  bottom: auto;
+  top: calc(100% + 12px);
+  /* 向下弹出 */
+  transform-origin: top center;
+  animation: dropdownFadeDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dropdownFadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 /* Island Button Refinement */
@@ -2439,8 +2466,8 @@ media-fullscreen-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(2.25rem, 5vh, 2.75rem);
-  height: clamp(2.25rem, 5vh, 2.75rem);
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2452,10 +2479,9 @@ media-fullscreen-button {
 
 .island-btn:hover {
   background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.3);
   color: #fff;
-  transform: scale(1.08);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  transform: scale(1.1);
 }
 
 .island-btn:active {
@@ -2476,8 +2502,8 @@ media-fullscreen-button {
 
 .island-divider {
   width: 1px;
-  height: 1.5rem;
-  background: rgba(255, 255, 255, 0.15);
+  height: 1.25rem;
+  background: rgba(255, 255, 255, 0.12);
   margin: 0 0.5rem;
 }
 
@@ -2485,13 +2511,12 @@ media-fullscreen-button {
 .header-info {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
   min-width: 0;
-  margin-left: 0.25rem;
+  margin-left: 0.4rem;
 }
 
 .header-title {
-  font-size: clamp(1rem, 1.2vw, 1.25rem);
+  font-size: 1.05rem;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
@@ -2500,14 +2525,11 @@ media-fullscreen-button {
 }
 
 .header-meta {
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.5);
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  font-size: 0.65rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-top: -1px;
 }
 
 /* Hide when locked - Logic can be added later via JS if needed */
@@ -2515,8 +2537,19 @@ media-fullscreen-button {
 
 @media (max-width: 1024px) {
   .master-island {
-    border-radius: 20px;
-    padding: 0.5rem;
+    min-width: 500px;
+    padding: 0.4rem 0.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .master-island {
+    min-width: 90%;
+    padding: 0.4rem;
+  }
+
+  .section-center {
+    display: none;
   }
 }
 

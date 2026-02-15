@@ -269,7 +269,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                 </button>
 
                 <!-- 二级大菜单：模块化控制中心 -->
-                <div id="master-control-panel" class="control-center-panel hidden">
+                <div id="master-control-panel" class="control-center-panel">
                   <!-- 第一排：巨型功能块 -->
                   <div class="panel-grid-top">
                     <button id="searchButton" class="panel-large-btn bg-indigo-600/20">
@@ -297,24 +297,28 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
                           ><path
                             stroke-width="2"
-                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg
+                        >
                       </div>
                       <div class="item-label">切换当前线路</div>
                       <div class="item-arrow">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                          ><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg>
+                          ><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg
+                        >
                       </div>
                     </div>
                     <div class="panel-item" id="skip-control-button">
                       <div class="item-icon">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"
                           ><path stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                          ></path></svg>
+                          ></path></svg
+                        >
                       </div>
                       <div class="item-label">智能跳过设置</div>
                       <div class="item-arrow">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                          ><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg>
+                          ><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg
+                        >
                       </div>
                     </div>
                     <div class="panel-item" id="play-settings-button">
@@ -323,12 +327,14 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
                           ><path
                             stroke-width="2"
                             d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37A1.724 1.724 0 0021 12c0 1.756-1.756 2.924-1.756 3.35a1.724 1.724 0 00-1.065 2.572c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                          ></path></svg>
+                          ></path></svg
+                        >
                       </div>
                       <div class="item-label">偏好与属性</div>
                       <div class="item-arrow">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                          ><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg>
+                          ><path d="M9 5l7 7-7 7" stroke-width="2"></path></svg
+                        >
                       </div>
                     </div>
                   </div>
@@ -498,44 +504,49 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
         <script is:inline>
           document.addEventListener('DOMContentLoaded', () => {
             const header = document.getElementById('cinematic-header-wrapper');
-            const player = document.getElementById('player');
             const panelToggle = document.getElementById('master-control-toggle');
             const panel = document.getElementById('master-control-panel');
+            const playerRegion = document.getElementById('player-region');
 
-            // 1. 同步显隐逻辑
-            // 监听 Vidstack 的 controls-change 事件 (如果存在) 或简单鼠标逻辑
-            let hideTimeout;
+            // 显隐逻辑更新
             const showHeader = () => {
               header.classList.add('active');
-              clearTimeout(hideTimeout);
             };
             const hideHeader = () => {
-              // 如果控制中心面板打开，则不隐藏顶栏
-              if (panel.classList.contains('active')) return;
-              hideTimeout = setTimeout(() => {
+              // 鼠标离开区域直接隐藏，除非面板打开
+              if (!panel.classList.contains('active')) {
                 header.classList.remove('active');
-              }, 3000);
+              }
             };
 
-            // 绑定到播放器容器的鼠标活动
-            const playerRegion = document.getElementById('player-region');
+            // 监听视频区域
             playerRegion.addEventListener('mousemove', showHeader);
             playerRegion.addEventListener('mouseleave', hideHeader);
+
+            // 顶栏自身悬停保持
             header.addEventListener('mouseenter', showHeader);
             header.addEventListener('mouseleave', hideHeader);
 
-            // 2. 控制中心面板点击切换
+            // 控制中心面板切换
             panelToggle.addEventListener('click', (e) => {
               e.stopPropagation();
-              panel.classList.toggle('active');
-              panelToggle.classList.toggle('active');
+              const isNowActive = panel.classList.toggle('active');
+              panelToggle.classList.toggle('active', isNowActive);
             });
 
-            // 点击外部关闭面板
+            // 点击外部关闭
             document.addEventListener('click', (e) => {
-              if (!panel.contains(e.target) && e.target !== panelToggle) {
+              if (
+                panel.classList.contains('active') &&
+                !panel.contains(e.target) &&
+                !panelToggle.contains(e.target)
+              ) {
                 panel.classList.remove('active');
                 panelToggle.classList.remove('active');
+                // 如果鼠标不在区域内，关闭面板后立即随之隐藏顶栏
+                if (!playerRegion.matches(':hover') && !header.matches(':hover')) {
+                  header.classList.remove('active');
+                }
               }
             });
           });

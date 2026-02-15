@@ -2370,21 +2370,21 @@ media-fullscreen-button {
   border-radius: 4px;
 }
 
-/* --- Cinematic Header Bar: 电影级同步顶栏 --- */
+/* --- Cinematic Header Bar: 系统级同步顶栏 --- */
 .cinematic-header-container {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  height: 100px;
-  /* 扩展触发感应区 */
+  height: 120px;
+  /* 增加感应区域高度 */
   z-index: 10005;
   pointer-events: none;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   padding-top: 1.25rem;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cinematic-header {
@@ -2395,7 +2395,6 @@ media-fullscreen-button {
   max-width: 1400px;
   height: 64px;
   background: rgba(10, 10, 18, 0.4);
-  /* 深色透明基底 */
   backdrop-filter: blur(60px) saturate(180%);
   -webkit-backdrop-filter: blur(60px) saturate(180%);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -2406,8 +2405,8 @@ media-fullscreen-button {
   padding: 0 1.5rem;
   pointer-events: auto;
   opacity: 0;
-  transform: translateY(-20px);
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(-30px);
+  transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cinematic-header-container.active .cinematic-header {
@@ -2415,7 +2414,7 @@ media-fullscreen-button {
   transform: translateY(0);
 }
 
-/* 段落分区 */
+/* 段落分区适配 */
 .header-section {
   display: flex;
   align-items: center;
@@ -2423,7 +2422,7 @@ media-fullscreen-button {
 }
 
 .section-left {
-  flex: 1;
+  flex: 1 1 30%;
   gap: 1.25rem;
   justify-content: flex-start;
   min-width: 0;
@@ -2431,22 +2430,23 @@ media-fullscreen-button {
 
 .section-center {
   flex: 0 0 auto;
+  margin: 0 1rem;
 }
 
 .section-right {
-  flex: 1;
+  flex: 1 1 30%;
   gap: 0.8rem;
   justify-content: flex-end;
 }
 
-/* [1] 左区样式 */
+/* [1] 左区响应式优化 */
 .header-back-btn {
   width: 2.75rem;
   height: 2.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 14px;
   color: #fff;
   transition: all 0.3s ease;
@@ -2454,31 +2454,32 @@ media-fullscreen-button {
 }
 
 .header-back-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  transform: translateX(-2px);
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(-4px);
 }
 
 .header-main-title {
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 320px;
+  max-width: clamp(100px, 20vw, 400px);
   letter-spacing: -0.01em;
 }
 
-/* [2] 中区：状态导航胶囊 */
+/* [2] 中区导航胶囊 */
 .status-pill {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.04);
   height: 44px;
   padding: 0 0.5rem;
   border-radius: 100px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.02);
+  /* 精显黄框：琥珀色微光边框 */
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.1);
 }
 
 .pill-nav-btn {
@@ -2489,31 +2490,31 @@ media-fullscreen-button {
   justify-content: center;
   color: rgba(255, 255, 255, 0.4);
   border-radius: 50%;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 
 .pill-nav-btn:hover {
   color: #fff;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .pill-nav-btn svg {
-  width: 1.2rem;
-  height: 1.2rem;
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .pill-divider {
   width: 1px;
-  height: 14px;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 0 0.4rem;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 0.5rem;
 }
 
 .pill-content {
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  padding: 0 0.6rem;
+  padding: 0 1rem;
   white-space: nowrap;
 }
 
@@ -2521,34 +2522,32 @@ media-fullscreen-button {
   font-size: 0.85rem;
   font-weight: 700;
   color: #818cf8;
-  /* 浅靛蓝色 - 还原图中的正在播放 */
-  letter-spacing: 0.02em;
+  /* 正在播放淡蓝 */
 }
 
 .status-meta-text {
   font-size: 0.85rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.4);
-  /* 还原图中的浅灰色 */
 }
 
-/* [3] 右区：工具中心 */
+/* [3] 右区工具集 */
 .header-tool-btn {
   width: 2.75rem;
   height: 2.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.65);
   border-radius: 14px;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
-.header-tool-btn:hover {
-  background: rgba(255, 255, 255, 0.08);
+.header-tool-btn:hover,
+.header-tool-btn.active {
+  background: rgba(255, 255, 255, 0.12);
   color: #fff;
-  transform: translateY(-1px);
 }
 
 .header-tool-btn svg {
@@ -2580,25 +2579,26 @@ media-fullscreen-button {
 .control-center-panel {
   position: absolute;
   top: calc(100% + 18px);
-  right: -60px;
+  right: -20px;
   width: 320px;
-  background: rgba(18, 18, 26, 0.9);
+  background: rgba(20, 20, 28, 0.95);
   backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 28px;
   padding: 1.25rem;
-  box-shadow:
-    0 30px 60px -15px rgba(0, 0, 0, 0.7),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 40px 80px -15px rgba(0, 0, 0, 0.8);
   z-index: 10006;
+  /* 关键：用 opacity & visibility 隐藏，不要用 hidden 类 */
   opacity: 0;
+  visibility: hidden;
   transform: translateY(-10px) scale(0.96);
   pointer-events: none;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .control-center-panel.active {
   opacity: 1;
+  visibility: visible;
   transform: translateY(0) scale(1);
   pointer-events: auto;
 }
@@ -2615,16 +2615,17 @@ media-fullscreen-button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 84px;
-  border-radius: 20px;
+  height: 86px;
+  border-radius: 18px;
   gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 
 .panel-large-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.15);
-  background: rgba(255, 255, 255, 0.1);
 }
 
 .panel-large-btn svg {
@@ -2641,7 +2642,7 @@ media-fullscreen-button {
 
 .panel-divider {
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  background: rgba(255, 255, 255, 0.08);
   margin: 1.2rem 0;
 }
 
@@ -2654,21 +2655,20 @@ media-fullscreen-button {
 .panel-item {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
-  border-radius: 16px;
+  padding: 0.75rem 0.8rem;
+  border-radius: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.65);
 }
 
 .panel-item:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   color: #fff;
 }
 
 .item-icon {
   width: 32px;
-  height: 32px;
   display: flex;
   align-items: center;
 }
@@ -2682,12 +2682,11 @@ media-fullscreen-button {
   flex: 1;
   font-size: 0.85rem;
   font-weight: 600;
-  margin-left: 0.4rem;
+  margin-left: 0.5rem;
 }
 
 .item-arrow svg {
   width: 1rem;
-  height: 1rem;
   opacity: 0.3;
 }
 
@@ -2701,13 +2700,13 @@ media-fullscreen-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.03);
+  gap: 0.6rem;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.035);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.8rem;
+  font-weight: 700;
   color: rgba(255, 255, 255, 0.5);
 }
 
@@ -2718,7 +2717,6 @@ media-fullscreen-button {
 
 .footer-mini-btn svg {
   width: 1rem;
-  height: 1rem;
 }
 
 /* 复用下拉菜单样式优化 (解决遮挡) */
@@ -2731,19 +2729,31 @@ media-fullscreen-button {
   border-radius: 20px !important;
 }
 
-@media (max-width: 1024px) {
+/* 响应式断点精修 */
+@media (max-width: 1200px) {
   .cinematic-header {
     width: 98vw;
+    padding: 0 1rem;
   }
 
-  .header-main-title {
-    max-width: 200px;
+  .section-left,
+  .section-right {
+    flex: 1 1 25%;
   }
 }
 
-@media (max-width: 768px) {
-  .section-center {
+@media (max-width: 900px) {
+  .header-main-title {
     display: none;
+  }
+
+  /* 极窄处仅保留返回箭头 */
+}
+
+@media (max-width: 768px) {
+  .cinematic-header {
+    height: 56px;
+    border-radius: 16px;
   }
 
   .status-pill {

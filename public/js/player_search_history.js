@@ -449,10 +449,45 @@ function renderBasicSearchResults(results) {
 
   const fragment = document.createDocumentFragment();
 
+  results.forEach((item) => {
+    const card = document.createElement('div');
+    card.className =
+      'card-hover bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4 hover:bg-white/10 transition-all duration-300 cursor-pointer';
+    card.dataset.id = item.vod_id;
+    card.dataset.sourceCode = item.source_code;
+    card.onclick = () => handlePlayerSearchResultClick(item);
+
+    // 构建速度标签
+    let speedBadge = '';
+    if (item.loadSpeed && isValidSpeedValue(item.loadSpeed)) {
+      speedBadge = `<span class="speed-tag inline-block px-2 py-1 text-xs rounded-full bg-green-600 text-white ml-2">${item.loadSpeed}</span>`;
+    } else {
+      speedBadge = `<span data-field="speed-tag" class="speed-tag hidden px-2 py-1 text-xs rounded-full bg-green-600 text-white ml-2"></span>`;
+    }
+
+    card.innerHTML = `
+            <div class="flex items-start gap-4">
+                <div class="flex-1">
+                    <h3 class="text-white font-medium text-lg mb-2">${sanitizeText(item.vod_name || '')}</h3>
+                    <div class="flex flex-wrap gap-2 text-sm text-gray-400 items-center">
+                        <span>${sanitizeText(item.type_name || '')}</span>
+                        ${item.vod_year ? `<span>·</span><span>${item.vod_year}</span>` : ''}
+                        <span>·</span>
+                        <span class="text-blue-400">${sanitizeText(item.source_name || '')}</span>
+                        ${speedBadge}
+                    </div>
+                    ${item.vod_content ? `<p class="text-gray-300 text-sm mt-2 line-clamp-2">${sanitizeText(item.vod_content.slice(0, 100))}...</p>` : ''}
+                </div>
+            </div>
+        `;
+
+    fragment.appendChild(card);
+  });
+
   // 直接将卡片添加到 searchResults，避免嵌套网格导致的显示异常
   searchResults.innerHTML = '';
   // 确保容器具有正确的网格类名，桌面端优先使用 2 列以保证卡片宽度充足
-  searchResults.className = 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 w-full';
+  searchResults.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 w-full';
   searchResults.appendChild(fragment);
 }
 
@@ -462,6 +497,15 @@ function renderBasicSearchResults(results) {
 function renderSearchResultsWithTemplate(results) {
   const searchResults = document.getElementById('searchResults');
   if (!searchResults) return;
+
+  const fragment = document.createDocumentFragment();
+
+  results.forEach((item) => {
+    const resultCard = createResultItemUsingTemplate(item);
+    if (resultCard) {
+      fragment.appendChild(resultCard);
+    }
+  });
 
   // 直接将片段添加到 searchResults，避免嵌套网格
   searchResults.innerHTML = '';

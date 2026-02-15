@@ -2424,11 +2424,13 @@ window.closeControlCenterPanel = closeControlCenterPanel;
     if (!btn) return;
 
     const isSearchTrigger = btn.id === 'search-button' ||
+      btn.id === 'searchButton' ||
       btn.id === 'openSearchPanelButton' ||
       btn.dataset.action === 'search' ||
       btn.closest('[data-action="search"]');
 
     const isHistoryTrigger = btn.id === 'history-button' ||
+      btn.id === 'historyButton' ||
       btn.id === 'openHistoryButton' ||
       btn.dataset.action === 'history' ||
       btn.closest('[data-action="history"]');

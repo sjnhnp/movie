@@ -1668,7 +1668,7 @@ media-fullscreen-button {
 /* ==================== 播放页搜索和历史面板样式 ==================== */
 
 /* 搜索弹窗新布局样式 */
-#searchPanel .bg-black\/20 {
+#searchPanel>.bg-black\/20 {
   padding: 1.5rem !important;
   /* 减小整体内边距 */
 }

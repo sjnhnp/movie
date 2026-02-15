@@ -1153,6 +1153,7 @@ function initEpisodeSidebar() {
   const sidebar = document.getElementById('episode-sidebar');
   const sortBtn = document.getElementById('sort-episodes');
   const mainContent = document.querySelector('.player-main-content');
+  const wrapper = document.querySelector('.player-page-wrapper');
 
   if (toggleBtn && sidebar) {
     toggleBtn.addEventListener('click', (e) => {
@@ -1160,8 +1161,6 @@ function initEpisodeSidebar() {
       const isHidden = sidebar.classList.toggle('hidden-sidebar');
       sidebar.classList.toggle('show-mobile');
 
-      // 同时切换外层容器的类名，方便整体布局调整
-      const wrapper = document.querySelector('.player-page-wrapper');
       if (wrapper) {
         wrapper.classList.toggle('sidebar-hidden', isHidden);
       }
@@ -1175,7 +1174,6 @@ function initEpisodeSidebar() {
     });
   }
 
-  // 移动端：点击主内容区关闭侧边栏
   if (mainContent && sidebar) {
     mainContent.addEventListener('click', () => {
       if (window.innerWidth <= 1024 && !sidebar.classList.contains('hidden-sidebar')) {
@@ -1183,6 +1181,26 @@ function initEpisodeSidebar() {
         sidebar.classList.remove('show-mobile');
       }
     });
+  }
+
+  if (wrapper && sidebar) {
+    let resizeTimeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const isDesktop = window.innerWidth > 1024;
+        const isSidebarHidden = sidebar.classList.contains('hidden-sidebar');
+
+        if (isDesktop) {
+          wrapper.classList.toggle('sidebar-hidden', isSidebarHidden);
+        } else {
+          wrapper.classList.add('sidebar-hidden');
+        }
+      }, 100);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize();
   }
 }
 

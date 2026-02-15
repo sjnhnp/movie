@@ -47,7 +47,7 @@ const settingsPasswordHash = settingsPassword ? sha256(settingsPassword) : '';
     <script is:inline src="/js/player_preload.js" defer></script>
   </head>
   <body class="page-bg text-white font-sans min-h-screen">
-    <div class="player-page-wrapper">
+    <div class="player-page-wrapper sidebar-hidden">
       <!-- 历史记录面板 (放在最外层，fixed 定位) -->
       <aside
         id="historyPanel"

@@ -2208,9 +2208,12 @@ media-fullscreen-button {
   }
 
   #episode-sidebar.hidden-sidebar {
-    margin-right: 0;
-    width: 100%;
-    opacity: 1;
+    width: 0;
+    min-width: 0;
+    opacity: 0;
+    pointer-events: none;
+    border-left-width: 0;
+    overflow: hidden;
     transform: translateY(100%);
   }
 }
@@ -2364,22 +2367,54 @@ media-fullscreen-button {
   left: 0;
   right: 0;
   height: 120px;
-  /* 增加感应区域高度 */
   z-index: 10005;
   pointer-events: none;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   padding-top: 1.25rem;
-  /* 关键：增加过渡效果，当右侧边距变化时（侧边栏打开）平滑缩放 */
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1), right 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* 桌面端：当侧边栏显示时，将顶栏容器收缩，避免遮挡 */
 @media (min-width: 1025px) {
   .player-page-wrapper:not(.sidebar-hidden) .cinematic-header-container {
-    right: 380px;
-    pointer-events: none;
+    width: calc(100vw - 380px);
+    max-width: calc(100vw - 380px);
+  }
+  
+  .player-page-wrapper.sidebar-hidden .cinematic-header-container {
+    width: 100vw;
+    max-width: 100vw;
+  }
+}
+
+/* 响应式断点精修 */
+@media (max-width: 1200px) {
+  .cinematic-header {
+    width: 98vw;
+    padding: 0 1rem;
+  }
+
+  .section-left,
+  .section-right {
+    flex: 1 1 25%;
+  }
+  
+  .player-page-wrapper:not(.sidebar-hidden) .cinematic-header-container {
+    width: calc(100vw - 320px);
+    max-width: calc(100vw - 320px);
+  }
+  
+  #episode-sidebar {
+    width: 320px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .cinematic-header-container {
+    width: 100vw !important;
+    max-width: 100vw !important;
   }
 }
 
@@ -2806,18 +2841,6 @@ media-fullscreen-button {
 }
 
 /* 响应式断点精修 */
-@media (max-width: 1200px) {
-  .cinematic-header {
-    width: 98vw;
-    padding: 0 1rem;
-  }
-
-  .section-left,
-  .section-right {
-    flex: 1 1 25%;
-  }
-}
-
 @media (max-width: 900px) {
   .header-main-title {
     display: none;

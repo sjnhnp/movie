@@ -64,7 +64,9 @@ function toggleWebFullscreen() {
             width: '100vw',
             height: '100vh',
             zIndex: '9999',
-            background: '#000'
+            background: '#000',
+            maxWidth: 'none',
+            margin: '0'
         });
 
         playerRegion.style.height = '100vh';
@@ -87,7 +89,9 @@ function toggleWebFullscreen() {
             width: '',
             height: '',
             zIndex: '',
-            background: ''
+            background: '',
+            maxWidth: '',
+            margin: ''
         });
         playerRegion.style.height = '60vh';
 

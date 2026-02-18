@@ -91,17 +91,15 @@ async function playVideo(episodeString, title, episodeIndex, sourceName = '', so
         console.error('解析出的播放链接无效:', playUrl);
         return;
     }
-    const isSpecialSource = !sourceCode.startsWith('custom_') && API_SITES[sourceCode] && API_SITES[sourceCode].detail;
+    const isSpecialSource = !sourceCode.startsWith('custom_') && window.API_SITES[sourceCode]?.detail;
     if (isSpecialSource) {
-        const detailUrl = `/api/detail?id=${vodId}&source=${sourceCode}`;
         try {
-            const response = await fetch(detailUrl);
-            const data = await response.json();
-            if (data.code === 200 && Array.isArray(data.episodes)) {
-                playUrl = data.episodes[episodeIndex];
+            const data = await fetchSpecialDetail(vodId, sourceCode);
+            if (data && Array.isArray(data.episodes)) {
+                playUrl = data.episodes[episodeIndex] || playUrl;
             }
         } catch (e) {
-            console.log('后台获取真实地址失败（播放前）', e);
+            console.log('播放前预获取地址失败:', e);
         }
     }
     AppState.set('currentEpisodeIndex', episodeIndex);

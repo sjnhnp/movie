@@ -22,45 +22,44 @@ async function fetchWithTimeout(targetUrl, options, timeout = 10000, responseTyp
     }
 }
 
+// 提取并清洗 M3U8 链接的通用逻辑
+function extractM3u8Links(htmlContent, baseUrl) {
+    let matches = htmlContent.match(/\$https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g) || [];
+    if (matches.length === 0) {
+        matches = htmlContent.match(/https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g) || [];
+    }
+
+    return Array.from(new Set(matches)).map(link => {
+        link = link.startsWith('$') ? link.slice(1) : link;
+
+        // 使用统一的 URL 解析函数
+        link = resolveUrl(baseUrl, link);
+
+        // 移除可能存在的括号备注 (针对某些特殊源)
+        const idx = link.indexOf('(');
+        link = idx > -1 ? link.slice(0, idx) : link;
+
+        // 规范化 URL
+        try {
+            return new URL(link).href;
+        } catch (e) {
+            return link;
+        }
+    }).filter(link => link && link.startsWith('http') && link.includes('.m3u8'));
+}
+
 // 处理特殊片源详情 (内置源，需要HTML抓取)
 async function handleSpecialSourceDetail(id, sourceCode) {
     try {
         const detailPageUrl = `${API_SITES[sourceCode].detail}/index.php/vod/detail/id/${id}.html`;
         const htmlContent = await fetchWithTimeout(
             PROXY_URL + encodeURIComponent(detailPageUrl),
-            { headers: { 'User-Agent': API_CONFIG.search.headers['User-Agent'] } },
+            { headers: { 'User-Agent': API_CONFIG.headers['User-Agent'] } },
             10000,
             'text'
         );
 
-        let matches = htmlContent.match(/\$https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g) || [];
-        if (matches.length === 0) {
-            matches = htmlContent.match(/https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g) || [];
-        }
-
-        matches = Array.from(new Set(matches)).map(link => {
-            link = link.startsWith('$') ? link.slice(1) : link;
-
-            // 补全协议或相对路径
-            if (link.startsWith('//')) {
-                link = 'https:' + link;
-            } else if (link.startsWith('/')) {
-                try {
-                    const origin = new URL(detailPageUrl).origin;
-                    link = origin + link;
-                } catch (e) {
-                    console.warn('补全绝对路径失败:', e);
-                }
-            } else if (!link.startsWith('http')) {
-                try {
-                    link = new URL(link, detailPageUrl).href;
-                } catch (e) { }
-            }
-
-            // 移除可能存在的括号备注 (针对某些特殊源)
-            const idx = link.indexOf('(');
-            return idx > -1 ? link.slice(0, idx) : link;
-        }).filter(link => link && link.startsWith('http') && link.includes('.m3u8'));
+        const matches = extractM3u8Links(htmlContent, detailPageUrl);
 
         if (matches.length === 0) {
             throw new Error(`未能从${API_SITES[sourceCode].name}详情页提取到有效的 m3u8 地址`);
@@ -81,7 +80,6 @@ async function handleSpecialSourceDetail(id, sourceCode) {
         });
     } catch (e) {
         console.error(`${API_SITES[sourceCode]?.name || sourceCode}详情获取失败:`, e);
-        // 将原始错误信息传递出去，方便调试
         throw new Error(`获取${API_SITES[sourceCode]?.name || sourceCode}详情失败: ${e.message}`);
     }
 }
@@ -90,53 +88,20 @@ async function handleSpecialSourceDetail(id, sourceCode) {
 async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl) {
     try {
         const detailPageUrl = `${customApiDetailBaseUrl}/index.php/vod/detail/id/${id}.html`;
-        const fullUrl = PROXY_URL + encodeURIComponent(detailPageUrl); // 使用代理避免跨域
-        // 增加超时控制（10秒），避免无限等待
+        const fullUrl = PROXY_URL + encodeURIComponent(detailPageUrl);
         const htmlContent = await fetchWithTimeout(
             fullUrl,
-            { headers: { 'User-Agent': API_CONFIG.search.headers['User-Agent'] } },
-            10000, // 超时时间10秒
+            { headers: { 'User-Agent': API_CONFIG.headers['User-Agent'] } },
+            10000,
             'text'
         );
 
-        // 优化1：增加多种播放地址正则匹配（兼容不同格式）
-        let matches = htmlContent.match(/\$https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g) || [];
-        if (matches.length === 0) {
-            matches = htmlContent.match(/https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g) || [];
-        }
-
-        // 优化2：清洗地址（移除多余字符并补全相对路径）
-        matches = Array.from(new Set(matches)).map(link => {
-            link = link.startsWith('$') ? link.slice(1) : link; // 移除可能的$前缀
-
-            // 补全协议或相对路径
-            if (link.startsWith('//')) {
-                link = 'https:' + link;
-            } else if (link.startsWith('/')) {
-                try {
-                    const origin = new URL(detailPageUrl).origin;
-                    link = origin + link;
-                } catch (e) {
-                    console.warn('补全绝对路径失败:', e);
-                }
-            } else if (!link.startsWith('http')) {
-                // 可能是相对路径，也可能是完全无效
-                try {
-                    link = new URL(link, detailPageUrl).href;
-                } catch (e) {
-                    // 保持原样，后续filter会过滤掉
-                }
-            }
-
-            link = link.split('?')[0] + '?' + link.split('?').slice(1).join('?'); // 保留参数
-            return link;
-        }).filter(link => link && link.startsWith('http') && link.includes('.m3u8')); // 过滤无效地址
+        const matches = extractM3u8Links(htmlContent, detailPageUrl);
 
         if (matches.length === 0) {
             throw new Error('未能从详情页提取到有效的 m3u8 播放地址');
         }
 
-        // 优化3：立即保存真实地址到缓存（供下次使用）
         localStorage.setItem('customApiRealUrls_' + id, JSON.stringify(matches));
 
         return JSON.stringify({
@@ -147,9 +112,8 @@ async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl) {
         });
     } catch (e) {
         console.error('自定义API detail源解析失败（本次尝试）', e);
-        // 即使失败，也保存空地址到缓存（避免重复无效请求）
         localStorage.setItem('customApiRealUrls_' + id, JSON.stringify([]));
-        throw e; // 抛出错误，触发重试逻辑
+        throw e;
     }
 }
 
@@ -179,7 +143,7 @@ async function handleApiRequest(url) {
             try {
                 const result = await fetchWithTimeout( // Expects JSON
                     PROXY_URL + encodeURIComponent(apiUrl),
-                    { headers: API_CONFIG.search.headers }
+                    { headers: API_CONFIG.headers }
                 );
                 if (!result || !Array.isArray(result.list)) throw new Error('API返回的数据格式无效');
 
@@ -233,7 +197,7 @@ async function handleApiRequest(url) {
 
                     const result = await fetchWithTimeout(
                         PROXY_URL + encodeURIComponent(detailUrl),
-                        { headers: API_CONFIG.detail.headers }
+                        { headers: API_CONFIG.headers }
                     );
                     if (!result || !Array.isArray(result.list) || !result.list.length)
                         throw new Error('获取到的详情内容无效');

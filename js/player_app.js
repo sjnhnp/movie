@@ -29,6 +29,23 @@ let adFilteringEnabled = false;
 let universalId = '';
 let isWebFullscreen = false;
 
+// 网页全屏辅助：批量设置元素显示/隐藏
+function setElementsDisplay(selectors, display) {
+    selectors.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+            el.style.display = display;
+        });
+    });
+}
+
+const WEB_FS_SELECTORS = [
+    'header',
+    '.flex.items-center.justify-between.p-6',
+    '.p-6.bg-white\\/5',
+    '#episodes-container'
+];
+
 // 网页全屏功能
 function toggleWebFullscreen() {
     const playerContainer = document.querySelector('.player-container');
@@ -40,30 +57,20 @@ function toggleWebFullscreen() {
 
     if (isWebFullscreen) {
         // 进入网页全屏
-        playerContainer.style.position = 'fixed';
-        playerContainer.style.top = '0';
-        playerContainer.style.left = '0';
-        playerContainer.style.width = '100vw';
-        playerContainer.style.height = '100vh';
-        playerContainer.style.zIndex = '9999';
-        playerContainer.style.background = '#000';
+        Object.assign(playerContainer.style, {
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            width: '100vw',
+            height: '100vh',
+            zIndex: '9999',
+            background: '#000'
+        });
 
         playerRegion.style.height = '100vh';
 
         // 隐藏其他元素，包括顶部导航栏
-        const elementsToHide = [
-            'header',
-            '.flex.items-center.justify-between.p-6',
-            '.p-6.bg-white\\/5',
-            '#episodes-container'
-        ];
-
-        elementsToHide.forEach(selector => {
-            const elements = document.querySelectorAll(selector);
-            elements.forEach(el => {
-                el.style.display = 'none';
-            });
-        });
+        setElementsDisplay(WEB_FS_SELECTORS, 'none');
 
         // 添加网页全屏状态CSS类
         document.body.classList.add('web-fullscreen-active');
@@ -73,30 +80,19 @@ function toggleWebFullscreen() {
         showToast('已进入网页全屏，按W或ESC键退出', 'info', 3000);
     } else {
         // 退出网页全屏
-        playerContainer.style.position = '';
-        playerContainer.style.top = '';
-        playerContainer.style.left = '';
-        playerContainer.style.width = '';
-        playerContainer.style.height = '';
-        playerContainer.style.zIndex = '';
-        playerContainer.style.background = '';
-
+        Object.assign(playerContainer.style, {
+            position: '',
+            top: '',
+            left: '',
+            width: '',
+            height: '',
+            zIndex: '',
+            background: ''
+        });
         playerRegion.style.height = '60vh';
 
         // 显示其他元素
-        const elementsToShow = [
-            'header',
-            '.flex.items-center.justify-between.p-6',
-            '.p-6.bg-white\\/5',
-            '#episodes-container'
-        ];
-
-        elementsToShow.forEach(selector => {
-            const elements = document.querySelectorAll(selector);
-            elements.forEach(el => {
-                el.style.display = '';
-            });
-        });
+        setElementsDisplay(WEB_FS_SELECTORS, '');
 
         // 移除网页全屏状态CSS类
         document.body.classList.remove('web-fullscreen-active');

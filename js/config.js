@@ -39,7 +39,6 @@ const API_SITES = {
     ruyi: { api: 'https://cj.rycjapi.com/api.php/provide/vod', name: '如意资源' },
     wolong: { api: 'https://wolongzyw.com/api.php/provide/vod', name: '卧龙资源' },
     wwzy: { api: 'https://wwzy.tv/api.php/provide/vod', name: '旺旺短剧' },
-    dbzy: { api: 'https://caiji.dbzy5.com/api.php/provide/vod', name: '豆瓣资源' },
     hwba: { api: 'https://cjhwba.com/api.php/provide/vod', name: '华为吧资源' },
     jmzy: { api: 'https://api.jmzy.com/api.php/provide/vod', name: '金马资源' },
     zy360: { api: 'https://360zy.com/api.php/provide/vod', name: '360资源' },
@@ -63,23 +62,18 @@ const AGGREGATED_SEARCH_CONFIG = {
     showSourceBadges: true
 };
 
-// API请求配置
 const API_CONFIG = {
+    headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'application/json'
+    },
     search: {
-        path: '?ac=videolist&wd=', // 更新：仅含查询参数 
-        pagePath: '?ac=videolist&wd={query}&pg={page}', // 新增：分页路径模板 
-        maxPages: 50, // 新增：最大获取页数 
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', // 
-            'Accept': 'application/json'
-        }
+        path: '?ac=videolist&wd=',
+        pagePath: '?ac=videolist&wd={query}&pg={page}',
+        maxPages: 50,
     },
     detail: {
-        path: '?ac=videolist&ids=', // 更新：仅含查询参数 
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36', // 
-            'Accept': 'application/json'
-        }
+        path: '?ac=videolist&ids=',
     }
 };
 

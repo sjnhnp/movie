@@ -795,6 +795,9 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
     const customAPIs = JSON.parse(AppStorage.getItem('customAPIs') || '[]');
     AppState.set('customAPIs', customAPIs);
 
+    // 初始化设置同步
+    initializeSettingsSync();
+
     document.addEventListener('DOMContentLoaded', async () => {
         const urlParams = new URLSearchParams(window.location.search);
 
@@ -1923,27 +1926,42 @@ function setupPlaySettingsEvents() {
         });
         preloadCountInput.setAttribute('data-initialized', 'true');
     }
+}
 
-    // 新增：监听 storage 事件，实现多标签页设置同步
+// 新增：全局设置初始化与同步函数
+function initializeSettingsSync() {
+    // 1. 初始化本地变量/配置
+    autoplayEnabled = AppStorage.getItem('autoplayEnabled') !== 'false';
+    const savedSpeed = AppStorage.getItem('playbackSpeed') || '1';
+    adFilteringEnabled = AppStorage.getItem('adFilteringEnabled') === 'true';
+
+    // 2. 监听 storage 事件，实现多标签页设置同步
     window.addEventListener('storage', (e) => {
         if (e.key === 'preloadingEnabled') {
             const enabled = e.newValue === 'true';
-            PLAYER_CONFIG.enablePreloading = enabled;
+            if (typeof PLAYER_CONFIG !== 'undefined') PLAYER_CONFIG.enablePreloading = enabled;
             const toggle = document.getElementById('preloadingToggle');
             if (toggle) toggle.checked = enabled;
-            if (enabled) startPreloading();
-            else stopPreloading();
+            if (enabled) {
+                if (typeof startPreloading === 'function') startPreloading();
+            } else {
+                if (typeof stopPreloading === 'function') stopPreloading();
+            }
         } else if (e.key === 'preloadCount') {
             const count = parseInt(e.newValue, 10);
             if (!isNaN(count)) {
-                PLAYER_CONFIG.preloadCount = count;
+                if (typeof PLAYER_CONFIG !== 'undefined') PLAYER_CONFIG.preloadCount = count;
                 const input = document.getElementById('preloadCountInput');
                 if (input) input.value = count;
+                // 数量变化时尝试重新开始预加载以应用新数量
+                if (typeof PLAYER_CONFIG !== 'undefined' && PLAYER_CONFIG.enablePreloading) {
+                    if (typeof startPreloading === 'function') startPreloading();
+                }
             }
         } else if (e.key === 'adFilteringEnabled') {
             const enabled = e.newValue === 'true';
-            adFilteringEnabled = enabled; // 更新模块内部变量
-            PLAYER_CONFIG.adFilteringEnabled = enabled; // 更新全局配置
+            adFilteringEnabled = enabled;
+            if (typeof PLAYER_CONFIG !== 'undefined') PLAYER_CONFIG.adFilteringEnabled = enabled;
             const toggle = document.getElementById('adFilterToggle');
             if (toggle) toggle.checked = enabled;
         } else if (e.key === 'autoplayEnabled') {
@@ -1951,6 +1969,11 @@ function setupPlaySettingsEvents() {
             autoplayEnabled = enabled;
             const toggle = document.getElementById('autoplay-next');
             if (toggle) toggle.checked = enabled;
+        } else if (e.key === 'playbackSpeed') {
+            const speed = parseFloat(e.newValue) || 1;
+            const select = document.getElementById('playback-speed-select');
+            if (select) select.value = speed.toString();
+            if (player) player.playbackRate = speed;
         }
     });
 }

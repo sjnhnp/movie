@@ -586,6 +586,8 @@ function initializeEventListeners() {
         adFilteringToggle.addEventListener('change', (e) => {
             const enabled = e.target.checked;
             AppStorage.setItem(PLAYER_CONFIG.adFilteringStorage, enabled.toString());
+            // Sync local config
+            PLAYER_CONFIG.adFilteringEnabled = enabled;
             showToast(enabled ? '已启用广告过滤' : '已禁用广告过滤', 'info');
         });
         adFilteringToggle.checked = getBoolConfig(PLAYER_CONFIG.adFilteringStorage, PLAYER_CONFIG.adFilteringEnabled);
@@ -604,19 +606,28 @@ function initializeEventListeners() {
     window.addEventListener('storage', (e) => {
         if (e.key === 'preloadingEnabled') {
             const enabled = e.newValue === 'true';
-            PLAYER_CONFIG.enablePreloading = enabled;
+            if (typeof PLAYER_CONFIG !== 'undefined') PLAYER_CONFIG.enablePreloading = enabled;
             const toggle = DOMCache.get('preloadingToggle');
             if (toggle) toggle.checked = enabled;
+            // Real-time trigger
+            if (enabled) {
+                if (typeof window.startPreloading === 'function') window.startPreloading();
+            } else {
+                if (typeof window.stopPreloading === 'function') window.stopPreloading();
+            }
         } else if (e.key === 'preloadCount') {
             const count = parseInt(e.newValue, 10);
             if (!isNaN(count)) {
-                PLAYER_CONFIG.preloadCount = count;
+                if (typeof PLAYER_CONFIG !== 'undefined') PLAYER_CONFIG.preloadCount = count;
                 const input = DOMCache.get('preloadCountInput');
                 if (input) input.value = count;
+                if (typeof PLAYER_CONFIG !== 'undefined' && PLAYER_CONFIG.enablePreloading) {
+                    if (typeof window.startPreloading === 'function') window.startPreloading();
+                }
             }
         } else if (e.key === 'adFilteringEnabled') {
             const enabled = e.newValue === 'true';
-            PLAYER_CONFIG.adFilteringEnabled = enabled;
+            if (typeof PLAYER_CONFIG !== 'undefined') PLAYER_CONFIG.adFilteringEnabled = enabled;
             const toggle = DOMCache.get('adFilteringToggle');
             if (toggle) toggle.checked = enabled;
         }
@@ -641,6 +652,12 @@ function initializeEventListeners() {
             // 更新 PLAYER_CONFIG 中的值
             PLAYER_CONFIG.enablePreloading = enabled;
             showToast(enabled ? '已启用预加载' : '已禁用预加载', 'info');
+            // Immediate trigger if preloading engine is present
+            if (enabled) {
+                if (typeof window.startPreloading === 'function') window.startPreloading();
+            } else {
+                if (typeof window.stopPreloading === 'function') window.stopPreloading();
+            }
         });
     }
 

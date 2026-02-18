@@ -9,14 +9,17 @@ const SEARCH_CACHE_CONFIG = {
     enabled: true // 是否启用搜索缓存
 };
 
-window.SEARCH_CACHE_CONFIG = SEARCH_CACHE_CONFIG;
+if (typeof window !== 'undefined') window.SEARCH_CACHE_CONFIG = SEARCH_CACHE_CONFIG;
 
 // 密码保护配置
-window.PASSWORD_CONFIG = window.PASSWORD_CONFIG || {
-    localStorageKey: 'passwordVerified',
-    settingsLocalStorageKey: 'settingsPasswordVerified', // 设置按钮密码
-    verificationTTL: 90 * 24 * 60 * 60 * 1000, // 90天验证有效期 
-};
+if (typeof window !== 'undefined') {
+    window.PASSWORD_CONFIG = window.PASSWORD_CONFIG || {
+        localStorageKey: 'passwordVerified',
+        settingsLocalStorageKey: 'settingsPasswordVerified', // 设置按钮密码
+        verificationTTL: 90 * 24 * 60 * 60 * 1000, // 90天验证有效期 
+    };
+}
+
 // 网站信息配置
 const SITE_CONFIG = {
     name: 'x',
@@ -26,7 +29,7 @@ const SITE_CONFIG = {
     version: ''
 };
 
-window.SITE_CONFIG = SITE_CONFIG;
+if (typeof window !== 'undefined') window.SITE_CONFIG = SITE_CONFIG;
 
 // API站点配置
 const API_SITES = {
@@ -49,9 +52,9 @@ const API_SITES = {
     tyyszy: { api: 'https://tyyszy.com/api.php/provide/vod', name: '天涯资源' },
 };
 
-window.API_SITES = API_SITES;
+if (typeof window !== 'undefined') window.API_SITES = API_SITES;
 const DEFAULT_SELECTED_APIS = ["mdzy", "bfzy", "maotai", "wolong"];
-window.DEFAULT_SELECTED_APIS = DEFAULT_SELECTED_APIS;
+if (typeof window !== 'undefined') window.DEFAULT_SELECTED_APIS = DEFAULT_SELECTED_APIS;
 
 // 聚合搜索配置
 const AGGREGATED_SEARCH_CONFIG = {
@@ -83,12 +86,52 @@ const M3U8_PATTERN = /\$https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\
 // 自定义播放器URL
 const CUSTOM_PLAYER_URL = 'player.html';
 
-// 预加载集数开关
+// 预加载配置默认值
 const DEFAULTS = {
     enablePreloading: false, // 预加载 
-    preloadCount: 1,       // 预加载集数 
+    preloadCount: 2,       // 预加载集数 
     debugMode: false      // 调试模式 
 };
+
+/**
+ * 安全地获取配置，兼容 AppStorage 和 localStorage
+ */
+function getBoolConfig(key, def) {
+    try {
+        let v = null;
+        if (typeof AppStorage !== 'undefined') {
+            v = AppStorage.getItem(key);
+        } else if (typeof localStorage !== 'undefined') {
+            v = localStorage.getItem(key);
+        }
+
+        if (v === null) return def;
+        return v === 'true' || v === true;
+    } catch (e) {
+        if (typeof Logger !== 'undefined') Logger.warn(`Error reading boolean config for ${key}:`, e);
+        else console.warn(`Error reading boolean config for ${key}:`, e);
+        return def;
+    }
+}
+
+function getIntConfig(key, def, min = 0, max = 10) {
+    try {
+        let raw = null;
+        if (typeof AppStorage !== 'undefined') {
+            raw = AppStorage.getItem(key);
+        } else if (typeof localStorage !== 'undefined') {
+            raw = localStorage.getItem(key);
+        }
+
+        if (raw === null) return def;
+        const v = parseInt(typeof raw === 'string' ? raw : String(raw));
+        return (!isNaN(v) && v >= min && v <= max) ? v : def;
+    } catch (e) {
+        if (typeof Logger !== 'undefined') Logger.warn(`Error reading integer config for ${key}:`, e);
+        else console.warn(`Error reading integer config for ${key}:`, e);
+        return def;
+    }
+}
 
 // 播放器配置
 const PLAYER_CONFIG = {
@@ -98,7 +141,7 @@ const PLAYER_CONFIG = {
     height: '600',
     timeout: 15000, // 播放器加载超时时间 
     autoPlayNext: true, // 默认启用自动连播功能 
-    adFilteringEnabled: getBoolConfig('adFilteringEnabled', false), // 默认关闭分片广告过滤，开启会导致某些资源卡住 
+    adFilteringEnabled: getBoolConfig('adFilteringEnabled', false), // 默认关闭分片广告过滤
     adFilteringStorage: 'adFilteringEnabled', // 存储广告过滤设置的键名 
     speedDetectionEnabled: getBoolConfig('speedDetectionEnabled', false), // 默认启用画质速度检测
     speedDetectionStorage: 'speedDetectionEnabled', // 存储画质速度检测设置的键名
@@ -107,67 +150,24 @@ const PLAYER_CONFIG = {
     debugMode: getBoolConfig('debugMode', DEFAULTS.debugMode),
 };
 
-window.PLAYER_CONFIG = PLAYER_CONFIG;
+if (typeof window !== 'undefined') window.PLAYER_CONFIG = PLAYER_CONFIG;
 
-// 错误消息本地化
-const ERROR_MESSAGES = {
-    NETWORK_ERROR: '网络连接错误，请检查网络设置',
-    TIMEOUT_ERROR: '请求超时，服务器响应时间过长',
-    API_ERROR: 'API接口返回错误，请尝试更换数据源',
-    PLAYER_ERROR: '播放器加载失败，请尝试其他视频源',
-    UNKNOWN_ERROR: '发生未知错误，请刷新页面重试'
-};
-// 安全配置
-const SECURITY_CONFIG = {
-    enableXSSProtection: true,  // 启用XSS保护 
-    sanitizeUrls: true,         // 清理URL 
-    maxQueryLength: 100        // 最大搜索长度 
-};
-// 自定义API配置
-const CUSTOM_API_CONFIG = {
-    separator: ',',           // 分隔符 
-    maxSources: 5,           // 最大允许的自定义源数量 
-    testTimeout: 5000,       // 测试超时时间(毫秒) 
-    namePrefix: 'Custom-',    // 自定义源名称前缀 
-    validateUrl: true,        // 验证URL格式 
-    cacheResults: true,       // 缓存测试结果 
-    cacheExpiry: 5184000000, // 缓存过期时间(2个月) 
-    adultPropName: 'isAdult'  // 成人内容标记属性名 
-};
-
-// 隐藏内置黄色采集站API的变量
-const HIDE_BUILTIN_ADULT_APIS = true;
-
-function getBoolConfig(key, def) {
+// 确保预加载配置存在默认值
+(function ensureDefaults() {
     try {
-        const v = AppStorage.getItem(key);
-        if (v === null) return def;
-        return v === 'true' || v === true;
-    } catch (e) {
-        Logger.warn(`Error reading boolean config for ${key}:`, e);
-        return def;
-    }
-}
+        const storage = (typeof AppStorage !== 'undefined' ? AppStorage : localStorage);
+        if (!storage) return;
 
-function getIntConfig(key, def, min = 0, max = 10) {
-    try {
-        const raw = AppStorage.getItem(key);
-        if (raw === null) return def;
-        const v = parseInt(typeof raw === 'string' ? raw : String(raw));
-        return (!isNaN(v) && v >= min && v <= max) ? v : def;
+        if (storage.getItem('preloadingEnabled') === null) {
+            storage.setItem('preloadingEnabled', DEFAULTS.enablePreloading.toString());
+        }
+        if (storage.getItem('preloadCount') === null) {
+            storage.setItem('preloadCount', DEFAULTS.preloadCount.toString());
+        }
+        if (storage.getItem('debugMode') === null) {
+            storage.setItem('debugMode', DEFAULTS.debugMode.toString());
+        }
     } catch (e) {
-        Logger.warn(`Error reading integer config for ${key}:`, e);
-        return def;
+        // Ignore initialization errors
     }
-}
-
-// 确保预加载配置在首次访问时生效
-if (AppStorage.getItem('preloadingEnabled') === null) {
-    AppStorage.setItem('preloadingEnabled', DEFAULTS.enablePreloading.toString());
-}
-if (AppStorage.getItem('preloadCount') === null) {
-    AppStorage.setItem('preloadCount', DEFAULTS.preloadCount.toString());
-}
-if (AppStorage.getItem('debugMode') === null) {
-    AppStorage.setItem('debugMode', DEFAULTS.debugMode.toString());
-}
+})();

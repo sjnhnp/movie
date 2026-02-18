@@ -749,6 +749,10 @@ function backgroundQualityUpdate(results) {
     let cursor = 0;
 
     async function worker() {
+        // 检查是否启用了画质速度检测
+        const speedDetectionEnabled = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
+        if (!speedDetectionEnabled) return;
+
         while (cursor < results.length) {
             const item = results[cursor++];
             if (!item || item.detectionMethod !== 'pending') continue;  // 只处理待检测项
@@ -877,6 +881,13 @@ async function performSearch(query, selectedAPIs) {
         }
 
         // 把缓存填回 videoDataMap / videoSourceMap，立即可渲染
+        if (!speedDetectionEnabled) {
+            cacheResult.results.forEach(item => {
+                if (item.loadSpeed === '检测中...') item.loadSpeed = 'N/A';
+                if (item.quality === '检测中...') item.quality = '未知';
+                if (item.detectionMethod === 'pending') item.detectionMethod = 'disabled';
+            });
+        }
         rebuildVideoCaches(cacheResult.results);
 
         // 若打开了速度检测，则后台刷新速度；画质检测随配置而定
@@ -894,7 +905,7 @@ async function performSearch(query, selectedAPIs) {
         }
 
         // 2) 画质：只要存在 pending 项就补测
-        if (cacheResult.results.some(
+        if (speedDetectionEnabled && cacheResult.results.some(
             r => r.detectionMethod === 'pending' || r.quality === '检测中...')) {
             setTimeout(() => backgroundQualityUpdate(cacheResult.results), 120);
         }
@@ -1123,7 +1134,7 @@ function restoreSearchFromCache() {
             }
 
             /* —— 再补画质（若需要） —— */
-            if (parsed.some(r =>
+            if (speedDetectionEnabled && parsed.some(r =>
                 r.detectionMethod === 'pending' ||
                 r.quality === '检测中...')) {
                 setTimeout(() => backgroundQualityUpdate(parsed), 120);

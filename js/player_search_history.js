@@ -383,15 +383,16 @@ async function performBasicSearch(query, selectedAPIs) {
             const data = await response.json();
 
             if (data.code === 200 && Array.isArray(data.list)) {
+                const speedDetectionEnabled = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
                 return data.list.map(item => ({
                     ...item,
                     source_name: apiId.startsWith('custom_')
                         ? (APISourceManager?.getCustomApiInfo(parseInt(apiId.replace('custom_', '')))?.name || '自定义源')
                         : (API_SITES[apiId]?.name || apiId),
                     source_code: apiId,
-                    loadSpeed: '检测中...',
-                    quality: '检测中...',
-                    detectionMethod: 'pending'
+                    loadSpeed: speedDetectionEnabled ? '检测中...' : 'N/A',
+                    quality: speedDetectionEnabled ? '检测中...' : '未知',
+                    detectionMethod: speedDetectionEnabled ? 'pending' : 'disabled'
                 }));
             }
             return [];
@@ -572,17 +573,20 @@ function createResultItemUsingTemplate(item) {
     // 速度标签处理
     const speedElement = cardElement.querySelector('[data-field="speed-tag"]');
     if (speedElement) {
-        if (item.loadSpeed && isValidSpeedValue(item.loadSpeed)) {
+        // 检查是否启用了画质速度检测
+        const speedDetectionEnabled = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
+
+        if (speedDetectionEnabled && item.loadSpeed && isValidSpeedValue(item.loadSpeed)) {
             speedElement.textContent = item.loadSpeed;
             speedElement.classList.remove('hidden');
             // 设置速度标签的颜色
             speedElement.className = 'text-xs py-0.5 px-1.5 rounded bg-opacity-20 bg-green-500 text-green-300';
-        } else if (item.loadSpeed === '检测中...') {
+        } else if (speedDetectionEnabled && item.loadSpeed === '检测中...') {
             speedElement.textContent = '检测中...';
             speedElement.classList.remove('hidden');
             speedElement.className = 'text-xs py-0.5 px-1.5 rounded bg-opacity-20 bg-yellow-500 text-yellow-300';
         } else {
-            // 如果没有速度信息，隐藏标签
+            // 如果没有启用检测或没有有效速度信息，隐藏标签
             speedElement.classList.add('hidden');
         }
     }
@@ -931,7 +935,9 @@ function initializeQualityTag(element, item) {
     // 检查是否启用了画质速度检测
     const speedDetectionEnabled = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
     if (!speedDetectionEnabled) {
-        updateQualityTag(element, item.quality || '未知');
+        let displayQuality = item.quality || '未知';
+        if (displayQuality === '检测中...') displayQuality = '未知';
+        updateQualityTag(element, displayQuality);
         return;
     }
 

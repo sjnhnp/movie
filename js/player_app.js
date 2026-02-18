@@ -779,8 +779,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
             }
             // 延迟触发预加载，确保状态同步
             setTimeout(() => {
-                const preloadingEnabled = AppStorage.getItem('preloadingEnabled') !== 'false';
-                if (preloadingEnabled && typeof preloadNextEpisodeParts === 'function') {
+                if (PLAYER_CONFIG.enablePreloading && typeof preloadNextEpisodeParts === 'function') {
                     preloadNextEpisodeParts(index).catch(e => {
                         Logger.warn('预获取失败:', e);
                     });
@@ -1663,8 +1662,7 @@ async function switchLine(newSourceCode, newVodId) {
             window.cancelCurrentPreload();
         }
         // 如果开启了预加载，也需要停止后台任务
-        const preloadingEnabled = AppStorage.getItem('preloadingEnabled') !== 'false';
-        if (preloadingEnabled && typeof startPreloading === 'function') {
+        if (PLAYER_CONFIG.enablePreloading && typeof startPreloading === 'function') {
             stopPreloading();
             // 重新初始化预加载（如果启用）
             setTimeout(() => {
@@ -1821,9 +1819,10 @@ function setupPlaySettingsEvents() {
     // 设置分片广告过滤
     const adFilterToggle = document.getElementById('adFilterToggle');
     if (adFilterToggle && !adFilterToggle.hasAttribute('data-initialized')) {
-        // 从URL参数初始化开关状态
+        // 从URL参数初始化开关状态，若无 af 参数则优先同步 PLAYER_CONFIG
         const urlParams = new URLSearchParams(window.location.search);
-        adFilteringEnabled = urlParams.get('af') === '1';
+        const afParam = urlParams.get('af');
+        adFilteringEnabled = afParam !== null ? afParam === '1' : PLAYER_CONFIG.adFilteringEnabled;
         adFilterToggle.checked = adFilteringEnabled;
 
         adFilterToggle.addEventListener('change', async function (event) {
@@ -1924,6 +1923,36 @@ function setupPlaySettingsEvents() {
         });
         preloadCountInput.setAttribute('data-initialized', 'true');
     }
+
+    // 新增：监听 storage 事件，实现多标签页设置同步
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'preloadingEnabled') {
+            const enabled = e.newValue === 'true';
+            PLAYER_CONFIG.enablePreloading = enabled;
+            const toggle = document.getElementById('preloadingToggle');
+            if (toggle) toggle.checked = enabled;
+            if (enabled) startPreloading();
+            else stopPreloading();
+        } else if (e.key === 'preloadCount') {
+            const count = parseInt(e.newValue, 10);
+            if (!isNaN(count)) {
+                PLAYER_CONFIG.preloadCount = count;
+                const input = document.getElementById('preloadCountInput');
+                if (input) input.value = count;
+            }
+        } else if (e.key === 'adFilteringEnabled') {
+            const enabled = e.newValue === 'true';
+            adFilteringEnabled = enabled; // 更新模块内部变量
+            PLAYER_CONFIG.adFilteringEnabled = enabled; // 更新全局配置
+            const toggle = document.getElementById('adFilterToggle');
+            if (toggle) toggle.checked = enabled;
+        } else if (e.key === 'autoplayEnabled') {
+            const enabled = e.newValue !== 'false';
+            autoplayEnabled = enabled;
+            const toggle = document.getElementById('autoplay-next');
+            if (toggle) toggle.checked = enabled;
+        }
+    });
 }
 
 function closeAllDropdowns() {

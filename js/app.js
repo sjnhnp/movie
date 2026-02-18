@@ -599,6 +599,28 @@ function initializeEventListeners() {
         });
         yellowFilterToggle.checked = getBoolConfig('yellowFilterEnabled', true);
     }
+
+    // Add storage listener for cross-tab synchronization
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'preloadingEnabled') {
+            const enabled = e.newValue === 'true';
+            PLAYER_CONFIG.enablePreloading = enabled;
+            const toggle = DOMCache.get('preloadingToggle');
+            if (toggle) toggle.checked = enabled;
+        } else if (e.key === 'preloadCount') {
+            const count = parseInt(e.newValue, 10);
+            if (!isNaN(count)) {
+                PLAYER_CONFIG.preloadCount = count;
+                const input = DOMCache.get('preloadCountInput');
+                if (input) input.value = count;
+            }
+        } else if (e.key === 'adFilteringEnabled') {
+            const enabled = e.newValue === 'true';
+            PLAYER_CONFIG.adFilteringEnabled = enabled;
+            const toggle = DOMCache.get('adFilteringToggle');
+            if (toggle) toggle.checked = enabled;
+        }
+    });
     const speedDetectionToggle = DOMCache.get('speedDetectionToggle');
     if (speedDetectionToggle) {
         speedDetectionToggle.addEventListener('change', (e) => {
@@ -1047,8 +1069,7 @@ function renderSearchResults(allResults, doubanSearchedTitle = null) {
     searchResultsContainer.appendChild(gridContainer);
     // 在渲染结果后同步预加载状态
     if (typeof window.startPreloading !== 'undefined' && typeof window.stopPreloading !== 'undefined') {
-        const preloadingEnabled = AppStorage.getItem('preloadingEnabled') !== 'false';
-        if (preloadingEnabled) {
+        if (PLAYER_CONFIG.enablePreloading) {
             // 确保预加载在搜索结果页面正确初始化
             setTimeout(() => {
                 if (typeof window.startPreloading === 'function') {

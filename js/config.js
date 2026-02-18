@@ -30,12 +30,10 @@ window.SITE_CONFIG = SITE_CONFIG;
 
 // API站点配置
 const API_SITES = {
-    yjzy: { api: 'https://caiji.maotaizy.cc/api.php/provide/vod', name: '影剧资源' },
     bfzy: { api: 'https://bfzyapi.com/api.php/provide/vod', name: '暴风资源' },
-    mozhua: { api: 'https://mozhuazy.com/api.php/provide/vod', name: '魔爪资源' },
     dyttzy: { api: 'https://caiji.dyttzyapi.com/api.php/provide/vod', name: '电影天堂', detail: 'https://caiji.dyttzyapi.com' },
-    tyyszy: { api: 'https://tyyszy.com/api.php/provide/vod', name: '天涯资源' },
     mdzy: { api: 'https://www.mdzyapi.com/api.php/provide/vod', name: '魔都资源' },
+    dbzy: { api: 'https://caiji.dbzy5.com/api.php/provide/vod', name: '豆瓣资源' },
     maotai: { api: 'https://caiji.maotaizy.cc/api.php/provide/vod', name: '茅台资源' },
     yzzy: { api: 'https://api.yzzy-api.com/inc/apijson.php', name: '优质资源' },
     ruyi: { api: 'https://cj.rycjapi.com/api.php/provide/vod', name: '如意资源' },
@@ -45,16 +43,15 @@ const API_SITES = {
     hwba: { api: 'https://cjhwba.com/api.php/provide/vod', name: '华为吧资源' },
     jmzy: { api: 'https://api.jmzy.com/api.php/provide/vod', name: '金马资源' },
     zy360: { api: 'https://360zy.com/api.php/provide/vod', name: '360资源' },
-    jisu: { api: 'https://jszyapi.com/api.php/provide/vod', name: '极速资源', detail: 'https://jszyapi.com' },
     zuid: { api: 'https://api.zuidapi.com/api.php/provide/vod', name: '最大资源' },
     baidu: { api: 'https://api.apibdzy.com/api.php/provide/vod', name: '百度云资源' },
     wujin: { api: 'https://api.wujinapi.me/api.php/provide/vod', name: '无尽资源' },
     ikun: { api: 'https://ikunzyapi.com/api.php/provide/vod', name: 'iKun资源' },
-    // huya: { api: 'https://www.huyaapi.com/api.php/provide/vod', name: '虎牙资源', detail: 'https://www.huyaapi.com' },  
+    tyyszy: { api: 'https://tyyszy.com/api.php/provide/vod', name: '天涯资源' },
 };
 
 window.API_SITES = API_SITES;
-const DEFAULT_SELECTED_APIS = ["yjzy", "mdzy", "mozhua", "bfzy", "dyttzy", "tyyszy"];
+const DEFAULT_SELECTED_APIS = ["mdzy", "bfzy", "dyttzy", "mdzy"];
 window.DEFAULT_SELECTED_APIS = DEFAULT_SELECTED_APIS;
 
 // 聚合搜索配置
@@ -94,7 +91,7 @@ const CUSTOM_PLAYER_URL = 'player.html';
 
 // 预加载集数开关
 const DEFAULTS = {
-    enablePreloading: true, // 预加载 
+    enablePreloading: false, // 预加载 
     preloadCount: 1,       // 预加载集数 
     debugMode: false      // 调试模式 
 };
@@ -107,9 +104,9 @@ const PLAYER_CONFIG = {
     height: '600',
     timeout: 15000, // 播放器加载超时时间 
     autoPlayNext: true, // 默认启用自动连播功能 
-    adFilteringEnabled: getBoolConfig('adFilteringEnabled', true), // 默认关闭分片广告过滤，开启会导致某些资源卡住 
+    adFilteringEnabled: getBoolConfig('adFilteringEnabled', false), // 默认关闭分片广告过滤，开启会导致某些资源卡住 
     adFilteringStorage: 'adFilteringEnabled', // 存储广告过滤设置的键名 
-    speedDetectionEnabled: getBoolConfig('speedDetectionEnabled', true), // 默认启用画质速度检测
+    speedDetectionEnabled: getBoolConfig('speedDetectionEnabled', false), // 默认启用画质速度检测
     speedDetectionStorage: 'speedDetectionEnabled', // 存储画质速度检测设置的键名
     enablePreloading: getBoolConfig('preloadingEnabled', DEFAULTS.enablePreloading),
     preloadCount: getIntConfig('preloadCount', DEFAULTS.preloadCount, 1, 10),

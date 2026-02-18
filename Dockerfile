@@ -19,8 +19,8 @@ EXPOSE 8080
 
 # 设置环境变量的默认值 (可以在 docker run 或 docker-compose 中覆盖)
 ENV PORT=8080
-ENV PASSWORD=""
-ENV SETTINGS_PASSWORD=""
+ENV PASSWORD=
+ENV SETTINGS_PASSWORD=
 
 # 容器启动时运行的命令
 CMD ["node", "server.js"]

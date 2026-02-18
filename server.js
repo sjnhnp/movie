@@ -18,8 +18,19 @@ const port = process.env.PORT || 8080;
 
 // -- 中间件：向HTML注入环境变量 -- (函数保持不变)
 async function injectEnvVars(html) {
-    const password = process.env.PASSWORD || "";
-    const settingsPassword = process.env.SETTINGS_PASSWORD || "";
+    let password = process.env.PASSWORD || "";
+    let settingsPassword = process.env.SETTINGS_PASSWORD || "";
+
+    // 增强健壮性：去除可能的首尾空格以及误加的引号
+    password = password.trim();
+    if ((password.startsWith('"') && password.endsWith('"')) || (password.startsWith("'") && password.endsWith("'"))) {
+        password = password.substring(1, password.length - 1);
+    }
+
+    settingsPassword = settingsPassword.trim();
+    if ((settingsPassword.startsWith('"') && settingsPassword.endsWith('"')) || (settingsPassword.startsWith("'") && settingsPassword.endsWith("'"))) {
+        settingsPassword = settingsPassword.substring(1, settingsPassword.length - 1);
+    }
 
     let passwordHash = "";
     let settingsPasswordHash = "";

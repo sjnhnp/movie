@@ -8,8 +8,18 @@ export async function onRequest(context) {
   if (contentType.includes("text/html")) {
     let html = await response.text();
 
-    const password = env.PASSWORD || "";
-    const settingsPassword = env.SETTINGS_PASSWORD || ""; // 新增：读取设置密码
+    let password = env.PASSWORD || "";
+    let settingsPassword = env.SETTINGS_PASSWORD || "";
+
+    // 增强健壮性：去除可能的首尾空格以及误加的引号
+    password = password.trim();
+    if ((password.startsWith('"') && password.endsWith('"')) || (password.startsWith("'") && password.endsWith("'"))) {
+      password = password.substring(1, password.length - 1);
+    }
+    settingsPassword = settingsPassword.trim();
+    if ((settingsPassword.startsWith('"') && settingsPassword.endsWith('"')) || (settingsPassword.startsWith("'") && settingsPassword.endsWith("'"))) {
+      settingsPassword = settingsPassword.substring(1, settingsPassword.length - 1);
+    }
 
     let passwordHash = "";
     let settingsPasswordHash = ""; // 新增：设置密码的哈希

@@ -4,7 +4,7 @@ import { sha256 } from './js/sha256.js'; // 需新建或引入SHA-256实现
 export default async function middleware(request) {
   // Get the URL from the request
   const url = new URL(request.url);
-  
+
   // Only process HTML pages
   const isHtmlPage = url.pathname.endsWith('.html') || url.pathname.endsWith('/');
   if (!isHtmlPage) {
@@ -13,7 +13,7 @@ export default async function middleware(request) {
 
   // Fetch the original response
   const response = await fetch(request);
-  
+
   // Check if it's an HTML response
   const contentType = response.headers.get('content-type') || '';
   if (!contentType.includes('text/html')) {
@@ -22,10 +22,16 @@ export default async function middleware(request) {
 
   // Get the HTML content
   const originalHtml = await response.text();
-  
+
   // Replace the placeholder with actual environment variable
   // If PASSWORD is not set, replace with empty string
-  const password = process.env.PASSWORD || '';
+  let password = process.env.PASSWORD || '';
+
+  // 增强健壮性：去除可能的首尾空格以及误加的引号
+  password = password.trim();
+  if ((password.startsWith('"') && password.endsWith('"')) || (password.startsWith("'") && password.endsWith("'"))) {
+    password = password.substring(1, password.length - 1);
+  }
   let passwordHash = '';
   if (password) {
     passwordHash = await sha256(password);
@@ -34,7 +40,7 @@ export default async function middleware(request) {
     'window.__ENV__.PASSWORD = "{{PASSWORD}}";',
     `window.__ENV__.PASSWORD = "${passwordHash}"; // SHA-256 hash`
   );
-  
+
   // Create a new response with the modified HTML
   return new Response(modifiedHtml, {
     status: response.status,

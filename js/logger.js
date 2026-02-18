@@ -6,7 +6,7 @@
         get isEnabled() {
             // Production check: If window.__ENV__.NODE_ENV is 'production' and debug_mode is not forced
             const isProd = window.__ENV__ && window.__ENV__.NODE_ENV === 'production';
-            const storageDebug = localStorage.getItem('debug_mode');
+            const storageDebug = AppStorage.getItem('debug_mode');
             const debugMode = (window.DEFAULTS && window.DEFAULTS.debugMode) || false;
 
             if (isProd && storageDebug !== 'true') return false;

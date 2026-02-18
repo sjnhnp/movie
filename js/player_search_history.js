@@ -30,11 +30,11 @@ function initPlayerSearchHistory() {
 function setupPlayerSearchHistory() {
     // 初始化AppState（如果还没有初始化）
     if (typeof AppState !== 'undefined' && !AppState.get('selectedAPIs')) {
-        const selectedAPIsRaw = localStorage.getItem('selectedAPIs');
+        const selectedAPIsRaw = AppStorage.getItem('selectedAPIs');
         const selectedAPIs = selectedAPIsRaw ? JSON.parse(selectedAPIsRaw) : (window.DEFAULT_SELECTED_APIS || []);
         AppState.set('selectedAPIs', selectedAPIs);
 
-        const customAPIs = JSON.parse(localStorage.getItem('customAPIs') || '[]');
+        const customAPIs = JSON.parse(AppStorage.getItem('customAPIs') || '[]');
         AppState.set('customAPIs', customAPIs);
     }
 
@@ -284,7 +284,7 @@ async function performPlayerSearch(query) {
         let selectedAPIs = AppState.get('selectedAPIs');
         if (!selectedAPIs) {
             // 尝试从localStorage获取
-            const storedAPIs = localStorage.getItem('selectedAPIs');
+            const storedAPIs = AppStorage.getItem('selectedAPIs');
             if (storedAPIs) {
                 selectedAPIs = JSON.parse(storedAPIs);
                 AppState.set('selectedAPIs', selectedAPIs);
@@ -1153,12 +1153,12 @@ function savePlayerSearchHistory(query) {
     }
 
     try {
-        localStorage.setItem(window.SEARCH_HISTORY_KEY || 'searchHistory', JSON.stringify(history));
+        AppStorage.setItem(window.SEARCH_HISTORY_KEY || 'searchHistory', JSON.stringify(history));
     } catch (e) {
         // 空间不足时清理
-        localStorage.removeItem(window.SEARCH_HISTORY_KEY || 'searchHistory');
+        AppStorage.removeItem(window.SEARCH_HISTORY_KEY || 'searchHistory');
         try {
-            localStorage.setItem(window.SEARCH_HISTORY_KEY || 'searchHistory', JSON.stringify(history.slice(0, 3)));
+            AppStorage.setItem(window.SEARCH_HISTORY_KEY || 'searchHistory', JSON.stringify(history.slice(0, 3)));
         } catch (e2) {
             // 两次都失败则放弃
         }
@@ -1241,7 +1241,7 @@ function handleClearSearchHistory(e) {
  * 获取布尔配置值
  */
 function getBoolConfig(key, defaultValue) {
-    const value = localStorage.getItem(key);
+    const value = AppStorage.getItem(key);
     if (value === null) return defaultValue;
     return value === 'true';
 }

@@ -83,7 +83,7 @@ const APISourceManager = {
         if (hasAdult) {
             yellowToggle.checked = false;
             yellowToggle.disabled = true;
-            localStorage.setItem('yellowFilterEnabled', 'false');
+            AppStorage.setItem('yellowFilterEnabled', 'false');
             row?.classList.add('filter-disabled');
             if (desc) desc.innerHTML = '<strong class="text-pink-300">选中黄色资源站时无法启用此过滤</strong>';
             // 去除提示信息
@@ -214,7 +214,7 @@ const APISourceManager = {
 
         updatedCustomAPIs[index] = apiData;
         AppState.set('customAPIs', updatedCustomAPIs);
-        localStorage.setItem('customAPIs', JSON.stringify(updatedCustomAPIs));
+        AppStorage.setItem('customAPIs', JSON.stringify(updatedCustomAPIs));
 
         // 重新渲染自定义API列表
         this.renderCustomAPIsList();
@@ -259,7 +259,7 @@ const APISourceManager = {
         const selectedAPIs = [...builtIn, ...custom];
 
         AppState.set('selectedAPIs', selectedAPIs);
-        localStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
+        AppStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
         this.updateSelectedApiCount();
     },
 
@@ -313,14 +313,14 @@ const APISourceManager = {
         const apiData = { name, url, isAdult, detail: detail || '' }; // 确保detail字段存在，即使为空
         const updatedCustomAPIs = [...customAPIs, apiData]; // 使用完整的apiData对象
         AppState.set('customAPIs', updatedCustomAPIs);
-        localStorage.setItem('customAPIs', JSON.stringify(updatedCustomAPIs));
+        AppStorage.setItem('customAPIs', JSON.stringify(updatedCustomAPIs));
 
         // 默认选中新添加的API
         const newApiIndex = updatedCustomAPIs.length - 1;
         const selectedAPIs = AppState.get('selectedAPIs');
         const updatedSelectedAPIs = [...selectedAPIs, 'custom_' + newApiIndex];
         AppState.set('selectedAPIs', updatedSelectedAPIs);
-        localStorage.setItem('selectedAPIs', JSON.stringify(updatedSelectedAPIs));
+        AppStorage.setItem('selectedAPIs', JSON.stringify(updatedSelectedAPIs));
 
         // 重新渲染自定义API列表
         this.renderCustomAPIsList();
@@ -357,7 +357,7 @@ const APISourceManager = {
         const updatedCustomAPIs = [...customAPIs];
         updatedCustomAPIs.splice(index, 1);
         AppState.set('customAPIs', updatedCustomAPIs);
-        localStorage.setItem('customAPIs', JSON.stringify(updatedCustomAPIs));
+        AppStorage.setItem('customAPIs', JSON.stringify(updatedCustomAPIs));
 
         // 从选中列表中移除
         const selectedAPIs = AppState.get('selectedAPIs');
@@ -376,7 +376,7 @@ const APISourceManager = {
         });
 
         AppState.set('selectedAPIs', finalSelectedAPIs);
-        localStorage.setItem('selectedAPIs', JSON.stringify(finalSelectedAPIs));
+        AppStorage.setItem('selectedAPIs', JSON.stringify(finalSelectedAPIs));
 
         // 重新渲染自定义API列表
         this.renderCustomAPIsList();
@@ -455,7 +455,7 @@ const APISourceManager = {
         } else {
             // 如果 AppState 不存在，则从 localStorage 回退 (用于 player.html)
             try {
-                customAPIs = JSON.parse(localStorage.getItem('customAPIs') || '[]');
+                customAPIs = JSON.parse(AppStorage.getItem('customAPIs') || '[]');
             } catch (e) {
                 Logger.error("从 localStorage 解析 customAPIs 失败:", e);
                 customAPIs = [];

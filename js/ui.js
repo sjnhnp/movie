@@ -305,7 +305,7 @@ function closeModal() {
  */
 function getSearchHistory() {
     try {
-        const data = localStorage.getItem(SEARCH_HISTORY_KEY);
+        const data = AppStorage.getItem(SEARCH_HISTORY_KEY);
         if (!data) return [];
         const parsed = JSON.parse(data);
         if (!Array.isArray(parsed)) return [];
@@ -338,12 +338,12 @@ function saveSearchHistory(query) {
     history.unshift({ text: query, timestamp: now });
     if (history.length > MAX_HISTORY_ITEMS) history = history.slice(0, MAX_HISTORY_ITEMS);
     try {
-        localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+        AppStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history), false);
     } catch (e) {
         // 空间不足时清理
-        localStorage.removeItem(SEARCH_HISTORY_KEY);
+        AppStorage.removeItem(SEARCH_HISTORY_KEY);
         try {
-            localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, 3)));
+            AppStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, 3)), false);
         } catch (e2) {
             // 两次都失败则放弃
         }
@@ -450,7 +450,7 @@ function deleteSingleSearchHistory(query) {
         let history = getSearchHistory();
         // 防XSS与历史一致
         history = history.filter(item => item.text !== query);
-        localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
+        AppStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history), false);
         renderSearchHistory(); // 重新渲染
     } catch (e) {
         Logger.error('删除单条搜索历史失败:', e);
@@ -465,7 +465,7 @@ function clearSearchHistory() {
     if (!checkPasswordProtection()) return;
 
     try {
-        localStorage.removeItem(SEARCH_HISTORY_KEY);
+        AppStorage.removeItem(SEARCH_HISTORY_KEY);
         renderSearchHistory();
         showToast('搜索历史已清除', 'success');
     } catch (e) {
@@ -497,7 +497,7 @@ function formatTimestamp(timestamp) {
  */
 function getViewingHistory() {
     try {
-        const data = localStorage.getItem('viewingHistory');
+        const data = AppStorage.getItem('viewingHistory');
         return data ? JSON.parse(data) : [];
     } catch (e) {
         Logger.error('获取观看历史失败:', e);
@@ -551,7 +551,7 @@ function formatPlaybackTime(seconds) {
  */
 function addToViewingHistory(videoInfo) {
     if (!checkPasswordProtection()) return;
-    const originalEpisodeNames = JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
+    const originalEpisodeNames = JSON.parse(AppStorage.getItem('originalEpisodeNames') || '[]');
 
     try {
         let history = getViewingHistory();
@@ -598,7 +598,7 @@ function addToViewingHistory(videoInfo) {
         } else {
             // 如果是新的剧集条目
             const originalEpisodeNames = AppState.get('originalEpisodeNames') ||
-                JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
+                JSON.parse(AppStorage.getItem('originalEpisodeNames') || '[]');
             const newItem = {
                 title: videoInfo.title,
                 url: videoInfo.url,
@@ -621,7 +621,7 @@ function addToViewingHistory(videoInfo) {
         if (history.length > HISTORY_MAX_ITEMS) {
             history.splice(HISTORY_MAX_ITEMS);
         }
-        localStorage.setItem('viewingHistory', JSON.stringify(history));
+        AppStorage.setItem('viewingHistory', JSON.stringify(history), false);
     } catch (e) {
         Logger.error('保存观看历史失败:', e);
     }
@@ -634,7 +634,7 @@ function clearViewingHistory() {
     if (!checkPasswordProtection()) return;
 
     try {
-        localStorage.removeItem('viewingHistory');
+        AppStorage.removeItem('viewingHistory');
         loadViewingHistory();
         showToast('观看历史已清除', 'success');
     } catch (e) {
@@ -924,7 +924,7 @@ function deleteHistoryItem(internalId) {
         const updatedHistory = history.filter(item => item.internalShowIdentifier !== internalId);
 
         if (history.length !== updatedHistory.length) {
-            localStorage.setItem('viewingHistory', JSON.stringify(updatedHistory));
+            AppStorage.setItem('viewingHistory', JSON.stringify(updatedHistory));
             loadViewingHistory(); // 重新渲染历史记录列表
             showToast('已删除该条记录', 'success');
         } else {

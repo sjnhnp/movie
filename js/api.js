@@ -102,7 +102,7 @@ async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl) {
             throw new Error('未能从详情页提取到有效的 m3u8 播放地址');
         }
 
-        localStorage.setItem('customApiRealUrls_' + id, JSON.stringify(matches));
+        AppStorage.setItem('customApiRealUrls_' + id, JSON.stringify(matches));
 
         return JSON.stringify({
             code: 200,
@@ -112,7 +112,7 @@ async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl) {
         });
     } catch (e) {
         Logger.error('自定义API detail源解析失败（本次尝试）', e);
-        localStorage.setItem('customApiRealUrls_' + id, JSON.stringify([]));
+        AppStorage.setItem('customApiRealUrls_' + id, JSON.stringify([]));
         throw e;
     }
 }

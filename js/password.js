@@ -23,7 +23,7 @@ function isPasswordProtected() {
 function isPasswordVerified() {
     try {
         if (!isPasswordProtected()) return true;
-        const raw = localStorage.getItem(PASSWORD_CONFIG.localStorageKey) || '{}';
+        const raw = AppStorage.getItem(PASSWORD_CONFIG.localStorageKey) || '{}';
         const { verified, timestamp, passwordHash } = JSON.parse(raw);
         const envHash = window.__ENV__?.PASSWORD;
         // 检查通过、未过期、且为当前密码
@@ -46,7 +46,7 @@ function isSettingsPasswordVerified() {
         const settingsHash = window.__ENV__?.SETTINGS_PASSWORD;
         if (!settingsHash || /^0+$/.test(settingsHash)) return true; // 如果未设置密码，则视为通过
 
-        const raw = localStorage.getItem(PASSWORD_CONFIG.settingsLocalStorageKey) || '{}';
+        const raw = AppStorage.getItem(PASSWORD_CONFIG.settingsLocalStorageKey) || '{}';
         const { verified, timestamp, passwordHash } = JSON.parse(raw);
 
         // 检查通过、未过期、且为当前设置密码的哈希
@@ -155,14 +155,14 @@ async function handlePasswordSubmit() {
         hidePasswordError();
         hidePasswordModal();
         if (purpose === 'main') {
-            localStorage.setItem(PASSWORD_CONFIG.localStorageKey, JSON.stringify({
+            AppStorage.setItem(PASSWORD_CONFIG.localStorageKey, JSON.stringify({
                 verified: true,
                 timestamp: Date.now(),
                 passwordHash: targetHash
             }));
             document.dispatchEvent(new CustomEvent('passwordVerified'));
         } else if (purpose === 'settings') {
-            localStorage.setItem(PASSWORD_CONFIG.settingsLocalStorageKey, JSON.stringify({
+            AppStorage.setItem(PASSWORD_CONFIG.settingsLocalStorageKey, JSON.stringify({
                 verified: true,
                 timestamp: Date.now(),
                 passwordHash: targetHash

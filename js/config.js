@@ -140,7 +140,7 @@ const HIDE_BUILTIN_ADULT_APIS = true;
 
 function getBoolConfig(key, def) {
     try {
-        const v = localStorage.getItem(key);
+        const v = AppStorage.getItem(key);
         if (v === null) return def;
         return v === 'true' || v === true;
     } catch (e) {
@@ -151,7 +151,7 @@ function getBoolConfig(key, def) {
 
 function getIntConfig(key, def, min = 0, max = 10) {
     try {
-        const raw = localStorage.getItem(key);
+        const raw = AppStorage.getItem(key);
         if (raw === null) return def;
         const v = parseInt(typeof raw === 'string' ? raw : String(raw));
         return (!isNaN(v) && v >= min && v <= max) ? v : def;
@@ -162,12 +162,12 @@ function getIntConfig(key, def, min = 0, max = 10) {
 }
 
 // 确保预加载配置在首次访问时生效
-if (localStorage.getItem('preloadingEnabled') === null) {
-    localStorage.setItem('preloadingEnabled', DEFAULTS.enablePreloading.toString());
+if (AppStorage.getItem('preloadingEnabled') === null) {
+    AppStorage.setItem('preloadingEnabled', DEFAULTS.enablePreloading.toString());
 }
-if (localStorage.getItem('preloadCount') === null) {
-    localStorage.setItem('preloadCount', DEFAULTS.preloadCount.toString());
+if (AppStorage.getItem('preloadCount') === null) {
+    AppStorage.setItem('preloadCount', DEFAULTS.preloadCount.toString());
 }
-if (localStorage.getItem('debugMode') === null) {
-    localStorage.setItem('debugMode', DEFAULTS.debugMode.toString());
+if (AppStorage.getItem('debugMode') === null) {
+    AppStorage.setItem('debugMode', DEFAULTS.debugMode.toString());
 }

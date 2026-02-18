@@ -119,7 +119,7 @@ async function playVideo(episodeString, title, episodeIndex, sourceName = '', so
         addToViewingHistory(videoInfoForHistory);
     }
     const originalEpisodeNames = AppState.get('originalEpisodeNames') || [];
-    localStorage.setItem('originalEpisodeNames', JSON.stringify(originalEpisodeNames));
+    AppStorage.setItem('originalEpisodeNames', JSON.stringify(originalEpisodeNames));
     const playerUrl = new URL('player.html', window.location.origin);
     playerUrl.searchParams.set('url', playUrl);
     playerUrl.searchParams.set('title', title);
@@ -151,7 +151,7 @@ function playPreviousEpisode() {
     if (currentIndex > 0 && episodes && episodes.length > 0) {
         const prevIndex = currentIndex - 1;
         AppState.set('currentEpisodeIndex', prevIndex);
-        localStorage.setItem('currentEpisodeIndex', prevIndex.toString());
+        AppStorage.setItem('currentEpisodeIndex', prevIndex.toString());
         const title = AppState.get('currentVideoTitle');
         playVideo(episodes[prevIndex], title, prevIndex);
     } else {
@@ -165,7 +165,7 @@ function playNextEpisode() {
     if (episodes && currentIndex < episodes.length - 1) {
         const nextIndex = currentIndex + 1;
         AppState.set('currentEpisodeIndex', nextIndex);
-        localStorage.setItem('currentEpisodeIndex', nextIndex.toString());
+        AppStorage.setItem('currentEpisodeIndex', nextIndex.toString());
         const title = AppState.get('currentVideoTitle');
         playVideo(episodes[nextIndex], title, nextIndex);
     } else {
@@ -182,7 +182,7 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
         videoYear = '',
         currentVideoTypeName = '';
     try {
-        const history = JSON.parse(localStorage.getItem('viewingHistory') || '[]');
+        const history = JSON.parse(AppStorage.getItem('viewingHistory') || '[]');
         historyItem = history.find(item => item.url === url && item.title === title && item.episodeIndex === episodeIndex);
         if (historyItem) {
             vodId = historyItem.vod_id || '';
@@ -216,10 +216,10 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
                 }
             }
         } catch (e) {
-            episodesList = AppState.get('currentEpisodes') || JSON.parse(localStorage.getItem('currentEpisodes') || '[]');
+            episodesList = AppState.get('currentEpisodes') || JSON.parse(AppStorage.getItem('currentEpisodes') || '[]');
         }
     } else {
-        episodesList = AppState.get('currentEpisodes') || JSON.parse(localStorage.getItem('currentEpisodes') || '[]');
+        episodesList = AppState.get('currentEpisodes') || JSON.parse(AppStorage.getItem('currentEpisodes') || '[]');
     }
 
     // 统一处理原始剧集名称
@@ -235,15 +235,15 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
 
     // 3. 根据结果更新 localStorage
     if (namesToStore.length > 0) {
-        localStorage.setItem('originalEpisodeNames', JSON.stringify(namesToStore));
+        AppStorage.setItem('originalEpisodeNames', JSON.stringify(namesToStore));
     } else {
         // 如果两种方式都获取不到，则清空旧缓存，避免显示错误的名称
-        localStorage.removeItem('originalEpisodeNames');
+        AppStorage.removeItem('originalEpisodeNames');
     }
 
     if (episodesList.length > 0) {
         AppState.set('currentEpisodes', episodesList);
-        localStorage.setItem('currentEpisodes', JSON.stringify(episodesList));
+        AppStorage.setItem('currentEpisodes', JSON.stringify(episodesList));
     }
     let actualEpisodeIndex = episodeIndex;
     if (actualEpisodeIndex >= episodesList.length) {
@@ -257,8 +257,8 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
     }
     AppState.set('currentEpisodeIndex', actualEpisodeIndex);
     AppState.set('currentVideoTitle', title);
-    localStorage.setItem('currentEpisodeIndex', actualEpisodeIndex.toString());
-    localStorage.setItem('currentVideoTitle', title);
+    AppStorage.setItem('currentEpisodeIndex', actualEpisodeIndex.toString());
+    AppStorage.setItem('currentVideoTitle', title);
 
     const playerUrl = new URL('player.html', window.location.origin);
     playerUrl.searchParams.set('url', finalUrl);
@@ -280,7 +280,7 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
 }
 
 function getBoolConfig(key, defaultValue) {
-    const value = localStorage.getItem(key);
+    const value = AppStorage.getItem(key);
     if (value === null) return defaultValue;
     return value === 'true';
 }
@@ -294,7 +294,7 @@ function getSearchCacheKey(query, selectedAPIs) {
 function checkSearchCache(query, selectedAPIs) {
     try {
         const cacheKey = getSearchCacheKey(query, selectedAPIs);
-        const cached = localStorage.getItem(cacheKey);
+        const cached = AppStorage.getItem(cacheKey);
         if (!cached) return { canUseCache: false };
 
         const cacheData = JSON.parse(cached);
@@ -302,7 +302,7 @@ function checkSearchCache(query, selectedAPIs) {
         const expireTime = SEARCH_CACHE_CONFIG.expireTime;
 
         if (now - cacheData.timestamp > expireTime) {
-            localStorage.removeItem(cacheKey);
+            AppStorage.removeItem(cacheKey);
             return { canUseCache: false };
         }
 
@@ -330,7 +330,7 @@ function saveSearchCache(query, selectedAPIs, results) {
             selectedAPIs: [...selectedAPIs],
             results: results
         };
-        localStorage.setItem(cacheKey, JSON.stringify(cacheData));
+        AppStorage.setItem(cacheKey, JSON.stringify(cacheData));
     } catch (e) {
         Logger.warn('保存搜索缓存失败:', e);
     }
@@ -384,12 +384,12 @@ function backgroundSpeedUpdate(results) {
                             }
 
                             /* localStorage 长期缓存（30 天） */
-                            const obj = JSON.parse(localStorage.getItem(cacheKey) || '{}');
+                            const obj = JSON.parse(AppStorage.getItem(cacheKey) || '{}');
                             if (obj.results) {
                                 const j = obj.results.findIndex(r => `${r.source_code}_${r.vod_id}` === uniqKey);
                                 if (j !== -1) {
                                     obj.results[j] = { ...obj.results[j], ...item };
-                                    localStorage.setItem(cacheKey, JSON.stringify(obj));
+                                    AppStorage.setItem(cacheKey, JSON.stringify(obj));
                                 }
                             }
                         }
@@ -463,17 +463,17 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function initializeAppState() {
-    const selectedAPIsRaw = localStorage.getItem('selectedAPIs');
+    const selectedAPIsRaw = AppStorage.getItem('selectedAPIs');
     AppState.initialize({
         'selectedAPIs': JSON.parse(selectedAPIsRaw || JSON.stringify(window.DEFAULT_SELECTED_APIS)),
-        'customAPIs': JSON.parse(localStorage.getItem('customAPIs') || '[]'),
+        'customAPIs': JSON.parse(AppStorage.getItem('customAPIs') || '[]'),
         'currentEpisodeIndex': 0,
         'currentEpisodes': [],
         'currentVideoTitle': '',
         'episodesReversed': false
     });
     if (selectedAPIsRaw === null) {
-        localStorage.setItem('selectedAPIs', JSON.stringify(window.DEFAULT_SELECTED_APIS));
+        AppStorage.setItem('selectedAPIs', JSON.stringify(window.DEFAULT_SELECTED_APIS));
     }
     try {
         const cachedData = sessionStorage.getItem('videoDataCache');
@@ -515,7 +515,7 @@ function restoreSearchStateFromPlayer() {
                 try {
                     const apis = JSON.parse(selectedAPIs);
                     AppState.set('selectedAPIs', apis);
-                    localStorage.setItem('selectedAPIs', selectedAPIs);
+                    AppStorage.setItem('selectedAPIs', selectedAPIs);
                 } catch (e) {
                     Logger.error('恢复API选择状态失败:', e);
                 }
@@ -585,7 +585,7 @@ function initializeEventListeners() {
     if (adFilteringToggle) {
         adFilteringToggle.addEventListener('change', (e) => {
             const enabled = e.target.checked;
-            localStorage.setItem(PLAYER_CONFIG.adFilteringStorage, enabled.toString());
+            AppStorage.setItem(PLAYER_CONFIG.adFilteringStorage, enabled.toString());
             showToast(enabled ? '已启用广告过滤' : '已禁用广告过滤', 'info');
         });
         adFilteringToggle.checked = getBoolConfig(PLAYER_CONFIG.adFilteringStorage, PLAYER_CONFIG.adFilteringEnabled);
@@ -594,7 +594,7 @@ function initializeEventListeners() {
     if (yellowFilterToggle) {
         yellowFilterToggle.addEventListener('change', (e) => {
             const enabled = e.target.checked;
-            localStorage.setItem('yellowFilterEnabled', enabled.toString());
+            AppStorage.setItem('yellowFilterEnabled', enabled.toString());
             showToast(enabled ? '已启用黄色内容过滤' : '已禁用黄色内容过滤', 'info');
         });
         yellowFilterToggle.checked = getBoolConfig('yellowFilterEnabled', true);
@@ -603,7 +603,7 @@ function initializeEventListeners() {
     if (speedDetectionToggle) {
         speedDetectionToggle.addEventListener('change', (e) => {
             const enabled = e.target.checked;
-            localStorage.setItem(PLAYER_CONFIG.speedDetectionStorage, enabled.toString());
+            AppStorage.setItem(PLAYER_CONFIG.speedDetectionStorage, enabled.toString());
             showToast(enabled ? '已启用画质速度检测' : '已禁用画质速度检测', 'info');
         });
         speedDetectionToggle.checked = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
@@ -615,7 +615,7 @@ function initializeEventListeners() {
 
         preloadingToggle.addEventListener('change', (e) => {
             const enabled = e.target.checked;
-            localStorage.setItem('preloadingEnabled', enabled.toString());
+            AppStorage.setItem('preloadingEnabled', enabled.toString());
             // 更新 PLAYER_CONFIG 中的值
             PLAYER_CONFIG.enablePreloading = enabled;
             showToast(enabled ? '已启用预加载' : '已禁用预加载', 'info');
@@ -632,7 +632,7 @@ function initializeEventListeners() {
             if (isNaN(count) || count < 1) count = 1;
             else if (count > 10) count = 10;
             e.target.value = count;
-            localStorage.setItem('preloadCount', count.toString());
+            AppStorage.setItem('preloadCount', count.toString());
             // 更新 PLAYER_CONFIG 中的值
             PLAYER_CONFIG.preloadCount = count;
             showToast(`预加载数量已设置为 ${count}`, 'info');
@@ -727,7 +727,7 @@ function rebuildVideoCaches(results) {
             videoSourceMap.get(key).push(item);
         }
     });
-    localStorage.setItem(
+    AppStorage.setItem(
         'videoSourceMap',
         JSON.stringify(Array.from(videoSourceMap.entries()))
     );
@@ -813,7 +813,7 @@ function backgroundQualityUpdate(results) {
                 /* ------------ 取出缓存对象 ------------ */
                 let cacheObj;
                 try {
-                    cacheObj = JSON.parse(localStorage.getItem(cacheKey) || '{}');
+                    cacheObj = JSON.parse(AppStorage.getItem(cacheKey) || '{}');
                 } catch {
                     cacheObj = {};
                 }
@@ -838,7 +838,7 @@ function backgroundQualityUpdate(results) {
                 cacheObj.results = resultsArr;
 
                 // 写回 localStorage
-                localStorage.setItem(cacheKey, JSON.stringify(cacheObj));
+                AppStorage.setItem(cacheKey, JSON.stringify(cacheObj));
 
             } catch (e) {
                 Logger.warn('写回搜索缓存失败:', e);
@@ -897,7 +897,7 @@ async function performSearch(query, selectedAPIs) {
         });
     }
 
-    const customAPIsFromStorage = JSON.parse(localStorage.getItem('customAPIs') || '[]');
+    const customAPIsFromStorage = JSON.parse(AppStorage.getItem('customAPIs') || '[]');
     AppState.set('customAPIs', customAPIsFromStorage);
     const searchPromises = selectedAPIs.map(apiId => {
         let apiUrl = `/api/search?wd=${encodeURIComponent(query)}&source=${apiId}`;
@@ -1047,7 +1047,7 @@ function renderSearchResults(allResults, doubanSearchedTitle = null) {
     searchResultsContainer.appendChild(gridContainer);
     // 在渲染结果后同步预加载状态
     if (typeof window.startPreloading !== 'undefined' && typeof window.stopPreloading !== 'undefined') {
-        const preloadEnabled = localStorage.getItem('preloadEnabled') !== 'false';
+        const preloadEnabled = AppStorage.getItem('preloadEnabled') !== 'false';
         if (preloadEnabled) {
             // 确保预加载在搜索结果页面正确初始化
             setTimeout(() => {
@@ -1189,9 +1189,9 @@ async function getVideoDetail(id, sourceCode, apiUrl = '') {
         AppState.set('currentEpisodeIndex', 0);
 
         // 保存到localStorage（用于播放器页面）
-        localStorage.setItem('currentEpisodes', JSON.stringify(episodes));
-        localStorage.setItem('currentVideoTitle', data.videoInfo?.title || '未知视频');
-        localStorage.setItem('currentEpisodeIndex', '0');
+        AppStorage.setItem('currentEpisodes', JSON.stringify(episodes));
+        AppStorage.setItem('currentVideoTitle', data.videoInfo?.title || '未知视频');
+        AppStorage.setItem('currentEpisodeIndex', '0');
 
         // 添加到观看历史
         if (data.videoInfo && typeof addToViewingHistory === 'function') {
@@ -1522,7 +1522,7 @@ async function showVideoEpisodesModal(id, title, sourceCode, apiUrl, fallbackDat
                 // 使用获取到的真实地址更新UI
                 episodes = detailData.episodes;
                 AppState.set('currentEpisodes', episodes);
-                localStorage.setItem('currentEpisodes', JSON.stringify(episodes));
+                AppStorage.setItem('currentEpisodes', JSON.stringify(episodes));
 
                 const episodeGrid = document.querySelector('#modalContent [data-field="episode-buttons-grid"]');
                 if (episodeGrid) {
@@ -1547,8 +1547,8 @@ async function showVideoEpisodesModal(id, title, sourceCode, apiUrl, fallbackDat
     AppState.set('currentVideoYear', videoData.vod_year || fallbackData.year);
     AppState.set('currentVideoTypeName', effectiveTypeName);
     AppState.set('currentVideoKey', fallbackData.videoKey);
-    localStorage.setItem('currentEpisodes', JSON.stringify(episodes));
-    localStorage.setItem('currentVideoTitle', effectiveTitle);
+    AppStorage.setItem('currentEpisodes', JSON.stringify(episodes));
+    AppStorage.setItem('currentVideoTitle', effectiveTitle);
     const template = document.getElementById('video-details-template');
     if (!template) return showToast('详情模板未找到!', 'error');
     const modalContent = template.content.cloneNode(true);

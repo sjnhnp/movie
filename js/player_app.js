@@ -53,7 +53,7 @@ function toggleWebFullscreen() {
 
     // 切换状态
     isWebFullscreen = !isWebFullscreen;
-    
+
 
     if (isWebFullscreen) {
         // 进入网页全屏
@@ -610,7 +610,7 @@ async function initPlayer(videoUrl, title) {
     handleSkipIntroOutro(player);
 
     // 应用保存的播放速率
-    const savedSpeed = localStorage.getItem('playbackSpeed') || '1';
+    const savedSpeed = AppStorage.getItem('playbackSpeed') || '1';
     player.playbackRate = parseFloat(savedSpeed);
 
     // 网页全屏功能初始化
@@ -714,10 +714,10 @@ async function playEpisode(index) {
 
     isNavigatingToEpisode = true;
 
-    const rememberOn = localStorage.getItem(REMEMBER_EPISODE_PROGRESS_ENABLED_KEY) !== 'false';
+    const rememberOn = AppStorage.getItem(REMEMBER_EPISODE_PROGRESS_ENABLED_KEY) !== 'false';
     if (rememberOn) {
         const currentUniversalId = generateUniversalId(currentVideoTitle, currentVideoYear, index);
-        const allProgress = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
+        const allProgress = JSON.parse(AppStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
         const savedProgress = allProgress[currentUniversalId];
         if (savedProgress && savedProgress > 5) {
             const wantsToResume = await showProgressRestoreModal({
@@ -779,7 +779,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
             }
             // 延迟触发预加载，确保状态同步
             setTimeout(() => {
-                const preloadEnabled = localStorage.getItem('preloadEnabled') !== 'false';
+                const preloadEnabled = AppStorage.getItem('preloadEnabled') !== 'false';
                 if (preloadEnabled && typeof preloadNextEpisodeParts === 'function') {
                     preloadNextEpisodeParts(index).catch(e => {
                         Logger.error('Preload error:', e);
@@ -793,7 +793,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
 
 (async function initializePage() {
     // 从localStorage加载最新的custom API配置
-    const customAPIs = JSON.parse(localStorage.getItem('customAPIs') || '[]');
+    const customAPIs = JSON.parse(AppStorage.getItem('customAPIs') || '[]');
     AppState.set('customAPIs', customAPIs);
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -816,7 +816,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
         currentVideoYear = urlParams.get('year') || '';
         currentVideoTypeName = urlParams.get('typeName') || '';
 
-        const sourceMapJSON = localStorage.getItem('videoSourceMap');
+        const sourceMapJSON = AppStorage.getItem('videoSourceMap');
         if (sourceMapJSON) {
             try {
                 // 从JSON重建Map
@@ -848,7 +848,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
         }
 
         try {
-            currentEpisodes = JSON.parse(localStorage.getItem('currentEpisodes') || '[]');
+            currentEpisodes = JSON.parse(AppStorage.getItem('currentEpisodes') || '[]');
             if (!episodeUrlForPlayer && currentEpisodes[currentEpisodeIndex]) {
                 episodeUrlForPlayer = currentEpisodes[currentEpisodeIndex];
             }
@@ -870,9 +870,9 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
         if (positionFromUrl) {
             nextSeekPosition = parseInt(positionFromUrl);
         } else {
-            const rememberOn = localStorage.getItem(REMEMBER_EPISODE_PROGRESS_ENABLED_KEY) !== 'false';
+            const rememberOn = AppStorage.getItem(REMEMBER_EPISODE_PROGRESS_ENABLED_KEY) !== 'false';
             if (rememberOn) {
-                const allProgress = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
+                const allProgress = JSON.parse(AppStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
                 const savedProgress = universalId ? allProgress[universalId] : undefined;
 
                 if (savedProgress && savedProgress > 5) {
@@ -924,7 +924,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
                     // 更新播放地址为最新获取的地址
                     episodeUrlForPlayer = detailData.episodes[targetIndex] || detailData.episodes[0];
                     // 同步更新缓存，避免下次重复请求
-                    localStorage.setItem('currentEpisodes', JSON.stringify(detailData.episodes));
+                    AppStorage.setItem('currentEpisodes', JSON.stringify(detailData.episodes));
                     window.currentEpisodes = detailData.episodes;
                     Logger.debug('播放页二次请求特殊源地址成功:', episodeUrlForPlayer);
                 }
@@ -1163,9 +1163,9 @@ function saveVideoSpecificProgress() {
 
     if (currentTime > 5 && duration > 0 && currentTime < duration * 0.95) {
         try {
-            let allProgresses = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
+            let allProgresses = JSON.parse(AppStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
             allProgresses[currentUniversalId] = currentTime;
-            localStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgresses));
+            AppStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgresses), false);
         } catch (e) {
             Logger.error('保存特定视频集数进度失败:', e);
         }
@@ -1182,10 +1182,10 @@ function startProgressSaveInterval() {
 
 function clearVideoProgressForEpisode(universalId) {
     try {
-        let allProgresses = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
+        let allProgresses = JSON.parse(AppStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
         if (allProgresses[universalId]) {
             delete allProgresses[universalId];
-            localStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgresses));
+            AppStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgresses), false);
         }
     } catch (e) {
         Logger.error(`清除进度失败:`, e);
@@ -1195,10 +1195,10 @@ function clearVideoProgressForEpisode(universalId) {
 function clearCurrentVideoAllEpisodeProgresses() {
     try {
         const showId = getShowIdentifier(false);
-        let allProgress = JSON.parse(localStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
+        let allProgress = JSON.parse(AppStorage.getItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY) || '{}');
         if (allProgress[showId]) {
             delete allProgress[showId];
-            localStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgress));
+            AppStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgress), false);
         }
     } catch (e) {
         Logger.error('清除当前视频所有集数进度失败:', e);
@@ -1235,7 +1235,7 @@ function renderEpisodes() {
     }
 
     // 读取localStorage中保存的原始剧集名称
-    const originalEpisodeNames = JSON.parse(localStorage.getItem('originalEpisodeNames') || '[]');
+    const originalEpisodeNames = JSON.parse(AppStorage.getItem('originalEpisodeNames') || '[]');
 
     const orderedEpisodes = episodesReversed ? [...currentEpisodes].reverse() : [...currentEpisodes];
     orderedEpisodes.forEach((episodeData, index) => {
@@ -1331,7 +1331,7 @@ function updateButtonStates() {
 
 function toggleEpisodeOrder() {
     episodesReversed = !episodesReversed;
-    localStorage.setItem('episodesReversed', episodesReversed.toString());
+    AppStorage.setItem('episodesReversed', episodesReversed.toString());
     updateOrderButton();
     renderEpisodes();
 }
@@ -1438,7 +1438,7 @@ function handleMediaClick(e) {
 
 function handleSkipIntroOutro(playerInstance) {
     if (!playerInstance) return;
-    const skipIntroTime = parseInt(localStorage.getItem(SKIP_INTRO_KEY)) || 0;
+    const skipIntroTime = parseInt(AppStorage.getItem(SKIP_INTRO_KEY)) || 0;
     if (skipIntroTime > 0) {
         playerInstance.addEventListener('loaded-metadata', () => {
             if (playerInstance.duration > skipIntroTime && playerInstance.currentTime < skipIntroTime) {
@@ -1447,7 +1447,7 @@ function handleSkipIntroOutro(playerInstance) {
             }
         }, { once: true });
     }
-    const skipOutroTime = parseInt(localStorage.getItem(SKIP_OUTRO_KEY)) || 0;
+    const skipOutroTime = parseInt(AppStorage.getItem(SKIP_OUTRO_KEY)) || 0;
     if (skipOutroTime > 0) {
         playerInstance.addEventListener('time-update', () => {
             if (!playerInstance || playerInstance.paused) return;
@@ -1486,20 +1486,20 @@ function setupSkipControls() {
     applyBtn.addEventListener('click', () => {
         const introTime = parseInt(skipIntroInput.value) || 0;
         const outroTime = parseInt(skipOutroInput.value) || 0;
-        localStorage.setItem(SKIP_INTRO_KEY, introTime);
-        localStorage.setItem(SKIP_OUTRO_KEY, outroTime);
+        AppStorage.setItem(SKIP_INTRO_KEY, introTime);
+        AppStorage.setItem(SKIP_OUTRO_KEY, outroTime);
         if (typeof showToast === 'function') showToast('跳过时间设置已保存', 'success');
         dropdown.classList.add('hidden');
     });
     resetBtn.addEventListener('click', () => {
-        localStorage.removeItem(SKIP_INTRO_KEY);
-        localStorage.removeItem(SKIP_OUTRO_KEY);
+        AppStorage.removeItem(SKIP_INTRO_KEY);
+        AppStorage.removeItem(SKIP_OUTRO_KEY);
         skipIntroInput.value = '';
         skipOutroInput.value = '';
         if (typeof showToast === 'function') showToast('跳过时间设置已重置', 'success');
     });
-    const savedIntroTime = parseInt(localStorage.getItem(SKIP_INTRO_KEY)) || 0;
-    const savedOutroTime = parseInt(localStorage.getItem(SKIP_OUTRO_KEY)) || 0;
+    const savedIntroTime = parseInt(AppStorage.getItem(SKIP_INTRO_KEY)) || 0;
+    const savedOutroTime = parseInt(AppStorage.getItem(SKIP_OUTRO_KEY)) || 0;
     skipIntroInput.value = savedIntroTime > 0 ? savedIntroTime : '';
     skipOutroInput.value = savedOutroTime > 0 ? savedOutroTime : '';
 }
@@ -1622,6 +1622,9 @@ async function switchLine(newSourceCode, newVodId) {
     const loadingEl = document.getElementById('loading');
     if (loadingEl) loadingEl.style.display = 'flex';
 
+    // 强制刷新缓存，确保切换前进度已保存
+    if (typeof AppStorage !== 'undefined') AppStorage.flush();
+
     try {
         const targetSourceItem = availableAlternativeSources.find(
             item => String(item.vod_id) === newVodId
@@ -1637,13 +1640,18 @@ async function switchLine(newSourceCode, newVodId) {
         }
 
         const newEps = detailData.episodes;
+
+        // 显式保存当前进度（即使有自动保存，这里再保一次更稳妥）
+        saveCurrentProgress();
+        saveVideoSpecificProgress();
+
         const timeToSeek = player.currentTime;
 
         vodIdForPlayer = newVodId;
         // 更新剧集列表（变量、全局、localStorage）
         currentEpisodes = newEps;
         window.currentEpisodes = newEps;
-        localStorage.setItem('currentEpisodes', JSON.stringify(newEps));
+        AppStorage.setItem('currentEpisodes', JSON.stringify(newEps));
         if (window.preloadedEpisodeUrls) window.preloadedEpisodeUrls.clear();
         if (window.inFlightEpisodeUrls) window.inFlightEpisodeUrls.clear();
 
@@ -1656,7 +1664,7 @@ async function switchLine(newSourceCode, newVodId) {
             window.cancelCurrentPreload();
         }
         // 重新初始化预加载（如果启用）
-        const preloadEnabled = localStorage.getItem('preloadEnabled') !== 'false';
+        const preloadEnabled = AppStorage.getItem('preloadEnabled') !== 'false';
         if (preloadEnabled && typeof startPreloading === 'function') {
             setTimeout(() => {
                 startPreloading();
@@ -1732,11 +1740,11 @@ function playPreviousEpisode() {
 function setupRememberEpisodeProgressToggle() {
     const toggle = document.getElementById('remember-episode-progress-toggle');
     if (!toggle) return;
-    const savedSetting = localStorage.getItem(REMEMBER_EPISODE_PROGRESS_ENABLED_KEY);
+    const savedSetting = AppStorage.getItem(REMEMBER_EPISODE_PROGRESS_ENABLED_KEY);
     toggle.checked = savedSetting !== 'false';
     toggle.addEventListener('change', function (event) {
         const isChecked = event.target.checked;
-        localStorage.setItem(REMEMBER_EPISODE_PROGRESS_ENABLED_KEY, isChecked.toString());
+        AppStorage.setItem(REMEMBER_EPISODE_PROGRESS_ENABLED_KEY, isChecked.toString());
         const messageText = isChecked ? '将记住本视频的各集播放进度' : '将不再记住本视频的各集播放进度';
         showMessage(messageText, 'info');
         if (!isChecked) {
@@ -1768,13 +1776,13 @@ function setupPlaySettingsEvents() {
     const autoplayToggle = document.getElementById('autoplay-next');
     if (autoplayToggle && !autoplayToggle.hasAttribute('data-initialized')) {
         // 从localStorage读取设置
-        const savedAutoplay = localStorage.getItem('autoplayEnabled');
+        const savedAutoplay = AppStorage.getItem('autoplayEnabled');
         autoplayEnabled = savedAutoplay !== 'false';
         autoplayToggle.checked = autoplayEnabled;
 
         autoplayToggle.addEventListener('change', function (event) {
             autoplayEnabled = event.target.checked;
-            localStorage.setItem('autoplayEnabled', autoplayEnabled.toString());
+            AppStorage.setItem('autoplayEnabled', autoplayEnabled.toString());
             const messageText = autoplayEnabled ? '已开启自动播放下一集' : '已关闭自动播放下一集';
             showMessage(messageText, 'info');
         });
@@ -1786,7 +1794,7 @@ function setupPlaySettingsEvents() {
     const speedSelect = document.getElementById('playback-speed-select');
     if (speedSelect && !speedSelect.hasAttribute('data-initialized')) {
         // 从localStorage读取设置
-        const savedSpeed = localStorage.getItem('playbackSpeed') || '1';
+        const savedSpeed = AppStorage.getItem('playbackSpeed') || '1';
         speedSelect.value = savedSpeed;
 
         // 应用当前速率到播放器
@@ -1796,7 +1804,7 @@ function setupPlaySettingsEvents() {
 
         speedSelect.addEventListener('change', function (event) {
             const speed = parseFloat(event.target.value);
-            localStorage.setItem('playbackSpeed', speed.toString());
+            AppStorage.setItem('playbackSpeed', speed.toString());
 
             if (player && player.playbackRate !== undefined) {
                 player.playbackRate = speed;
@@ -1820,7 +1828,7 @@ function setupPlaySettingsEvents() {
         adFilterToggle.addEventListener('change', async function (event) {
             adFilteringEnabled = event.target.checked;
             // 更新localStorage（保持与首页同步）
-            localStorage.setItem('adFilteringEnabled', adFilteringEnabled.toString());
+            AppStorage.setItem('adFilteringEnabled', adFilteringEnabled.toString());
             // 更新URL中的af参数，以便刷新或分享时保留设置
             const url = new URL(window.location);
             url.searchParams.set('af', adFilteringEnabled ? '1' : '0');
@@ -1874,7 +1882,7 @@ function setupPlaySettingsEvents() {
 
         // 添加事件监听器以响应变化
         preloadToggle.addEventListener('change', function () {
-            localStorage.setItem('preloadingEnabled', this.checked.toString());
+            AppStorage.setItem('preloadingEnabled', this.checked.toString());
             // 更新 PLAYER_CONFIG 中的值
             PLAYER_CONFIG.enablePreloading = this.checked;
             showToast(this.checked ? '预加载已开启' : '预加载已关闭', 'info');
@@ -1899,12 +1907,12 @@ function setupPlaySettingsEvents() {
             const count = parseInt(this.value, 10);
             // 验证输入值是否为有效的正数（限制1-10集，与首页逻辑一致）
             if (count >= 1 && count <= 10) {
-                localStorage.setItem('preloadEpisodeCount', count.toString());
+                AppStorage.setItem('preloadEpisodeCount', count.toString());
                 // 更新 PLAYER_CONFIG 中的值
                 PLAYER_CONFIG.preloadCount = count;
                 showToast(`预加载集数已设置为 ${count}`, 'info');
                 // 触发预加载逻辑（新增：集数变化时立即生效）
-                if (localStorage.getItem('preloadingEnabled') !== 'false') {
+                if (AppStorage.getItem('preloadingEnabled') !== 'false') {
                     startPreloading();
                 }
             } else {

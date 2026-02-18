@@ -154,7 +154,7 @@ const utils = {
   storage: {
     get(key, defaultValue = null) {
       try {
-        const value = localStorage.getItem(key);
+        const value = AppStorage.getItem(key);
         return value ? JSON.parse(value) : defaultValue;
       } catch (e) {
         Logger.error(`Error reading from localStorage: ${key}`, e);
@@ -164,7 +164,7 @@ const utils = {
 
     set(key, value) {
       try {
-        localStorage.setItem(key, JSON.stringify(value));
+        AppStorage.setItem(key, JSON.stringify(value));
         return true;
       } catch (e) {
         Logger.error(`Error writing to localStorage: ${key}`, e);
@@ -228,7 +228,7 @@ function initDoubanToggle() {
   doubanToggle.checked = isEnabled;
 
   // 如果是首次加载且 localStorage 中没有设置过，则强制写入 true
-  if (localStorage.getItem(CONFIG.STORAGE_KEYS.ENABLED) === null) {
+  if (AppStorage.getItem(CONFIG.STORAGE_KEYS.ENABLED) === null) {
     utils.storage.set(CONFIG.STORAGE_KEYS.ENABLED, false);
   }
 

@@ -508,16 +508,30 @@ async function processVideoUrl(url) {
             // 直接返回代理地址，代理服务器会自动处理 M3U8 重写和分片代理
             return '/proxy/' + encodeURIComponent(targetUrl);
         }
-        const m3u8Text = await resp.text();
+        const contentType = resp.headers.get('content-type') || '';
+        let m3u8Text = await resp.text();
+        m3u8Text = m3u8Text.trim(); // 移除首尾空白及可能的 BOM
 
-        // 2. 广告过滤 & URL 补全
+        // 3. 校验内容是否为有效的 M3U8 (必须以 #EXTM3U 开头)
+        if (!m3u8Text.startsWith('#EXTM3U')) {
+            // 如果看起来像 HTML
+            if (m3u8Text.includes('<html') || m3u8Text.includes('<!DOCTYPE')) {
+                console.warn(`[ProcessVideo] 抓取到 HTML 内容而非 M3U8。可能是鉴权、重定向或错误页面。尝试回退到代理: ${targetUrl}`);
+                return '/proxy/' + encodeURIComponent(targetUrl);
+            }
+            console.warn(`[ProcessVideo] 内容校验失败 (不含 #EXTM3U)。内容预览: ${m3u8Text.slice(0, 100)}`);
+            // 依然尝试抛给代理（代理可能会尝试不同的 UA 或处理逻辑）
+            return '/proxy/' + encodeURIComponent(targetUrl);
+        }
+
+        // 4. 广告过滤 & URL 补全
         const adPatterns = [
             /#EXT-X-DISCONTINUITY/i,
             /MOMENT-START/i,
             /\/\/.*\.(ts|jpg|png)\?ad=/i
         ];
-        const lines = m3u8Text.split('\n');
-        const baseUrl = url;
+        const lines = m3u8Text.split(/\r?\n/);
+        const baseUrl = targetUrl;
         const cleanLines = [];
 
         for (let line of lines) {
@@ -651,6 +665,10 @@ function addPlayerEventListeners() {
         let errorMessage = '播放器遇到错误，请检查视频源';
         if (errorDetail && errorDetail.message) {
             errorMessage += ': ' + errorDetail.message;
+            // 针对常见错误提供建议
+            if (errorDetail.message.includes('EXTM3U')) {
+                errorMessage = '视频地址解析失败 (非有效 M3U8)，建议切换线路或稍后重试';
+            }
         } else if (errorDetail && errorDetail.code) {
             errorMessage += ` (错误码: ${errorDetail.code})`;
         }

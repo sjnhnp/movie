@@ -84,7 +84,7 @@ const API_CONFIG = {
 };
 
 // 正则表达式模式
-const M3U8_PATTERN = /\$https?:\/\/[^"'\s]+?\.m3u8/g;
+const M3U8_PATTERN = /\$https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g;
 
 // 自定义播放器URL
 const CUSTOM_PLAYER_URL = 'player.html';

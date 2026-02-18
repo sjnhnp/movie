@@ -74,10 +74,32 @@ const getBaseUrl = (urlStr) => {
   }
 };
 
-const isM3u8Content = (content, contentType) =>
-  (contentType &&
-    M3U8_CONTENT_TYPES.some((ct) => contentType.toLowerCase().includes(ct))) ||
-  (typeof content === "string" && content.trimStart().startsWith("#EXTM3U"));
+const isM3u8Content = (content, contentType) => {
+  if (contentType && M3U8_CONTENT_TYPES.some((ct) => contentType.toLowerCase().includes(ct))) {
+    return true;
+  }
+  if (typeof content === "string") {
+    return content.trimStart().startsWith("#EXTM3U");
+  }
+  if (content instanceof ArrayBuffer || (typeof Buffer !== "undefined" && Buffer.isBuffer(content)) || ArrayBuffer.isView(content)) {
+    const view = new Uint8Array(content);
+    // Find first non-whitespace
+    let start = 0;
+    while (start < view.length && view[start] <= 32) start++;
+    // Check for #EXTM3U
+    return (
+      view.length - start >= 7 &&
+      view[start] === 0x23 && // #
+      view[start + 1] === 0x45 && // E
+      view[start + 2] === 0x58 && // X
+      view[start + 3] === 0x54 && // T
+      view[start + 4] === 0x4d && // M
+      view[start + 5] === 0x33 && // 3
+      view[start + 6] === 0x55    // U
+    );
+  }
+  return false;
+};
 
 const logDebug = (debugEnabled, msg) => {
   if (debugEnabled) console.log(`[Proxy] ${msg}`);

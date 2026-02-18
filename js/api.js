@@ -33,9 +33,9 @@ async function handleSpecialSourceDetail(id, sourceCode) {
             'text'
         );
 
-        let matches = htmlContent.match(/\$(https?:\/\/[^"'\s]+?\.m3u8[^\s"']*)/g) || [];
+        let matches = htmlContent.match(/\$https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g) || [];
         if (matches.length === 0) {
-            matches = htmlContent.match(/(https?:\/\/[^"'\s]+?\.m3u8[^\s"']*)/g) || [];
+            matches = htmlContent.match(/https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g) || [];
         }
 
         matches = Array.from(new Set(matches)).map(link => {
@@ -100,9 +100,9 @@ async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl) {
         );
 
         // 优化1：增加多种播放地址正则匹配（兼容不同格式）
-        let matches = htmlContent.match(/\$(https?:\/\/[^"'\s]+?\.m3u8[^\s"']*)/g) || [];
+        let matches = htmlContent.match(/\$https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g) || [];
         if (matches.length === 0) {
-            matches = htmlContent.match(/(https?:\/\/[^"'\s]+?\.m3u8[^\s"']*)/g) || [];
+            matches = htmlContent.match(/https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g) || [];
         }
 
         // 优化2：清洗地址（移除多余字符并补全相对路径）

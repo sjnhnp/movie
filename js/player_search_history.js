@@ -594,14 +594,22 @@ function createResultItemUsingTemplate(item) {
     // 画质标签处理
     const qualityElement = cardElement.querySelector('[data-field="quality-tag"]');
     if (qualityElement) {
-        // 初始化画质标签
-        initializeQualityTag(qualityElement, item);
-
-        // 添加画质标签点击事件
-        qualityElement.addEventListener('click', (e) => {
-            e.stopPropagation();
-            handleQualityTagClick(qualityElement, item);
-        });
+        // 检查是否启用了画质速度检测
+        const speedDetectionEnabled = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
+        
+        if (speedDetectionEnabled) {
+            // 只有启用画质检测时才初始化画质标签
+            initializeQualityTag(qualityElement, item);
+            
+            // 添加画质标签点击事件
+            qualityElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleQualityTagClick(qualityElement, item);
+            });
+        } else {
+            // 如果没有启用画质检测，隐藏画质标签
+            qualityElement.classList.add('hidden');
+        }
     }
 
     // 添加卡片点击事件（打开详情）

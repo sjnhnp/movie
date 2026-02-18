@@ -647,7 +647,7 @@ function showPlayerVideoDetail(item) {
     const episodesContainer = clone.querySelector('[data-field="episodesContainer"]');
     if (episodesContainer && item.vod_play_url) {
         const episodes = item.vod_play_url.split('#').filter(ep => ep.trim());
-        
+
         // 设置集数
         const episodeCountElement = clone.querySelector('[data-field="episode-count"]');
         if (episodeCountElement) {
@@ -660,7 +660,7 @@ function showPlayerVideoDetail(item) {
             // 判断是否为综艺节目
             const varietyShowTypes = ['综艺', '脱口秀', '真人秀', '纪录片'];
             const isVarietyShow = varietyShowTypes.some(type => item.type_name && item.type_name.includes(type));
-            
+
             // 根据类型设置容器样式
             if (isVarietyShow) {
                 episodeButtonsGrid.className = 'variety-grid-layout';
@@ -673,7 +673,7 @@ function showPlayerVideoDetail(item) {
             episodes.forEach((episode, index) => {
                 if (episode.trim()) {
                     const episodeButton = document.createElement('button');
-                    
+
                     let episodeName = `第${index + 1}集`;
                     if (episode.includes('$')) {
                         episodeName = episode.split('$')[0] || episodeName;
@@ -925,6 +925,13 @@ function initializeQualityTag(element, item) {
     // 如果已有画质信息，直接显示
     if (item.quality && item.quality !== '检测中...') {
         updateQualityTag(element, item.quality);
+        return;
+    }
+
+    // 检查是否启用了画质速度检测
+    const speedDetectionEnabled = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
+    if (!speedDetectionEnabled) {
+        updateQualityTag(element, item.quality || '未知');
         return;
     }
 

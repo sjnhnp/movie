@@ -1876,6 +1876,24 @@ function setupPlaySettingsEvents() {
         adFilterToggle.setAttribute('data-initialized', 'true');
     }
 
+    // 设置画质速度检测
+    const speedDetectionToggle = document.getElementById('speedDetectionToggle');
+    if (speedDetectionToggle && !speedDetectionToggle.hasAttribute('data-initialized')) {
+        // 从 AppStorage 读取设置
+        const savedSetting = AppStorage.getItem(PLAYER_CONFIG.speedDetectionStorage) === 'true';
+        speedDetectionToggle.checked = savedSetting;
+
+        speedDetectionToggle.addEventListener('change', function (event) {
+            const enabled = event.target.checked;
+            AppStorage.setItem(PLAYER_CONFIG.speedDetectionStorage, enabled.toString());
+            // 更新 PLAYER_CONFIG 中的值
+            PLAYER_CONFIG.speedDetectionEnabled = enabled;
+            showToast(enabled ? '已开启画质速度检测' : '已关闭画质速度检测', 'info');
+        });
+
+        speedDetectionToggle.setAttribute('data-initialized', 'true');
+    }
+
     // 设置预加载开关
     const preloadingToggle = document.getElementById('preloadingToggle');
     if (preloadingToggle && !preloadingToggle.hasAttribute('data-initialized')) {
@@ -1925,6 +1943,33 @@ function setupPlaySettingsEvents() {
         });
         preloadCountInput.setAttribute('data-initialized', 'true');
     }
+
+    // 监听 storage 事件以同步设置（确保播放页跟随首页设置）
+    window.addEventListener('storage', (e) => {
+        if (e.key === PLAYER_CONFIG.speedDetectionStorage) {
+            const enabled = e.newValue === 'true';
+            PLAYER_CONFIG.speedDetectionEnabled = enabled;
+            const toggle = document.getElementById('speedDetectionToggle');
+            if (toggle) toggle.checked = enabled;
+        } else if (e.key === 'preloadingEnabled') {
+            const enabled = e.newValue === 'true';
+            PLAYER_CONFIG.enablePreloading = enabled;
+            const toggle = document.getElementById('preloadingToggle');
+            if (toggle) toggle.checked = enabled;
+        } else if (e.key === 'preloadCount') {
+            const count = parseInt(e.newValue, 10);
+            if (!isNaN(count)) {
+                PLAYER_CONFIG.preloadCount = count;
+                const input = document.getElementById('preloadCountInput');
+                if (input) input.value = count;
+            }
+        } else if (e.key === 'adFilteringEnabled') {
+            const enabled = e.newValue === 'true';
+            adFilteringEnabled = enabled;
+            const toggle = document.getElementById('adFilterToggle');
+            if (toggle) toggle.checked = enabled;
+        }
+    });
 }
 
 function closeAllDropdowns() {

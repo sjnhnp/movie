@@ -31,10 +31,10 @@ window.SITE_CONFIG = SITE_CONFIG;
 // API站点配置
 const API_SITES = {
     bfzy: { api: 'https://bfzyapi.com/api.php/provide/vod', name: '暴风资源' },
-    dyttzy: { api: 'https://caiji.dyttzyapi.com/api.php/provide/vod', name: '电影天堂', detail: 'https://caiji.dyttzyapi.com' },
     mdzy: { api: 'https://www.mdzyapi.com/api.php/provide/vod', name: '魔都资源' },
     dbzy: { api: 'https://caiji.dbzy5.com/api.php/provide/vod', name: '豆瓣资源' },
     maotai: { api: 'https://caiji.maotaizy.cc/api.php/provide/vod', name: '茅台资源' },
+    dyttzy: { api: 'https://caiji.dyttzyapi.com/api.php/provide/vod', name: '电影天堂', detail: 'https://caiji.dyttzyapi.com' },
     yzzy: { api: 'https://api.yzzy-api.com/inc/apijson.php', name: '优质资源' },
     ruyi: { api: 'https://cj.rycjapi.com/api.php/provide/vod', name: '如意资源' },
     wolong: { api: 'https://wolongzyw.com/api.php/provide/vod', name: '卧龙资源' },
@@ -51,7 +51,7 @@ const API_SITES = {
 };
 
 window.API_SITES = API_SITES;
-const DEFAULT_SELECTED_APIS = ["mdzy", "bfzy", "dyttzy", "mdzy"];
+const DEFAULT_SELECTED_APIS = ["mdzy", "bfzy", "maotai", "wolong"];
 window.DEFAULT_SELECTED_APIS = DEFAULT_SELECTED_APIS;
 
 // 聚合搜索配置

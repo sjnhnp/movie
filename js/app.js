@@ -88,7 +88,7 @@ async function playVideo(episodeString, title, episodeIndex, sourceName = '', so
     }
     if (!playUrl || !playUrl.startsWith('http')) {
         showToast('视频链接格式无效', 'error');
-        console.error('解析出的播放链接无效:', playUrl);
+        Logger.error('解析出的播放链接无效:', playUrl);
         return;
     }
     const isSpecialSource = !sourceCode.startsWith('custom_') && window.API_SITES[sourceCode]?.detail;
@@ -99,7 +99,7 @@ async function playVideo(episodeString, title, episodeIndex, sourceName = '', so
                 playUrl = data.episodes[episodeIndex] || playUrl;
             }
         } catch (e) {
-            console.log('播放前预获取地址失败:', e);
+            Logger.log('播放前预获取地址失败:', e);
         }
     }
     AppState.set('currentEpisodeIndex', episodeIndex);
@@ -192,7 +192,7 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
             currentVideoTypeName = historyItem.typeName || '';
         }
     } catch (e) {
-        console.error("读取历史记录失败:", e);
+        Logger.error("读取历史记录失败:", e);
     }
     if (historyItem && Array.isArray(historyItem.episodes) && historyItem.episodes.length > 0 && historyItem.episodes[0].includes('$')) {
         episodesList = historyItem.episodes;
@@ -317,7 +317,7 @@ function checkSearchCache(query, selectedAPIs) {
             newAPIs: added
         };
     } catch (e) {
-        console.warn('检查搜索缓存失败:', e);
+        Logger.warn('检查搜索缓存失败:', e);
         return { canUseCache: false };
     }
 }
@@ -332,7 +332,7 @@ function saveSearchCache(query, selectedAPIs, results) {
         };
         localStorage.setItem(cacheKey, JSON.stringify(cacheData));
     } catch (e) {
-        console.warn('保存搜索缓存失败:', e);
+        Logger.warn('保存搜索缓存失败:', e);
     }
 }
 
@@ -394,7 +394,7 @@ function backgroundSpeedUpdate(results) {
                             }
                         }
                     } catch (e) {
-                        console.warn('写回测速缓存失败:', e);
+                        Logger.warn('写回测速缓存失败:', e);
                     }
 
                 } catch {
@@ -481,14 +481,14 @@ function initializeAppState() {
         if (cachedData) {
             const rawArr = JSON.parse(cachedData);
             if (rawArr.length > 0 && !String(rawArr[0][0]).includes('_')) {
-                console.warn("检测到旧版视频缓存，已清除。");
+                Logger.warn("检测到旧版视频缓存，已清除。");
             } else {
                 restoredMap = new Map(rawArr);
             }
         }
         AppState.set('videoDataMap', restoredMap);
     } catch (e) {
-        console.error('从 sessionStorage 恢复视频元数据缓存失败:', e);
+        Logger.error('从 sessionStorage 恢复视频元数据缓存失败:', e);
         AppState.set('videoDataMap', new Map());
     }
 }
@@ -517,7 +517,7 @@ function restoreSearchStateFromPlayer() {
                     AppState.set('selectedAPIs', apis);
                     localStorage.setItem('selectedAPIs', selectedAPIs);
                 } catch (e) {
-                    console.error('恢复API选择状态失败:', e);
+                    Logger.error('恢复API选择状态失败:', e);
                 }
             }
 
@@ -531,7 +531,7 @@ function restoreSearchStateFromPlayer() {
                     }
                 }
             } catch (e) {
-                console.error('恢复搜索结果失败:', e);
+                Logger.error('恢复搜索结果失败:', e);
                 // 如果恢复失败，重新执行搜索
                 if (typeof performSearch === 'function') {
                     performSearch(searchQuery, AppState.get('selectedAPIs'));
@@ -545,7 +545,7 @@ function restoreSearchStateFromPlayer() {
         window.history.replaceState({}, document.title, url.toString());
 
     } catch (error) {
-        console.error('恢复搜索状态失败:', error);
+        Logger.error('恢复搜索状态失败:', error);
         // 降级到普通的缓存恢复
         restoreSearchFromCache();
     }
@@ -647,7 +647,7 @@ function search(options = {}) {
         sessionStorage.removeItem('searchSelectedAPIs');
         sessionStorage.removeItem('videoSourceMap');
     } catch (e) {
-        console.error('清除 sessionStorage 失败:', e);
+        Logger.error('清除 sessionStorage 失败:', e);
     }
     const searchInput = DOMCache.get('searchInput');
     const searchResultsContainer = DOMCache.get('searchResults');
@@ -687,7 +687,7 @@ function search(options = {}) {
                     sessionStorage.setItem('searchResults', JSON.stringify(resultsData));
                     sessionStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
                 } catch (e) {
-                    console.error('保存搜索状态失败:', e);
+                    Logger.error('保存搜索状态失败:', e);
                 }
             }
 
@@ -796,7 +796,7 @@ function backgroundQualityUpdate(results) {
                     }
                 }
             } catch (e) {
-                console.warn('写回 searchResults 失败：', e);
+                Logger.warn('写回 searchResults 失败：', e);
             }
 
             /* ============================================================
@@ -841,7 +841,7 @@ function backgroundQualityUpdate(results) {
                 localStorage.setItem(cacheKey, JSON.stringify(cacheObj));
 
             } catch (e) {
-                console.warn('写回搜索缓存失败:', e);
+                Logger.warn('写回搜索缓存失败:', e);
             }
         }
     }
@@ -989,7 +989,7 @@ async function performSearch(query, selectedAPIs) {
         }
         return checkedResults;
     } catch (error) {
-        console.error("执行搜索或预检测时出错:", error);
+        Logger.error("执行搜索或预检测时出错:", error);
         return [];
     }
 }
@@ -1015,7 +1015,7 @@ function renderSearchResults(allResults, doubanSearchedTitle = null) {
             sessionStorage.setItem('searchSelectedAPIs', JSON.stringify(AppState.get('selectedAPIs')));
         }
     } catch (e) {
-        console.error("缓存搜索结果失败:", e);
+        Logger.error("缓存搜索结果失败:", e);
     }
     searchResultsContainer.innerHTML = '';
     resultsArea.classList.remove('hidden');
@@ -1082,7 +1082,7 @@ function restoreSearchFromCache() {
                 try {
                     AppState.set('selectedAPIs', JSON.parse(cachedSelectedAPIs));
                 } catch (e) {
-                    console.warn('恢复API选择状态失败:', e);
+                    Logger.warn('恢复API选择状态失败:', e);
                 }
             }
             const parsed = JSON.parse(cachedResults);
@@ -1110,7 +1110,7 @@ function restoreSearchFromCache() {
                         const apis = JSON.parse(sessionStorage.getItem('searchSelectedAPIs') || '[]');
                         sessionStorage.setItem('searchResults', JSON.stringify(parsed));
                         if (query && apis.length > 0) saveSearchCache(query, apis, parsed);
-                    } catch (e) { console.error("回写缓存失败", e) }
+                    } catch (e) { Logger.error("回写缓存失败", e) }
                 });
             }
 
@@ -1125,7 +1125,7 @@ function restoreSearchFromCache() {
 
         }
     } catch (e) {
-        console.error('恢复搜索状态失败:', e);
+        Logger.error('恢复搜索状态失败:', e);
     }
 }
 
@@ -1145,7 +1145,7 @@ function renderSearchResultsFromCache(cachedResults) {
             try {
                 fragment.appendChild(createResultItemUsingTemplate(item));
             } catch (error) {
-                console.error('渲染缓存结果项失败:', error);
+                Logger.error('渲染缓存结果项失败:', error);
             }
         });
         gridContainer.appendChild(fragment);
@@ -1262,7 +1262,7 @@ function parseHtmlEpisodeList(html) {
 
         return episodes;
     } catch (e) {
-        console.error("解析HTML剧集失败", e);
+        Logger.error("解析HTML剧集失败", e);
         return [];
     }
 }
@@ -1333,7 +1333,7 @@ function resetToHome() {
         sessionStorage.removeItem('searchResults');
         sessionStorage.removeItem('searchSelectedAPIs');
     } catch (e) {
-        console.error('清理搜索缓存失败:', e);
+        Logger.error('清理搜索缓存失败:', e);
     }
 
     renderSearchHistory();
@@ -1468,7 +1468,7 @@ function handleResultClick(event) {
     if (typeof showVideoEpisodesModal === 'function') {
         showVideoEpisodesModal(id, name, sourceCode, apiUrl, { year, typeName, videoKey, blurb, remarks, area, actor, director });
     } else {
-        console.error('showVideoEpisodesModal function not found!');
+        Logger.error('showVideoEpisodesModal function not found!');
         showToast('无法加载剧集信息', 'error');
     }
 }
@@ -1529,7 +1529,7 @@ async function showVideoEpisodesModal(id, title, sourceCode, apiUrl, fallbackDat
                     episodeGrid.innerHTML = renderEpisodeButtons(episodes, title, sourceCode, sourceNameForDisplay, effectiveTypeName);
                 }
             } catch (e) {
-                console.log('后台获取真实地址失败:', e.message);
+                Logger.log('后台获取真实地址失败:', e.message);
             }
         }, 500);
     }
@@ -1698,7 +1698,7 @@ function copyLinks() {
     navigator.clipboard.writeText(linkList).then(() => {
         showToast('所有剧集链接已复制', 'success');
     }).catch(err => {
-        console.error('复制链接失败:', err);
+        Logger.error('复制链接失败:', err);
         showToast('复制失败，请检查浏览器权限', 'error');
     });
 }
@@ -1859,11 +1859,11 @@ async function manualRetryDetection(qualityId, videoData) {
                 }
             }
         } catch (e) {
-            console.warn('手动重测后，回写搜索结果缓存列表失败:', e);
+            Logger.warn('手动重测后，回写搜索结果缓存列表失败:', e);
         }
 
     } catch (error) {
-        console.error('手动重新检测失败:', error);
+        Logger.error('手动重新检测失败:', error);
         // 如果出错，也在UI上明确显示失败
         updateQualityBadgeUI(qualityId, '检测失败', badge);
     }
@@ -1899,7 +1899,7 @@ async function fetchSpecialDetail(id, sourceCode) {
         if (data.code === 200 && Array.isArray(data.episodes) && data.episodes.length > 0) return data;
         throw new Error(data.msg || '无剧集数据');
     } catch (e) {
-        console.error('获取特殊详情错误:', e);
+        Logger.error('获取特殊详情错误:', e);
         throw e;
     }
 }

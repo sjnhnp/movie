@@ -77,7 +77,7 @@ async function simplePrecheckSource(m3u8Url) {
         const hashMatch = m3u8Url.match(/[a-f0-9]{20,}/i);
         if (hashMatch) {
             quality = '1080p';
-            console.log('启发式规则匹配：长哈希值URL，猜测为 1080p');
+            Logger.debug('启发式规则匹配：长哈希值URL，猜测为 1080p');
         } else {
             // 优先级 2: 如果不是CDN URL，才进行数字分析
             const numbers = m3u8Url.match(/\d+/g) || [];
@@ -160,7 +160,7 @@ async function tryParseM3u8Resolution(m3u8Url, prefetchedContent = null) {
                 content = await response.text();
             }
         } catch (corsError) {
-            console.log('直接请求失败，尝试代理:', corsError.message);
+            Logger.debug('直接请求失败，尝试代理:', corsError.message);
 
             // 方法2：使用代理（如果可用）
             if (typeof PROXY_URL !== 'undefined') {
@@ -174,7 +174,7 @@ async function tryParseM3u8Resolution(m3u8Url, prefetchedContent = null) {
                         content = await proxyResponse.text();
                     }
                 } catch (proxyError) {
-                    console.log('代理请求也失败:', proxyError.message);
+                    Logger.warn('代理请求也失败:', proxyError.message);
                 }
             }
         }
@@ -186,7 +186,7 @@ async function tryParseM3u8Resolution(m3u8Url, prefetchedContent = null) {
                 const width = parseInt(resolutionMatch[1]);
                 const height = parseInt(resolutionMatch[2]);
 
-                console.log(`找到RESOLUTION: ${width}x${height}`);
+                Logger.debug(`找到RESOLUTION: ${width}x${height}`);
 
                 const quality = getQualityStringFromDimensions(width, height);
 
@@ -201,7 +201,7 @@ async function tryParseM3u8Resolution(m3u8Url, prefetchedContent = null) {
             const bandwidthMatch = content.match(/BANDWIDTH=(\d+)/);
             if (bandwidthMatch) {
                 const bandwidth = parseInt(bandwidthMatch[1]);
-                console.log(`找到BANDWIDTH: ${bandwidth}`);
+                Logger.debug(`找到BANDWIDTH: ${bandwidth}`);
 
                 let quality = 'SD';
                 if (bandwidth >= 15000000) quality = '4K';
@@ -218,7 +218,7 @@ async function tryParseM3u8Resolution(m3u8Url, prefetchedContent = null) {
             }
         }
     } catch (error) {
-        console.warn('M3U8解析错误:', error.message);
+        Logger.warn('M3U8解析错误:', error.message);
     }
 
     return { quality: '未知', loadSpeed: 'N/A', pingTime: -1 };
@@ -307,7 +307,7 @@ async function comprehensiveQualityCheck(m3u8Url, prefetchedContent = null) {
 
     // 并行执行所有检测方法
     const detectionPromises = [];
-    
+
     // 1. M3U8 RESOLUTION解析（最准确）
     detectionPromises.push(
         tryParseM3u8Resolution(m3u8Url, prefetchedContent)
@@ -351,7 +351,7 @@ async function comprehensiveQualityCheck(m3u8Url, prefetchedContent = null) {
     // 等待所有检测完成
     const results = await Promise.all(detectionPromises);
 
-    console.log('所有检测结果:', results);
+
 
     // 按优先级选择最佳结果
     let bestResult = null;
@@ -359,7 +359,7 @@ async function comprehensiveQualityCheck(m3u8Url, prefetchedContent = null) {
     // 优先级1: M3U8 RESOLUTION解析
     const m3u8Result = results.find(r => r.method === 'm3u8_resolution');
     if (m3u8Result && m3u8Result.quality !== '未知') {
-        console.log('采用M3U8 RESOLUTION解析结果:', m3u8Result.quality);
+        Logger.debug('采用M3U8 RESOLUTION解析结果:', m3u8Result.quality);
         bestResult = m3u8Result;
     }
 
@@ -371,7 +371,7 @@ async function comprehensiveQualityCheck(m3u8Url, prefetchedContent = null) {
             videoResult.quality !== '播放失败' &&
             videoResult.quality !== '高清' &&
             videoResult.quality !== '未知') {
-            console.log('采用Video元素检测结果:', videoResult.quality);
+            Logger.debug('采用Video元素检测结果:', videoResult.quality);
             bestResult = videoResult;
         }
     }
@@ -380,7 +380,7 @@ async function comprehensiveQualityCheck(m3u8Url, prefetchedContent = null) {
     if (!bestResult) {
         const keywordResult = results.find(r => r.method === 'keyword');
         if (keywordResult) {
-            console.log('采用关键词识别结果:', keywordResult.quality);
+            Logger.debug('采用关键词识别结果:', keywordResult.quality);
             bestResult = keywordResult;
         }
     }
@@ -389,14 +389,14 @@ async function comprehensiveQualityCheck(m3u8Url, prefetchedContent = null) {
     if (!bestResult) {
         const simpleResult = results.find(r => r.method === 'simple_analysis');
         if (simpleResult && simpleResult.quality !== '检测失败' && simpleResult.quality !== '未知') {
-            console.log('采用简单检测结果:', simpleResult.quality);
+            Logger.debug('采用简单检测结果:', simpleResult.quality);
             bestResult = simpleResult;
         }
     }
 
     // 如果所有方法都失败，返回明确的'未知'
     if (!bestResult) {
-        console.log('所有检测方法都失败，返回未知');
+
         bestResult = {
             quality: '未知', // 不再猜测，返回真实状态
             loadSpeed: 'N/A',
@@ -414,7 +414,7 @@ async function comprehensiveQualityCheck(m3u8Url, prefetchedContent = null) {
         bestResult.pingTime = simpleResult.pingTime;
     }
 
-    console.log('最终选择的结果:', bestResult);
+
 
     return {
         quality: bestResult.quality,

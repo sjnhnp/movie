@@ -457,7 +457,7 @@ const APISourceManager = {
             try {
                 customAPIs = JSON.parse(localStorage.getItem('customAPIs') || '[]');
             } catch (e) {
-                console.error("从 localStorage 解析 customAPIs 失败:", e);
+                Logger.error("从 localStorage 解析 customAPIs 失败:", e);
                 customAPIs = [];
             }
         }
@@ -465,7 +465,7 @@ const APISourceManager = {
         if (customAPIs && typeof index === 'number' && index >= 0 && index < customAPIs.length) {
             return customAPIs[index];
         }
-        console.warn(`getCustomApiInfo: Invalid index ${index} or customAPIs not found.`);
+        Logger.warn(`getCustomApiInfo: Invalid index ${index} or customAPIs not found.`);
         return null;
     },
 
@@ -488,7 +488,7 @@ const APISourceManager = {
             if (typeof API_SITES !== 'undefined' && API_SITES[sourceCode]) {
                 return { name: API_SITES[sourceCode].name, url: API_SITES[sourceCode].api, isCustom: false };
             } else {
-                console.error("API_SITES 未定义或未找到 sourceCode:", sourceCode);
+                Logger.error("API_SITES 未定义或未找到 sourceCode:", sourceCode);
                 return null;
             }
         }

@@ -665,7 +665,14 @@
         </div>
     </template>
 
+    <!-- 服务端环境变量注入 -->
+    <script>
+        window.__ENV__ = window.__ENV__ || {};
+        window.__ENV__.NODE_ENV = "{{NODE_ENV}}";
+    </script>
+
     <!-- 启动脚本 -->
+    <script src="js/logger.js" defer></script>
     <script src="js/utils.js" defer></script>
     <script src="js/player_search_history.js" defer></script>
     <script type="module" src="./js/player_app.js"></script>

@@ -40,26 +40,26 @@
         window.cancelCurrentPreload = () => {
             preloadCancelled = true;
             isPreloadingInProgress = false;
-            if (PLAYER_CONFIG.debugMode) console.log('[Preload] Current preload cancelled');
+            if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] Current preload cancelled');
         };
 
         if (isPreloadingInProgress) {
-            if (PLAYER_CONFIG.debugMode) console.log('[Preload] Aborted: another preload is already in progress.');
+            if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] Aborted: another preload is already in progress.');
             return;
         }
 
         if (!PLAYER_CONFIG.enablePreloading) {
-            if (PLAYER_CONFIG.debugMode) console.log('[Preload] Preloading is globally disabled.');
+            if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] Preloading is globally disabled.');
             return;
         }
 
         if (isSlowNetwork()) {
-            if (PLAYER_CONFIG.debugMode) console.log('[Preload] Skipping preloading due to slow network.');
+            if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] Skipping preloading due to slow network.');
             return;
         }
 
         if (!window.currentEpisodes || !Array.isArray(window.currentEpisodes)) {
-            if (PLAYER_CONFIG.debugMode) console.log('[Preload] Skipping, episode data is missing.');
+            if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] Skipping, episode data is missing.');
             return;
         }
 
@@ -67,7 +67,7 @@
         const startIndex = customStartIndex !== null ? customStartIndex : window.currentEpisodeIndex;
 
         isPreloadingInProgress = true;
-        if (PLAYER_CONFIG.debugMode) console.log('[Preload] Lock acquired, starting preload cycle.');
+        if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] Lock acquired, starting preload cycle.');
 
         try {
             const preloadCount = getPreloadCount();
@@ -75,7 +75,7 @@
             const totalEpisodes = window.currentEpisodes.length;
 
             if (PLAYER_CONFIG.debugMode) {
-                console.log(`[Preload] Start index: ${startIndex}, Current index: ${currentIndex}, Total: ${totalEpisodes}, Count: ${preloadCount}`);
+                Logger.log(`[Preload] Start index: ${startIndex}, Current index: ${currentIndex}, Total: ${totalEpisodes}, Count: ${preloadCount}`);
             }
 
             /* ---------- 跳过已缓存集数 ---------- */
@@ -94,7 +94,7 @@
                 if (preloadedEpisodeUrls.has(nextEpisodeUrl) ||
                     inFlightEpisodeUrls.has(nextEpisodeUrl)) {
                     if (PLAYER_CONFIG.debugMode)
-                        console.log(`[Preload] Skip cached ep ${episodeIdxToPreload + 1}`);
+                        Logger.log(`[Preload] Skip cached ep ${episodeIdxToPreload + 1}`);
                     loaded++;
                     continue;    // 进入下一轮 offset
                 }
@@ -146,29 +146,29 @@
                         preloadedEpisodeUrls.add(nextEpisodeUrl);   // 真正完成          
                         loaded++;
                         if (PLAYER_CONFIG.debugMode)
-                            console.log(`[Preload] ✔ ep ${episodeIdxToPreload + 1} cached (${tsCached} ts)`);
+                            Logger.log(`[Preload] ✔ ep ${episodeIdxToPreload + 1} cached (${tsCached} ts)`);
                     } else {
                         if (PLAYER_CONFIG.debugMode)
-                            console.log(`[Preload] ✖ ep ${episodeIdxToPreload + 1} had no ts, ignore`);
+                            Logger.log(`[Preload] ✖ ep ${episodeIdxToPreload + 1} had no ts, ignore`);
                     }
                 } catch (e) {
-                    if (PLAYER_CONFIG.debugMode) console.error('[Preload] error:', e);
+                    if (PLAYER_CONFIG.debugMode) Logger.error('[Preload] error:', e);
                 } finally {
                     inFlightEpisodeUrls.delete(nextEpisodeUrl);
                 }
             }
         } catch (e) {
-            if (PLAYER_CONFIG.debugMode) console.error(`[Preload] Fatal error in preload cycle:`, e);
+            if (PLAYER_CONFIG.debugMode) Logger.error(`[Preload] Fatal error in preload cycle:`, e);
         } finally {
             isPreloadingInProgress = false;
             preloadCancelled = false; // 确保状态重置
-            if (PLAYER_CONFIG.debugMode) console.log('[Preload] Lock released, preload cycle finished');
+            if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] Lock released, preload cycle finished');
         }
     }
 
     function registerPreloadEvents() {
         if (!window.player) {
-            if (PLAYER_CONFIG.debugMode) console.log('[Preload] Player not ready, deferring event registration.');
+            if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] Player not ready, deferring event registration.');
             setTimeout(registerPreloadEvents, 200);
             return;
         }
@@ -211,7 +211,7 @@
             episodesListContainer.addEventListener('click', episodeGridClickListener);
         }
 
-        if (PLAYER_CONFIG.debugMode) console.log('[Preload] All event listeners registered.');
+        if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] All event listeners registered.');
     }
 
     function unregisterPreloadEvents() {
@@ -233,7 +233,7 @@
             episodesListContainer.removeEventListener('click', episodeGridClickListener);
             episodeGridClickListener = null;
         }
-        if (PLAYER_CONFIG.debugMode) console.log('[Preload] All event listeners unregistered.');
+        if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] All event listeners unregistered.');
     }
 
 
@@ -250,7 +250,7 @@
             typeof window.currentEpisodeIndex === 'number') {
 
             if (PLAYER_CONFIG.debugMode)
-                console.log('[Preload] System ready, starting preloading features.');
+                Logger.log('[Preload] System ready, starting preloading features.');
 
             // 事件只注册一次
             if (!eventsRegistered) {
@@ -284,7 +284,7 @@
 
     function stopPreloading() {
         unregisterPreloadEvents();
-        if (PLAYER_CONFIG.debugMode) console.log('[Preload] Preloading stopped.');
+        if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] Preloading stopped.');
     }
 
     function enhancePlayEpisodeForPreloading() {
@@ -295,7 +295,7 @@
         //         setTimeout(() => preloadNextEpisodeParts(), 250);
         //     };
         //     window.playEpisode._preloadEnhanced = true;
-        //     if (PLAYER_CONFIG.debugMode) console.log('[Preload] playEpisode function enhanced.');
+        //     if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] playEpisode function enhanced.');
         // }
     }
 
@@ -307,7 +307,7 @@
                 startPreloading();
             } else {
 
-                if (PLAYER_CONFIG.debugMode) console.log('[Preload] Preloading is disabled by user setting on page load.');
+                if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] Preloading is disabled by user setting on page load.');
             }
         }, 500);
     });

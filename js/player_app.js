@@ -53,7 +53,7 @@ function toggleWebFullscreen() {
 
     // 切换状态
     isWebFullscreen = !isWebFullscreen;
-    console.log(`Toggling web fullscreen. New state: ${isWebFullscreen}`);
+    
 
     if (isWebFullscreen) {
         // 进入网页全屏
@@ -504,7 +504,7 @@ async function processVideoUrl(url) {
             resp = await fetch(targetUrl, { mode: 'cors' });
             if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
         } catch (e) {
-            console.warn(`[ProcessVideo] 直接抓取失败 (可能是 CORS)，回退到内置代理: ${targetUrl}`, e);
+            Logger.warn(`[ProcessVideo] 直接抓取失败 (可能是 CORS)，回退到内置代理: ${targetUrl}`, e);
             // 直接返回代理地址，代理服务器会自动处理 M3U8 重写和分片代理
             return '/proxy/' + encodeURIComponent(targetUrl);
         }
@@ -516,10 +516,10 @@ async function processVideoUrl(url) {
         if (!m3u8Text.startsWith('#EXTM3U')) {
             // 如果看起来像 HTML
             if (m3u8Text.includes('<html') || m3u8Text.includes('<!DOCTYPE')) {
-                console.warn(`[ProcessVideo] 抓取到 HTML 内容而非 M3U8。可能是鉴权、重定向或错误页面。尝试回退到代理: ${targetUrl}`);
+                Logger.warn(`[ProcessVideo] 抓取到 HTML 内容而非 M3U8。可能是鉴权、重定向或错误页面。尝试回退到代理: ${targetUrl}`);
                 return '/proxy/' + encodeURIComponent(targetUrl);
             }
-            console.warn(`[ProcessVideo] 内容校验失败 (不含 #EXTM3U)。内容预览: ${m3u8Text.slice(0, 100)}`);
+            Logger.warn(`[ProcessVideo] 内容校验失败 (不含 #EXTM3U)。内容预览: ${m3u8Text.slice(0, 100)}`);
             // 依然尝试抛给代理（代理可能会尝试不同的 UA 或处理逻辑）
             return '/proxy/' + encodeURIComponent(targetUrl);
         }
@@ -547,7 +547,7 @@ async function processVideoUrl(url) {
                         const absoluteUri = new URL(relativeUri, baseUrl).href;
                         line = line.replace(relativeUri, absoluteUri);
                     } catch (e) {
-                        console.warn('加密密钥 URL 补全失败，保留原行:', line, e);
+                        Logger.warn('加密密钥 URL 补全失败，保留原行:', line, e);
                     }
                 }
             }
@@ -556,7 +556,7 @@ async function processVideoUrl(url) {
                 try {
                     line = new URL(line.trim(), baseUrl).href;
                 } catch (e) {
-                    console.warn('URL 补全失败，保留原行:', line, e);
+                    Logger.warn('URL 补全失败，保留原行:', line, e);
                 }
             }
             cleanLines.push(line);
@@ -568,7 +568,7 @@ async function processVideoUrl(url) {
         return URL.createObjectURL(blob);
 
     } catch (err) {
-        console.error('广告过滤或 URL 补全失败：', err);
+        Logger.error('广告过滤或 URL 补全失败：', err);
         showToast('广告过滤失败，播放原始地址', 'warning');
         return url;
     }
@@ -659,7 +659,7 @@ function addPlayerEventListeners() {
 
     player.addEventListener('error', (event) => {
         const errorDetail = event.detail;
-        console.error("Vidstack Player Error:", errorDetail);
+        Logger.error("Vidstack Player Error:", errorDetail);
 
         // 尝试获取更详细的错误信息
         let errorMessage = '播放器遇到错误，请检查视频源';
@@ -757,7 +757,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
     // 增加一个检查，确保一个有效的URL
     if (!playUrl || !playUrl.startsWith('http')) {
         showError(`无效的播放链接: ${playUrl || '链接为空'}`);
-        console.error("解析出的播放链接无效:", playUrl);
+        Logger.error("解析出的播放链接无效:", playUrl);
         isNavigatingToEpisode = false;
         return;
     }
@@ -782,12 +782,12 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
                 const preloadEnabled = localStorage.getItem('preloadEnabled') !== 'false';
                 if (preloadEnabled && typeof preloadNextEpisodeParts === 'function') {
                     preloadNextEpisodeParts(index).catch(e => {
-                        console.error('Preload error:', e);
+                        Logger.error('Preload error:', e);
                     });
                 }
             }, 500);
         }
-        player.play().catch(e => console.warn("Autoplay after episode switch was prevented.", e));
+        player.play().catch(e => Logger.warn("Autoplay after episode switch was prevented.", e));
     }
 }
 
@@ -842,7 +842,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
                 }
                 availableAlternativeSources = relevantSources;
             } catch (e) {
-                console.error("从 localStorage 构建聚合线路列表失败:", e);
+                Logger.error("从 localStorage 构建聚合线路列表失败:", e);
                 availableAlternativeSources = [];
             }
         }
@@ -908,7 +908,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
 
         if ((isBuiltinSpecialSource || isCustomSpecialSource) && (!episodeUrlForPlayer || !episodeUrlForPlayer.includes('.m3u8'))) {
             try {
-                console.log('检测到特殊详情源，正在重新抓取真实地址...');
+                Logger.debug('检测到特殊详情源，正在重新抓取真实地址...');
                 let detailResultStr;
 
                 if (isCustomSpecialSource) {
@@ -926,10 +926,10 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
                     // 同步更新缓存，避免下次重复请求
                     localStorage.setItem('currentEpisodes', JSON.stringify(detailData.episodes));
                     window.currentEpisodes = detailData.episodes;
-                    console.log('播放页二次请求特殊源地址成功:', episodeUrlForPlayer);
+                    Logger.debug('播放页二次请求特殊源地址成功:', episodeUrlForPlayer);
                 }
             } catch (e) {
-                console.error('播放页二次请求特殊源地址失败:', e);
+                Logger.error('播放页二次请求特殊源地址失败:', e);
             }
         }
 
@@ -1120,7 +1120,7 @@ function saveToHistory() {
         };
         window.addToViewingHistory(videoInfo);
     } catch (e) {
-        console.error('保存到历史记录失败:', e);
+        Logger.error('保存到历史记录失败:', e);
     }
 }
 
@@ -1146,7 +1146,7 @@ function saveCurrentProgress() {
             };
             window.addToViewingHistory(videoInfo);
         } catch (e) {
-            console.error('保存播放进度失败:', e);
+            Logger.error('保存播放进度失败:', e);
         }
     }
 }
@@ -1167,7 +1167,7 @@ function saveVideoSpecificProgress() {
             allProgresses[currentUniversalId] = currentTime;
             localStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgresses));
         } catch (e) {
-            console.error('保存特定视频集数进度失败:', e);
+            Logger.error('保存特定视频集数进度失败:', e);
         }
     }
 }
@@ -1188,7 +1188,7 @@ function clearVideoProgressForEpisode(universalId) {
             localStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgresses));
         }
     } catch (e) {
-        console.error(`清除进度失败:`, e);
+        Logger.error(`清除进度失败:`, e);
     }
 }
 
@@ -1201,7 +1201,7 @@ function clearCurrentVideoAllEpisodeProgresses() {
             localStorage.setItem(VIDEO_SPECIFIC_EPISODE_PROGRESSES_KEY, JSON.stringify(allProgress));
         }
     } catch (e) {
-        console.error('清除当前视频所有集数进度失败:', e);
+        Logger.error('清除当前视频所有集数进度失败:', e);
     }
 }
 
@@ -1354,14 +1354,14 @@ function copyLinks() {
     navigator.clipboard.writeText(linkUrl).then(() => {
         if (typeof showToast === 'function') showToast('当前视频链接已复制', 'success');
     }).catch(err => {
-        console.error('复制链接失败:', err);
+        Logger.error('复制链接失败:', err);
         if (typeof showToast === 'function') showToast('复制失败，请检查浏览器权限', 'error');
     });
 }
 
 function toggleLockScreen() {
     if (!player) {
-        console.warn("播放器未初始化，无法锁定屏幕。");
+        Logger.warn("播放器未初始化，无法锁定屏幕。");
         return;
     }
 
@@ -1711,7 +1711,7 @@ async function switchLine(newSourceCode, newVodId) {
         showMessage(`已切换到线路: ${targetSourceItem.source_name}`, 'success');
 
     } catch (err) {
-        console.error("切换线路失败:", err);
+        Logger.error("切换线路失败:", err);
         showError(`切换失败: ${err.message}`);
         if (loadingEl) loadingEl.style.display = 'none';
     }
@@ -1859,7 +1859,7 @@ function setupPlaySettingsEvents() {
                     if (resumeAt > 0) {
                         player.currentTime = resumeAt;
                     }
-                }).catch(e => console.warn('重新加载播放失败:', e));
+                }).catch(e => Logger.warn('重新加载播放失败:', e));
             }
         });
 
@@ -1986,23 +1986,23 @@ function retryLastAction() {
 
     if (!lastFailedAction) {
         if (player && player.currentSrc) {
-            console.log("重试：重新加载当前视频源。");
+            Logger.log("重试：重新加载当前视频源。");
             player.src = player.currentSrc; // 重新设置源
-            player.play().catch(e => console.error("重试播放失败", e));
+            player.play().catch(e => Logger.error("重试播放失败", e));
         }
         return;
     }
     if (lastFailedAction.type === 'switchLine') {
         const { sourceCode, vodId } = lastFailedAction.payload;
-        console.log(`重试：切换到线路 ${sourceCode} (ID: ${vodId})`);
+        Logger.log(`重试：切换到线路 ${sourceCode} (ID: ${vodId})`);
         lastFailedAction = null;
         switchLine(sourceCode, vodId);
     } else {
-        console.log("重试：未知操作类型，执行默认重载。");
+        Logger.log("重试：未知操作类型，执行默认重载。");
         lastFailedAction = null;
         if (player && player.currentSrc) {
             player.src = player.currentSrc;
-            player.play().catch(e => console.error("重试播放失败", e));
+            player.play().catch(e => Logger.error("重试播放失败", e));
         }
     }
 }

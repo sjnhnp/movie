@@ -335,7 +335,7 @@ async function performPlayerSearch(query) {
                         // 重新渲染以应用新的排序
                         renderPlayerSearchResults(results);
                     }).catch(error => {
-                        console.error('播放页速度检测失败:', error);
+                        Logger.error('播放页速度检测失败:', error);
                     });
                 } else {
                     // 如果没有backgroundSpeedUpdate函数，至少刷新现有的速度标签
@@ -350,7 +350,7 @@ async function performPlayerSearch(query) {
         }
 
     } catch (error) {
-        console.error('搜索出错:', error);
+        Logger.error('搜索出错:', error);
         if (searchResults) {
             searchResults.innerHTML = `<div class="text-center py-4 text-red-400">搜索出错: ${error.message}</div>`;
         }
@@ -396,7 +396,7 @@ async function performBasicSearch(query, selectedAPIs) {
             }
             return [];
         } catch (error) {
-            console.error(`API ${apiId} 搜索失败:`, error);
+            Logger.error(`API ${apiId} 搜索失败:`, error);
             return [];
         }
     });
@@ -765,7 +765,7 @@ function handlePlayerSearchResultClick(item) {
         // 显示详情模态框
         showPlayerVideoDetail(item);
     } catch (error) {
-        console.error('处理搜索结果点击失败:', error);
+        Logger.error('处理搜索结果点击失败:', error);
         if (typeof showToast === 'function') {
             showToast('打开视频详情失败', 'error');
         }
@@ -938,7 +938,7 @@ function initializeQualityTag(element, item) {
         // 更新item对象中的画质信息
         item.quality = quality;
     }).catch(error => {
-        console.error('画质检测失败:', error);
+        Logger.error('画质检测失败:', error);
         updateQualityTag(element, '检测失败');
         item.quality = '检测失败';
     });
@@ -982,7 +982,7 @@ function handleQualityTagClick(element, item) {
             // 清除防抖记录
             qualityDetectionDebounce.delete(itemKey);
         }).catch(error => {
-            console.error('画质重测失败:', error);
+            Logger.error('画质重测失败:', error);
             updateQualityTag(element, '检测失败');
             item.quality = '检测失败';
             // 清除防抖记录
@@ -1074,7 +1074,7 @@ async function detectVideoQuality(item, forceRetest = false) {
         return result.quality || '未知';
 
     } catch (error) {
-        console.error('画质检测出错:', error);
+        Logger.error('画质检测出错:', error);
         if (error.message === '检测超时') {
             return '检测超时';
         }

@@ -144,7 +144,7 @@ function getBoolConfig(key, def) {
         if (v === null) return def;
         return v === 'true' || v === true;
     } catch (e) {
-        console.warn(`Error reading boolean config for ${key}:`, e);
+        Logger.warn(`Error reading boolean config for ${key}:`, e);
         return def;
     }
 }
@@ -156,7 +156,7 @@ function getIntConfig(key, def, min = 0, max = 10) {
         const v = parseInt(typeof raw === 'string' ? raw : String(raw));
         return (!isNaN(v) && v >= min && v <= max) ? v : def;
     } catch (e) {
-        console.warn(`Error reading integer config for ${key}:`, e);
+        Logger.warn(`Error reading integer config for ${key}:`, e);
         return def;
     }
 }

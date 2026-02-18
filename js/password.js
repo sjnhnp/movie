@@ -6,7 +6,7 @@ window.verifyingPurpose = 'main'; // 'main' 或 'settings'
 // 只从全局读取，不再声明const，避免重复
 const PASSWORD_CONFIG = window.PASSWORD_CONFIG;
 if (!PASSWORD_CONFIG) {
-    console.warn('PASSWORD_CONFIG 未定义，密码功能默认关闭');
+    Logger.warn('PASSWORD_CONFIG 未定义，密码功能默认关闭');
 }
 /**
  * 检查是否设置了密码保护（依赖 window.__ENV__ 挂载的 PASSWORD SHA256 哈希）
@@ -29,7 +29,7 @@ function isPasswordVerified() {
         // 检查通过、未过期、且为当前密码
         return !!(verified && timestamp && passwordHash === envHash && Date.now() < timestamp + PASSWORD_CONFIG.verificationTTL);
     } catch (e) {
-        console.error('密码验证状态判断异常:', e);
+        Logger.error('密码验证状态判断异常:', e);
         return false;
     }
 }
@@ -52,7 +52,7 @@ function isSettingsPasswordVerified() {
         // 检查通过、未过期、且为当前设置密码的哈希
         return !!(verified && timestamp && passwordHash === settingsHash && Date.now() < timestamp + PASSWORD_CONFIG.verificationTTL);
     } catch (e) {
-        console.error('设置密码验证状态判断异常:', e);
+        Logger.error('设置密码验证状态判断异常:', e);
         return false;
     }
 }
@@ -69,7 +69,7 @@ async function verifyPassword(password, correctHash) {
         const inputHash = await sha256(password);
         return inputHash === correctHash;
     } catch (error) {
-        console.error('SHA-256 计算失败:', error);
+        Logger.error('SHA-256 计算失败:', error);
         return false;
     }
 }

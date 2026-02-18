@@ -551,7 +551,8 @@
         });
     </script>
 
-    <!-- 延迟加载主应用脚本（defer避免阻塞）-->
+    <!-- 统一日志输出控制 -->
+    <script src="js/logger.js" defer></script>
     <script src="js/config.js" defer></script>
     <script src="js/simple_quality_detector.js" defer></script>
     <script src="js/speed_tester.js" defer></script>
@@ -569,6 +570,7 @@
         window.__ENV__ = window.__ENV__ || {};
         window.__ENV__.PASSWORD = "{{PASSWORD}}";
         window.__ENV__.SETTINGS_PASSWORD = "{{SETTINGS_PASSWORD}}";
+        window.__ENV__.NODE_ENV = "{{NODE_ENV}}"; // 可由服务端替换或手动改为 'production'
     </script>
 
     <!-- Templates -->

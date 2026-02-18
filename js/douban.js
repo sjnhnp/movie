@@ -157,7 +157,7 @@ const utils = {
         const value = localStorage.getItem(key);
         return value ? JSON.parse(value) : defaultValue;
       } catch (e) {
-        console.error(`Error reading from localStorage: ${key}`, e);
+        Logger.error(`Error reading from localStorage: ${key}`, e);
         return defaultValue;
       }
     },
@@ -167,7 +167,7 @@ const utils = {
         localStorage.setItem(key, JSON.stringify(value));
         return true;
       } catch (e) {
-        console.error(`Error writing to localStorage: ${key}`, e);
+        Logger.error(`Error writing to localStorage: ${key}`, e);
         return false;
       }
     }
@@ -317,7 +317,7 @@ function fillAndSearch(title) {
     if (typeof search === 'function') {
       search();
     } else {
-      console.error('search函数不可用');
+      Logger.error('search函数不可用');
       showToast('搜索功能暂不可用', 'error');
     }
   }
@@ -358,7 +358,7 @@ function fillAndSearchWithDouban(title) {
       // 传递一个回调，用于在搜索完成后隐藏loading
       search({ doubanQuery: safeTitle, onComplete: hideGlobalLoadingAfterSearch });
     } else {
-      console.error('search函数不可用');
+      Logger.error('search函数不可用');
       if (typeof showToast === 'function') showToast('搜索功能暂不可用', 'error');
       if (typeof hideLoading === 'function') hideLoading(); // 如果 search 不可用，也要隐藏 loading
     }
@@ -519,7 +519,7 @@ async function fetchDoubanData(url) {
     return data;
   } catch (err) {
     clearTimeout(timeoutId);
-    console.error("豆瓣 API 请求失败：", err);
+    Logger.error("豆瓣 API 请求失败：", err);
 
     if (err.name === 'AbortError') {
       throw new Error(CONFIG.MESSAGES.TIMEOUT_ERROR);
@@ -543,7 +543,7 @@ async function fetchDoubanData(url) {
 
       throw new Error("无法获取有效数据");
     } catch (fallbackErr) {
-      console.error("豆瓣 API 备用请求也失败：", fallbackErr);
+      Logger.error("豆瓣 API 备用请求也失败：", fallbackErr);
       throw new Error(CONFIG.MESSAGES.API_ERROR);
     }
   }
@@ -565,7 +565,7 @@ async function renderRecommend(tag, pageLimit, pageStart) {
     const data = await fetchDoubanData(target);
     renderDoubanCards(data, container);
   } catch (error) {
-    console.error("获取豆瓣数据失败：", error);
+    Logger.error("获取豆瓣数据失败：", error);
     container.innerHTML = `
       <div class="col-span-full text-center py-8">
         <div class="text-red-400">❌ ${CONFIG.MESSAGES.API_ERROR}</div>
@@ -882,7 +882,7 @@ function reloadDoubanIfNeeded() {
 
   // 检查：如果豆瓣功能已开启，并且其内容容器确实是空的
   if (isEnabled && doubanResultsContainer && doubanResultsContainer.children.length === 0) {
-      console.log('[Douban] Returning home, reloading Douban Hot content...');
+      
       // 使用模块内部的状态变量，加载当前选中的热门内容
       renderRecommend(doubanCurrentTag, doubanPageSize, 0);
   }

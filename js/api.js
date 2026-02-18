@@ -79,7 +79,7 @@ async function handleSpecialSourceDetail(id, sourceCode) {
             }
         });
     } catch (e) {
-        console.error(`${API_SITES[sourceCode]?.name || sourceCode}详情获取失败:`, e);
+        Logger.error(`${API_SITES[sourceCode]?.name || sourceCode}详情获取失败:`, e);
         throw new Error(`获取${API_SITES[sourceCode]?.name || sourceCode}详情失败: ${e.message}`);
     }
 }
@@ -111,7 +111,7 @@ async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl) {
             videoInfo: { title: '自定义源播放', source_name: '自定义API', source_code: 'custom' }
         });
     } catch (e) {
-        console.error('自定义API detail源解析失败（本次尝试）', e);
+        Logger.error('自定义API detail源解析失败（本次尝试）', e);
         localStorage.setItem('customApiRealUrls_' + id, JSON.stringify([]));
         throw e;
     }
@@ -241,7 +241,7 @@ async function handleApiRequest(url) {
                     });
                 }
             } catch (error) {
-                console.error(`Error in detail processing for source ${sourceCode}, id ${id}:`, error);
+                Logger.error(`Error in detail processing for source ${sourceCode}, id ${id}:`, error);
                 const errorMsg = error.name === 'AbortError' ? '详情请求超时'
                     : error.name === 'SyntaxError' ? '详情数据格式无效'
                         : error.message;
@@ -254,7 +254,7 @@ async function handleApiRequest(url) {
         }
         throw new Error('未知的API路径');
     } catch (error) {
-        console.error('API处理错误 (outer):', error);
+        Logger.error('API处理错误 (outer):', error);
         return JSON.stringify({
             code: 400,
             msg: error && error.message ? error.message : '请求处理失败',
@@ -298,7 +298,7 @@ window.fetch = async function (input, init) {
                 }
             });
         } catch (err) {
-            console.error("Error during API request handling in fetch override:", err);
+            Logger.error("Error during API request handling in fetch override:", err);
             return new Response(JSON.stringify({
                 code: 500,
                 msg: '服务器内部错误: ' + (err.message || '未知错误'),
@@ -325,11 +325,11 @@ async function testSiteAvailability(apiUrl) {
             const data = JSON.parse(text);
             return data && data.code !== 400 && Array.isArray(data.list);
         } catch (e) {
-            console.error('可用性测试JSON解析失败:', e, text.slice(0, 100));
+            Logger.error('可用性测试JSON解析失败:', e, text.slice(0, 100));
             return false;
         }
     } catch (e) {
-        console.error('站点可用性测试失败:', e);
+        Logger.error('站点可用性测试失败:', e);
         return false;
     }
 }
@@ -347,7 +347,7 @@ function resolveUrl(baseUrl, relativeUrl) {
             const { protocol } = new URL(baseUrl);
             return protocol + relativeUrl;
         } catch (e) {
-            console.warn(`Protocol-relative URL 解析失败:`, e);
+            Logger.warn(`Protocol-relative URL 解析失败:`, e);
             return relativeUrl;
         }
     }
@@ -361,7 +361,7 @@ function resolveUrl(baseUrl, relativeUrl) {
     try {
         return new URL(relativeUrl, baseUrl).toString();
     } catch (e) {
-        console.warn(`URL 解析失败: base="${baseUrl}", relative="${relativeUrl}"`, e);
+        Logger.warn(`URL 解析失败: base="${baseUrl}", relative="${relativeUrl}"`, e);
         // —— 4. 回退到简单拼接 —— 
         let base = baseUrl;
         let rel = relativeUrl;

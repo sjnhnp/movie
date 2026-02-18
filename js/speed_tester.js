@@ -23,7 +23,7 @@ const SpeedTester = (() => {
                     return response;
                 }
             } catch (corsError) {
-                console.log('直接请求失败，尝试代理:', corsError.message);
+                Logger.debug('直接请求失败，尝试代理:', corsError.message);
             }
 
             // 方法2：使用代理
@@ -118,7 +118,7 @@ const SpeedTester = (() => {
             return result;
 
         } catch (error) {
-            console.log(`测试源失败 ${source.source_name}:`, error.message);
+            Logger.debug(`测试源失败 ${source.source_name}:`, error.message);
             // 失败时设置合理的默认值
             result.loadSpeed = 'N/A';
             result.sortPriority = 99;

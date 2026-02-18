@@ -313,7 +313,7 @@ function getSearchHistory() {
             .map(item => typeof item === 'string' ? { text: item, timestamp: 0 } : item)
             .filter(item => item && item.text);
     } catch (e) {
-        console.error('获取搜索历史出错:', e);
+        Logger.error('获取搜索历史出错:', e);
         return [];
     }
 }
@@ -453,7 +453,7 @@ function deleteSingleSearchHistory(query) {
         localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history));
         renderSearchHistory(); // 重新渲染
     } catch (e) {
-        console.error('删除单条搜索历史失败:', e);
+        Logger.error('删除单条搜索历史失败:', e);
         showToast('删除单条搜索历史失败', 'error');
     }
 }
@@ -469,7 +469,7 @@ function clearSearchHistory() {
         renderSearchHistory();
         showToast('搜索历史已清除', 'success');
     } catch (e) {
-        console.error('清除搜索历史失败:', e);
+        Logger.error('清除搜索历史失败:', e);
         showToast('清除搜索历史失败', 'error');
     }
 }
@@ -500,7 +500,7 @@ function getViewingHistory() {
         const data = localStorage.getItem('viewingHistory');
         return data ? JSON.parse(data) : [];
     } catch (e) {
-        console.error('获取观看历史失败:', e);
+        Logger.error('获取观看历史失败:', e);
         return [];
     }
 }
@@ -623,7 +623,7 @@ function addToViewingHistory(videoInfo) {
         }
         localStorage.setItem('viewingHistory', JSON.stringify(history));
     } catch (e) {
-        console.error('保存观看历史失败:', e);
+        Logger.error('保存观看历史失败:', e);
     }
 }
 
@@ -638,7 +638,7 @@ function clearViewingHistory() {
         loadViewingHistory();
         showToast('观看历史已清除', 'success');
     } catch (e) {
-        console.error('清除观看历史失败:', e);
+        Logger.error('清除观看历史失败:', e);
         showToast('清除观看历史失败', 'error');
     }
 }
@@ -931,7 +931,7 @@ function deleteHistoryItem(internalId) {
             showToast('未找到要删除的记录', 'warning');
         }
     } catch (e) {
-        console.error('删除观看历史失败:', e);
+        Logger.error('删除观看历史失败:', e);
         showToast('删除历史记录失败', 'error');
     }
 }

@@ -755,7 +755,7 @@ function backgroundQualityUpdate(results) {
             try {
                 const q = await window.precheckSource(
                     firstEpisodeUrl,
-                    item.m3u8Content || null    // 把 m3u8 文本传进去
+                    item.m3u8Content || null // 把 m3u8 文本传进去
                 );
 
                 // 属性更新，确保只更新画质相关字段
@@ -1047,8 +1047,8 @@ function renderSearchResults(allResults, doubanSearchedTitle = null) {
     searchResultsContainer.appendChild(gridContainer);
     // 在渲染结果后同步预加载状态
     if (typeof window.startPreloading !== 'undefined' && typeof window.stopPreloading !== 'undefined') {
-        const preloadEnabled = AppStorage.getItem('preloadEnabled') !== 'false';
-        if (preloadEnabled) {
+        const preloadingEnabled = AppStorage.getItem('preloadingEnabled') !== 'false';
+        if (preloadingEnabled) {
             // 确保预加载在搜索结果页面正确初始化
             setTimeout(() => {
                 if (typeof window.startPreloading === 'function') {

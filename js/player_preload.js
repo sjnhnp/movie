@@ -234,6 +234,8 @@
             episodeGridClickListener = null;
         }
         if (PLAYER_CONFIG.debugMode) Logger.log('[Preload] All event listeners unregistered.');
+        eventsRegistered = false;
+        lastPreloadIndex = -1;
     }
 
 

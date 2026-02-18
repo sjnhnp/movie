@@ -341,11 +341,16 @@ function saveSearchCache(query, selectedAPIs, results) {
  * ============================================================ */
 function backgroundSpeedUpdate(results) {
     return new Promise(resolve => {
-        const concurrency = 2;          // 同时跑 2 条线路即可
+        const speedDetectionEnabled = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
+        if (!speedDetectionEnabled) {
+            return resolve();
+        }
+        
+        const concurrency = 2;
         let cursor = 0;
         const isPending = v => !v || v === '检测中...' || v === 'pending';
         let remain = results.filter(r => isPending(r.loadSpeed)).length;
-        if (remain === 0) return resolve();  // 没有要测的
+        if (remain === 0) return resolve();
 
         async function worker() {
             while (cursor < results.length) {

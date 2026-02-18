@@ -1047,6 +1047,12 @@ function updateQualityTag(element, quality) {
  */
 async function detectVideoQuality(item, forceRetest = false) {
     try {
+        // 检查是否启用了画质速度检测
+        const speedDetectionEnabled = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
+        if (!speedDetectionEnabled) {
+            return '未知';
+        }
+        
         // 如果没有播放链接，返回未知
         if (!item.vod_play_url) {
             return '未知';
@@ -1126,6 +1132,11 @@ async function basicQualityDetection(url) {
  * 刷新播放页搜索结果中的速度标签
  */
 function refreshPlayerSpeedBadges(results) {
+    const speedDetectionEnabled = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
+    if (!speedDetectionEnabled) {
+        return;
+    }
+    
     results.forEach(item => {
         const badge = document.querySelector(
             `.card-hover[data-id="${item.vod_id}"][data-source-code="${item.source_code}"] [data-field="speed-tag"]`

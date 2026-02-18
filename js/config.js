@@ -86,6 +86,10 @@ const M3U8_PATTERN = /\$https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\
 // 自定义播放器URL
 const CUSTOM_PLAYER_URL = 'player.html';
 
+// 隐藏内置黄色采集站API的变量
+const HIDE_BUILTIN_ADULT_APIS = true;
+if (typeof window !== 'undefined') window.HIDE_BUILTIN_ADULT_APIS = HIDE_BUILTIN_ADULT_APIS;
+
 // 预加载配置默认值
 const DEFAULTS = {
     enablePreloading: false, // 预加载 

@@ -88,7 +88,7 @@ async function playVideo(episodeString, title, episodeIndex, sourceName = '', so
     }
     if (!playUrl || !playUrl.startsWith('http')) {
         showToast('视频链接格式无效', 'error');
-        Logger.error('解析出的播放链接无效:', playUrl);
+        console.error('解析出的播放链接无效:', playUrl);
         return;
     }
     const isSpecialSource = !sourceCode.startsWith('custom_') && window.API_SITES[sourceCode]?.detail;
@@ -99,7 +99,7 @@ async function playVideo(episodeString, title, episodeIndex, sourceName = '', so
                 playUrl = data.episodes[episodeIndex] || playUrl;
             }
         } catch (e) {
-            Logger.log('播放前预获取地址失败:', e);
+            console.log('播放前预获取地址失败:', e);
         }
     }
     AppState.set('currentEpisodeIndex', episodeIndex);
@@ -119,7 +119,7 @@ async function playVideo(episodeString, title, episodeIndex, sourceName = '', so
         addToViewingHistory(videoInfoForHistory);
     }
     const originalEpisodeNames = AppState.get('originalEpisodeNames') || [];
-    AppStorage.setItem('originalEpisodeNames', JSON.stringify(originalEpisodeNames));
+    localStorage.setItem('originalEpisodeNames', JSON.stringify(originalEpisodeNames));
     const playerUrl = new URL('player.html', window.location.origin);
     playerUrl.searchParams.set('url', playUrl);
     playerUrl.searchParams.set('title', title);
@@ -151,7 +151,7 @@ function playPreviousEpisode() {
     if (currentIndex > 0 && episodes && episodes.length > 0) {
         const prevIndex = currentIndex - 1;
         AppState.set('currentEpisodeIndex', prevIndex);
-        AppStorage.setItem('currentEpisodeIndex', prevIndex.toString());
+        localStorage.setItem('currentEpisodeIndex', prevIndex.toString());
         const title = AppState.get('currentVideoTitle');
         playVideo(episodes[prevIndex], title, prevIndex);
     } else {
@@ -165,7 +165,7 @@ function playNextEpisode() {
     if (episodes && currentIndex < episodes.length - 1) {
         const nextIndex = currentIndex + 1;
         AppState.set('currentEpisodeIndex', nextIndex);
-        AppStorage.setItem('currentEpisodeIndex', nextIndex.toString());
+        localStorage.setItem('currentEpisodeIndex', nextIndex.toString());
         const title = AppState.get('currentVideoTitle');
         playVideo(episodes[nextIndex], title, nextIndex);
     } else {
@@ -182,7 +182,7 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
         videoYear = '',
         currentVideoTypeName = '';
     try {
-        const history = JSON.parse(AppStorage.getItem('viewingHistory') || '[]');
+        const history = JSON.parse(localStorage.getItem('viewingHistory') || '[]');
         historyItem = history.find(item => item.url === url && item.title === title && item.episodeIndex === episodeIndex);
         if (historyItem) {
             vodId = historyItem.vod_id || '';
@@ -192,7 +192,7 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
             currentVideoTypeName = historyItem.typeName || '';
         }
     } catch (e) {
-        Logger.error("读取历史记录失败:", e);
+        console.error("读取历史记录失败:", e);
     }
     if (historyItem && Array.isArray(historyItem.episodes) && historyItem.episodes.length > 0 && historyItem.episodes[0].includes('$')) {
         episodesList = historyItem.episodes;
@@ -216,10 +216,10 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
                 }
             }
         } catch (e) {
-            episodesList = AppState.get('currentEpisodes') || JSON.parse(AppStorage.getItem('currentEpisodes') || '[]');
+            episodesList = AppState.get('currentEpisodes') || JSON.parse(localStorage.getItem('currentEpisodes') || '[]');
         }
     } else {
-        episodesList = AppState.get('currentEpisodes') || JSON.parse(AppStorage.getItem('currentEpisodes') || '[]');
+        episodesList = AppState.get('currentEpisodes') || JSON.parse(localStorage.getItem('currentEpisodes') || '[]');
     }
 
     // 统一处理原始剧集名称
@@ -235,15 +235,15 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
 
     // 3. 根据结果更新 localStorage
     if (namesToStore.length > 0) {
-        AppStorage.setItem('originalEpisodeNames', JSON.stringify(namesToStore));
+        localStorage.setItem('originalEpisodeNames', JSON.stringify(namesToStore));
     } else {
         // 如果两种方式都获取不到，则清空旧缓存，避免显示错误的名称
-        AppStorage.removeItem('originalEpisodeNames');
+        localStorage.removeItem('originalEpisodeNames');
     }
 
     if (episodesList.length > 0) {
         AppState.set('currentEpisodes', episodesList);
-        AppStorage.setItem('currentEpisodes', JSON.stringify(episodesList));
+        localStorage.setItem('currentEpisodes', JSON.stringify(episodesList));
     }
     let actualEpisodeIndex = episodeIndex;
     if (actualEpisodeIndex >= episodesList.length) {
@@ -257,8 +257,8 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
     }
     AppState.set('currentEpisodeIndex', actualEpisodeIndex);
     AppState.set('currentVideoTitle', title);
-    AppStorage.setItem('currentEpisodeIndex', actualEpisodeIndex.toString());
-    AppStorage.setItem('currentVideoTitle', title);
+    localStorage.setItem('currentEpisodeIndex', actualEpisodeIndex.toString());
+    localStorage.setItem('currentVideoTitle', title);
 
     const playerUrl = new URL('player.html', window.location.origin);
     playerUrl.searchParams.set('url', finalUrl);
@@ -280,7 +280,7 @@ async function playFromHistory(url, title, episodeIndex, playbackPosition = 0, t
 }
 
 function getBoolConfig(key, defaultValue) {
-    const value = AppStorage.getItem(key);
+    const value = localStorage.getItem(key);
     if (value === null) return defaultValue;
     return value === 'true';
 }
@@ -294,7 +294,7 @@ function getSearchCacheKey(query, selectedAPIs) {
 function checkSearchCache(query, selectedAPIs) {
     try {
         const cacheKey = getSearchCacheKey(query, selectedAPIs);
-        const cached = AppStorage.getItem(cacheKey);
+        const cached = localStorage.getItem(cacheKey);
         if (!cached) return { canUseCache: false };
 
         const cacheData = JSON.parse(cached);
@@ -302,7 +302,7 @@ function checkSearchCache(query, selectedAPIs) {
         const expireTime = SEARCH_CACHE_CONFIG.expireTime;
 
         if (now - cacheData.timestamp > expireTime) {
-            AppStorage.removeItem(cacheKey);
+            localStorage.removeItem(cacheKey);
             return { canUseCache: false };
         }
 
@@ -317,7 +317,7 @@ function checkSearchCache(query, selectedAPIs) {
             newAPIs: added
         };
     } catch (e) {
-        Logger.warn('检查搜索缓存失败:', e);
+        console.warn('检查搜索缓存失败:', e);
         return { canUseCache: false };
     }
 }
@@ -330,9 +330,9 @@ function saveSearchCache(query, selectedAPIs, results) {
             selectedAPIs: [...selectedAPIs],
             results: results
         };
-        AppStorage.setItem(cacheKey, JSON.stringify(cacheData));
+        localStorage.setItem(cacheKey, JSON.stringify(cacheData));
     } catch (e) {
-        Logger.warn('保存搜索缓存失败:', e);
+        console.warn('保存搜索缓存失败:', e);
     }
 }
 
@@ -384,17 +384,17 @@ function backgroundSpeedUpdate(results) {
                             }
 
                             /* localStorage 长期缓存（30 天） */
-                            const obj = JSON.parse(AppStorage.getItem(cacheKey) || '{}');
+                            const obj = JSON.parse(localStorage.getItem(cacheKey) || '{}');
                             if (obj.results) {
                                 const j = obj.results.findIndex(r => `${r.source_code}_${r.vod_id}` === uniqKey);
                                 if (j !== -1) {
                                     obj.results[j] = { ...obj.results[j], ...item };
-                                    AppStorage.setItem(cacheKey, JSON.stringify(obj));
+                                    localStorage.setItem(cacheKey, JSON.stringify(obj));
                                 }
                             }
                         }
                     } catch (e) {
-                        Logger.warn('写回测速缓存失败:', e);
+                        console.warn('写回测速缓存失败:', e);
                     }
 
                 } catch {
@@ -463,17 +463,17 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function initializeAppState() {
-    const selectedAPIsRaw = AppStorage.getItem('selectedAPIs');
+    const selectedAPIsRaw = localStorage.getItem('selectedAPIs');
     AppState.initialize({
         'selectedAPIs': JSON.parse(selectedAPIsRaw || JSON.stringify(window.DEFAULT_SELECTED_APIS)),
-        'customAPIs': JSON.parse(AppStorage.getItem('customAPIs') || '[]'),
+        'customAPIs': JSON.parse(localStorage.getItem('customAPIs') || '[]'),
         'currentEpisodeIndex': 0,
         'currentEpisodes': [],
         'currentVideoTitle': '',
         'episodesReversed': false
     });
     if (selectedAPIsRaw === null) {
-        AppStorage.setItem('selectedAPIs', JSON.stringify(window.DEFAULT_SELECTED_APIS));
+        localStorage.setItem('selectedAPIs', JSON.stringify(window.DEFAULT_SELECTED_APIS));
     }
     try {
         const cachedData = sessionStorage.getItem('videoDataCache');
@@ -481,14 +481,14 @@ function initializeAppState() {
         if (cachedData) {
             const rawArr = JSON.parse(cachedData);
             if (rawArr.length > 0 && !String(rawArr[0][0]).includes('_')) {
-                Logger.warn("检测到旧版视频缓存，已清除。");
+                console.warn("检测到旧版视频缓存，已清除。");
             } else {
                 restoredMap = new Map(rawArr);
             }
         }
         AppState.set('videoDataMap', restoredMap);
     } catch (e) {
-        Logger.error('从 sessionStorage 恢复视频元数据缓存失败:', e);
+        console.error('从 sessionStorage 恢复视频元数据缓存失败:', e);
         AppState.set('videoDataMap', new Map());
     }
 }
@@ -515,9 +515,9 @@ function restoreSearchStateFromPlayer() {
                 try {
                     const apis = JSON.parse(selectedAPIs);
                     AppState.set('selectedAPIs', apis);
-                    AppStorage.setItem('selectedAPIs', selectedAPIs);
+                    localStorage.setItem('selectedAPIs', selectedAPIs);
                 } catch (e) {
-                    Logger.error('恢复API选择状态失败:', e);
+                    console.error('恢复API选择状态失败:', e);
                 }
             }
 
@@ -531,7 +531,7 @@ function restoreSearchStateFromPlayer() {
                     }
                 }
             } catch (e) {
-                Logger.error('恢复搜索结果失败:', e);
+                console.error('恢复搜索结果失败:', e);
                 // 如果恢复失败，重新执行搜索
                 if (typeof performSearch === 'function') {
                     performSearch(searchQuery, AppState.get('selectedAPIs'));
@@ -545,7 +545,7 @@ function restoreSearchStateFromPlayer() {
         window.history.replaceState({}, document.title, url.toString());
 
     } catch (error) {
-        Logger.error('恢复搜索状态失败:', error);
+        console.error('恢复搜索状态失败:', error);
         // 降级到普通的缓存恢复
         restoreSearchFromCache();
     }
@@ -585,9 +585,7 @@ function initializeEventListeners() {
     if (adFilteringToggle) {
         adFilteringToggle.addEventListener('change', (e) => {
             const enabled = e.target.checked;
-            AppStorage.setItem(PLAYER_CONFIG.adFilteringStorage, enabled.toString());
-            // Sync local config
-            PLAYER_CONFIG.adFilteringEnabled = enabled;
+            localStorage.setItem(PLAYER_CONFIG.adFilteringStorage, enabled.toString());
             showToast(enabled ? '已启用广告过滤' : '已禁用广告过滤', 'info');
         });
         adFilteringToggle.checked = getBoolConfig(PLAYER_CONFIG.adFilteringStorage, PLAYER_CONFIG.adFilteringEnabled);
@@ -596,7 +594,7 @@ function initializeEventListeners() {
     if (yellowFilterToggle) {
         yellowFilterToggle.addEventListener('change', (e) => {
             const enabled = e.target.checked;
-            AppStorage.setItem('yellowFilterEnabled', enabled.toString());
+            localStorage.setItem('yellowFilterEnabled', enabled.toString());
             showToast(enabled ? '已启用黄色内容过滤' : '已禁用黄色内容过滤', 'info');
         });
         yellowFilterToggle.checked = getBoolConfig('yellowFilterEnabled', true);
@@ -605,7 +603,7 @@ function initializeEventListeners() {
     if (speedDetectionToggle) {
         speedDetectionToggle.addEventListener('change', (e) => {
             const enabled = e.target.checked;
-            AppStorage.setItem(PLAYER_CONFIG.speedDetectionStorage, enabled.toString());
+            localStorage.setItem(PLAYER_CONFIG.speedDetectionStorage, enabled.toString());
             showToast(enabled ? '已启用画质速度检测' : '已禁用画质速度检测', 'info');
         });
         speedDetectionToggle.checked = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
@@ -617,16 +615,10 @@ function initializeEventListeners() {
 
         preloadingToggle.addEventListener('change', (e) => {
             const enabled = e.target.checked;
-            AppStorage.setItem('preloadingEnabled', enabled.toString());
+            localStorage.setItem('preloadingEnabled', enabled.toString());
             // 更新 PLAYER_CONFIG 中的值
             PLAYER_CONFIG.enablePreloading = enabled;
             showToast(enabled ? '已启用预加载' : '已禁用预加载', 'info');
-            // 触发搜索结果页面的预加载同步（参考468c777逻辑：即时反馈）
-            if (enabled) {
-                if (typeof window.startPreloading === 'function') window.startPreloading();
-            } else {
-                if (typeof window.stopPreloading === 'function') window.stopPreloading();
-            }
         });
     }
 
@@ -640,7 +632,7 @@ function initializeEventListeners() {
             if (isNaN(count) || count < 1) count = 1;
             else if (count > 10) count = 10;
             e.target.value = count;
-            AppStorage.setItem('preloadCount', count.toString());
+            localStorage.setItem('preloadCount', count.toString());
             // 更新 PLAYER_CONFIG 中的值
             PLAYER_CONFIG.preloadCount = count;
             showToast(`预加载数量已设置为 ${count}`, 'info');
@@ -655,7 +647,7 @@ function search(options = {}) {
         sessionStorage.removeItem('searchSelectedAPIs');
         sessionStorage.removeItem('videoSourceMap');
     } catch (e) {
-        Logger.error('清除 sessionStorage 失败:', e);
+        console.error('清除 sessionStorage 失败:', e);
     }
     const searchInput = DOMCache.get('searchInput');
     const searchResultsContainer = DOMCache.get('searchResults');
@@ -695,7 +687,7 @@ function search(options = {}) {
                     sessionStorage.setItem('searchResults', JSON.stringify(resultsData));
                     sessionStorage.setItem('selectedAPIs', JSON.stringify(selectedAPIs));
                 } catch (e) {
-                    Logger.error('保存搜索状态失败:', e);
+                    console.error('保存搜索状态失败:', e);
                 }
             }
 
@@ -735,7 +727,7 @@ function rebuildVideoCaches(results) {
             videoSourceMap.get(key).push(item);
         }
     });
-    AppStorage.setItem(
+    localStorage.setItem(
         'videoSourceMap',
         JSON.stringify(Array.from(videoSourceMap.entries()))
     );
@@ -763,7 +755,7 @@ function backgroundQualityUpdate(results) {
             try {
                 const q = await window.precheckSource(
                     firstEpisodeUrl,
-                    item.m3u8Content || null // 把 m3u8 文本传进去
+                    item.m3u8Content || null    // 把 m3u8 文本传进去
                 );
 
                 // 属性更新，确保只更新画质相关字段
@@ -804,7 +796,7 @@ function backgroundQualityUpdate(results) {
                     }
                 }
             } catch (e) {
-                Logger.warn('写回 searchResults 失败：', e);
+                console.warn('写回 searchResults 失败：', e);
             }
 
             /* ============================================================
@@ -821,7 +813,7 @@ function backgroundQualityUpdate(results) {
                 /* ------------ 取出缓存对象 ------------ */
                 let cacheObj;
                 try {
-                    cacheObj = JSON.parse(AppStorage.getItem(cacheKey) || '{}');
+                    cacheObj = JSON.parse(localStorage.getItem(cacheKey) || '{}');
                 } catch {
                     cacheObj = {};
                 }
@@ -846,10 +838,10 @@ function backgroundQualityUpdate(results) {
                 cacheObj.results = resultsArr;
 
                 // 写回 localStorage
-                AppStorage.setItem(cacheKey, JSON.stringify(cacheObj));
+                localStorage.setItem(cacheKey, JSON.stringify(cacheObj));
 
             } catch (e) {
-                Logger.warn('写回搜索缓存失败:', e);
+                console.warn('写回搜索缓存失败:', e);
             }
         }
     }
@@ -905,7 +897,7 @@ async function performSearch(query, selectedAPIs) {
         });
     }
 
-    const customAPIsFromStorage = JSON.parse(AppStorage.getItem('customAPIs') || '[]');
+    const customAPIsFromStorage = JSON.parse(localStorage.getItem('customAPIs') || '[]');
     AppState.set('customAPIs', customAPIsFromStorage);
     const searchPromises = selectedAPIs.map(apiId => {
         let apiUrl = `/api/search?wd=${encodeURIComponent(query)}&source=${apiId}`;
@@ -997,7 +989,7 @@ async function performSearch(query, selectedAPIs) {
         }
         return checkedResults;
     } catch (error) {
-        Logger.error("执行搜索或预检测时出错:", error);
+        console.error("执行搜索或预检测时出错:", error);
         return [];
     }
 }
@@ -1023,7 +1015,7 @@ function renderSearchResults(allResults, doubanSearchedTitle = null) {
             sessionStorage.setItem('searchSelectedAPIs', JSON.stringify(AppState.get('selectedAPIs')));
         }
     } catch (e) {
-        Logger.error("缓存搜索结果失败:", e);
+        console.error("缓存搜索结果失败:", e);
     }
     searchResultsContainer.innerHTML = '';
     resultsArea.classList.remove('hidden');
@@ -1055,14 +1047,14 @@ function renderSearchResults(allResults, doubanSearchedTitle = null) {
     searchResultsContainer.appendChild(gridContainer);
     // 在渲染结果后同步预加载状态
     if (typeof window.startPreloading !== 'undefined' && typeof window.stopPreloading !== 'undefined') {
-        const preloadingEnabled = AppStorage.getItem('preloadingEnabled') !== 'false';
-        if (preloadingEnabled) {
+        const preloadEnabled = localStorage.getItem('preloadEnabled') !== 'false';
+        if (preloadEnabled) {
             // 确保预加载在搜索结果页面正确初始化
             setTimeout(() => {
                 if (typeof window.startPreloading === 'function') {
                     window.startPreloading();
                 }
-            }, 300);
+            }, 100);
         } else {
             if (typeof window.stopPreloading === 'function') {
                 window.stopPreloading();
@@ -1090,7 +1082,7 @@ function restoreSearchFromCache() {
                 try {
                     AppState.set('selectedAPIs', JSON.parse(cachedSelectedAPIs));
                 } catch (e) {
-                    Logger.warn('恢复API选择状态失败:', e);
+                    console.warn('恢复API选择状态失败:', e);
                 }
             }
             const parsed = JSON.parse(cachedResults);
@@ -1118,7 +1110,7 @@ function restoreSearchFromCache() {
                         const apis = JSON.parse(sessionStorage.getItem('searchSelectedAPIs') || '[]');
                         sessionStorage.setItem('searchResults', JSON.stringify(parsed));
                         if (query && apis.length > 0) saveSearchCache(query, apis, parsed);
-                    } catch (e) { Logger.error("回写缓存失败", e) }
+                    } catch (e) { console.error("回写缓存失败", e) }
                 });
             }
 
@@ -1133,7 +1125,7 @@ function restoreSearchFromCache() {
 
         }
     } catch (e) {
-        Logger.error('恢复搜索状态失败:', e);
+        console.error('恢复搜索状态失败:', e);
     }
 }
 
@@ -1153,7 +1145,7 @@ function renderSearchResultsFromCache(cachedResults) {
             try {
                 fragment.appendChild(createResultItemUsingTemplate(item));
             } catch (error) {
-                Logger.error('渲染缓存结果项失败:', error);
+                console.error('渲染缓存结果项失败:', error);
             }
         });
         gridContainer.appendChild(fragment);
@@ -1197,9 +1189,9 @@ async function getVideoDetail(id, sourceCode, apiUrl = '') {
         AppState.set('currentEpisodeIndex', 0);
 
         // 保存到localStorage（用于播放器页面）
-        AppStorage.setItem('currentEpisodes', JSON.stringify(episodes));
-        AppStorage.setItem('currentVideoTitle', data.videoInfo?.title || '未知视频');
-        AppStorage.setItem('currentEpisodeIndex', '0');
+        localStorage.setItem('currentEpisodes', JSON.stringify(episodes));
+        localStorage.setItem('currentVideoTitle', data.videoInfo?.title || '未知视频');
+        localStorage.setItem('currentEpisodeIndex', '0');
 
         // 添加到观看历史
         if (data.videoInfo && typeof addToViewingHistory === 'function') {
@@ -1270,7 +1262,7 @@ function parseHtmlEpisodeList(html) {
 
         return episodes;
     } catch (e) {
-        Logger.error("解析HTML剧集失败", e);
+        console.error("解析HTML剧集失败", e);
         return [];
     }
 }
@@ -1341,7 +1333,7 @@ function resetToHome() {
         sessionStorage.removeItem('searchResults');
         sessionStorage.removeItem('searchSelectedAPIs');
     } catch (e) {
-        Logger.error('清理搜索缓存失败:', e);
+        console.error('清理搜索缓存失败:', e);
     }
 
     renderSearchHistory();
@@ -1476,7 +1468,7 @@ function handleResultClick(event) {
     if (typeof showVideoEpisodesModal === 'function') {
         showVideoEpisodesModal(id, name, sourceCode, apiUrl, { year, typeName, videoKey, blurb, remarks, area, actor, director });
     } else {
-        Logger.error('showVideoEpisodesModal function not found!');
+        console.error('showVideoEpisodesModal function not found!');
         showToast('无法加载剧集信息', 'error');
     }
 }
@@ -1530,14 +1522,14 @@ async function showVideoEpisodesModal(id, title, sourceCode, apiUrl, fallbackDat
                 // 使用获取到的真实地址更新UI
                 episodes = detailData.episodes;
                 AppState.set('currentEpisodes', episodes);
-                AppStorage.setItem('currentEpisodes', JSON.stringify(episodes));
+                localStorage.setItem('currentEpisodes', JSON.stringify(episodes));
 
                 const episodeGrid = document.querySelector('#modalContent [data-field="episode-buttons-grid"]');
                 if (episodeGrid) {
                     episodeGrid.innerHTML = renderEpisodeButtons(episodes, title, sourceCode, sourceNameForDisplay, effectiveTypeName);
                 }
             } catch (e) {
-                Logger.log('后台获取真实地址失败:', e.message);
+                console.log('后台获取真实地址失败:', e.message);
             }
         }, 500);
     }
@@ -1555,8 +1547,8 @@ async function showVideoEpisodesModal(id, title, sourceCode, apiUrl, fallbackDat
     AppState.set('currentVideoYear', videoData.vod_year || fallbackData.year);
     AppState.set('currentVideoTypeName', effectiveTypeName);
     AppState.set('currentVideoKey', fallbackData.videoKey);
-    AppStorage.setItem('currentEpisodes', JSON.stringify(episodes));
-    AppStorage.setItem('currentVideoTitle', effectiveTitle);
+    localStorage.setItem('currentEpisodes', JSON.stringify(episodes));
+    localStorage.setItem('currentVideoTitle', effectiveTitle);
     const template = document.getElementById('video-details-template');
     if (!template) return showToast('详情模板未找到!', 'error');
     const modalContent = template.content.cloneNode(true);
@@ -1706,7 +1698,7 @@ function copyLinks() {
     navigator.clipboard.writeText(linkList).then(() => {
         showToast('所有剧集链接已复制', 'success');
     }).catch(err => {
-        Logger.error('复制链接失败:', err);
+        console.error('复制链接失败:', err);
         showToast('复制失败，请检查浏览器权限', 'error');
     });
 }
@@ -1867,11 +1859,11 @@ async function manualRetryDetection(qualityId, videoData) {
                 }
             }
         } catch (e) {
-            Logger.warn('手动重测后，回写搜索结果缓存列表失败:', e);
+            console.warn('手动重测后，回写搜索结果缓存列表失败:', e);
         }
 
     } catch (error) {
-        Logger.error('手动重新检测失败:', error);
+        console.error('手动重新检测失败:', error);
         // 如果出错，也在UI上明确显示失败
         updateQualityBadgeUI(qualityId, '检测失败', badge);
     }
@@ -1907,7 +1899,7 @@ async function fetchSpecialDetail(id, sourceCode) {
         if (data.code === 200 && Array.isArray(data.episodes) && data.episodes.length > 0) return data;
         throw new Error(data.msg || '无剧集数据');
     } catch (e) {
-        Logger.error('获取特殊详情错误:', e);
+        console.error('获取特殊详情错误:', e);
         throw e;
     }
 }

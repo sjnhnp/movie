@@ -26,9 +26,12 @@
     <meta property="og:url" content="https://yourwebsite.com" />
     <meta property="og:type" content="website" />
 
-    <!-- 资源预连接，加快第三方资源加载 -->
+    <!-- 字体和图标 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&display=swap"
+        rel="stylesheet">
     <link rel="preconnect" href="https://images.icon-icons.com">
     <link rel="dns-prefetch" href="https://images.icon-icons.com">
 
@@ -307,10 +310,16 @@
                             </p>
                         </div>
                         <div class="flex items-center gap-3">
-                            <label class="switch" style="margin-bottom:0;">
-                                <input type="checkbox" id="preloadingToggle">
-                                <span class="slider"></span>
-                            </label>
+                            <div class="relative inline-block w-12 align-middle select-none">
+                                <input type="checkbox" id="preloadingToggle"
+                                    class="opacity-0 absolute w-full h-full cursor-pointer z-10" aria-checked="false">
+                                <div
+                                    class="toggle-bg bg-white/20 w-12 h-6 rounded-full transition-all duration-300 ease-in-out">
+                                </div>
+                                <div
+                                    class="toggle-dot absolute w-5 h-5 bg-white rounded-full top-0.5 left-0.5 transition-all duration-300 ease-in-out shadow-lg">
+                                </div>
+                            </div>
                             <input type="number" min="1" max="10" step="1" id="preloadCountInput"
                                 class="w-16 bg-white/10 border border-white/20 text-white px-2 py-1 rounded-lg text-sm text-center focus:outline-none focus:border-white/40 transition-all duration-300"
                                 title="预加载范围1-10" aria-label="预加载集数">

@@ -1,58 +1,72 @@
 /* -------- 1. 全局 CSS 变量（现代简约风格） -------- */
 :root {
-  --primary-color: #6366f1;  /* 现代紫色 */
-  --primary-light: #a5b4fc;  /* 浅紫色 */
-  --secondary-color: #0f0f23;  /* 深蓝黑 */
-  --accent-color: #8b5cf6;  /* 优雅紫色 */
-  --text-color: #f8fafc;  /* 纯净白 */
-  --text-muted: #94a3b8;  /* 温和灰 */
-  --border-color: rgba(148, 163, 184, 0.1);  /* 极淡边框 */
-  --page-gradient-start: #0f0f23;  /* 深色起始 */
-  --page-gradient-end: #1e1e3f;  /* 深色结束 */
-  --card-gradient-start: #1a1a2e;  /* 卡片渐变起始 */
-  --card-gradient-end: #16213e;  /* 卡片渐变结束 */
-  --card-accent: rgba(99, 102, 241, 0.05);  /* 极淡紫色 */
-  --card-hover-border: rgba(99, 102, 241, 0.3);  /* 悬停边框 */
-  --surface-color: #1e293b;  /* 表面颜色 */
-  --surface-hover: #334155;  /* 表面悬停 */
+  --primary-color: #6366f1;
+  /* 现代紫色 */
+  --primary-light: #a5b4fc;
+  /* 浅紫色 */
+  --secondary-color: #0f0f23;
+  /* 深蓝黑 */
+  --accent-color: #8b5cf6;
+  /* 优雅紫色 */
+  --text-color: #f8fafc;
+  /* 纯净白 */
+  --text-muted: #94a3b8;
+  /* 温和灰 */
+  --border-color: rgba(148, 163, 184, 0.1);
+  /* 极淡边框 */
+  --page-gradient-start: #0f0f23;
+  /* 深色起始 */
+  --page-gradient-end: #1e1e3f;
+  /* 深色结束 */
+  --card-gradient-start: #1a1a2e;
+  /* 卡片渐变起始 */
+  --card-gradient-end: #16213e;
+  /* 卡片渐变结束 */
+  --card-accent: rgba(99, 102, 241, 0.05);
+  /* 极淡紫色 */
+  --card-hover-border: rgba(99, 102, 241, 0.3);
+  /* 悬停边框 */
+  --surface-color: #1e293b;
+  /* 表面颜色 */
+  --surface-hover: #334155;
+  /* 表面悬停 */
+  --font-main: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
 }
 
-/* -------- 2. 统一滚动条样式（全局应用） -------- */
-
-html::-webkit-scrollbar,
-body::-webkit-scrollbar,
-.history-panel::-webkit-scrollbar,
-.episode-grid::-webkit-scrollbar,
-.custom-title-scroll::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+body {
+  font-family: var(--font-main);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-html::-webkit-scrollbar-track,
-body::-webkit-scrollbar-track,
-.history-panel::-webkit-scrollbar-track,
-.episode-grid::-webkit-scrollbar-track,
-.custom-title-scroll::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 4px;
+/* -------- 2. 全局滚动条美化（现代简约） -------- */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
-html::-webkit-scrollbar-thumb,
-body::-webkit-scrollbar-thumb,
-.history-panel::-webkit-scrollbar-thumb,
-.episode-grid::-webkit-scrollbar-thumb,
-.custom-title-scroll::-webkit-scrollbar-thumb {
-  background-color: #444;
-  border-radius: 4px;
-  transition: background-color 0.3s ease;
+::-webkit-scrollbar-track {
+  background: rgba(15, 15, 35, 0.1);
+  border-radius: 10px;
 }
 
-html::-webkit-scrollbar-thumb:hover,
-body::-webkit-scrollbar-thumb:hover,
-.history-panel::-webkit-scrollbar-thumb:hover,
-.episode-grid::-webkit-scrollbar-thumb:hover,
-.custom-title-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: #555;
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.4);
+  background-clip: content-box;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
 /* -------- 3. 页面背景（现代简约风格） -------- */
@@ -67,7 +81,8 @@ body::-webkit-scrollbar-thumb:hover,
 }
 
 /* 修复Android Chrome地址栏隐藏时底部白色背景问题 */
-html, body {
+html,
+body {
   background-color: var(--page-gradient-start);
   min-height: 100vh;
   /* 确保页面至少占满视口高度 */
@@ -101,12 +116,14 @@ button,
 }
 
 /* 选中状态的样式 */
-input[type="checkbox"]:checked + .toggle-bg {
-  background-color: #6366f1 !important; /* 使用主色调 */
+input[type="checkbox"]:checked+.toggle-bg {
+  background-color: #6366f1 !important;
+  /* 使用主色调 */
 }
 
-input[type="checkbox"]:checked + .toggle-bg + .toggle-dot {
-  transform: translateX(1.5rem); /* 24px = 1.5rem */
+input[type="checkbox"]:checked+.toggle-bg+.toggle-dot {
+  transform: translateX(1.5rem);
+  /* 24px = 1.5rem */
 }
 
 /* -------- 6. 卡片基本样式（现代简约风格） -------- */
@@ -137,7 +154,7 @@ input[type="checkbox"]:checked + .toggle-bg + .toggle-dot {
   overflow: hidden;
   text-overflow: ellipsis;
   -webkit-line-clamp: 2;
-  line-clamp: 2; 
+  line-clamp: 2;
   line-height: 1.4;
   word-break: break-word;
   hyphens: auto;
@@ -185,11 +202,12 @@ input[type="checkbox"]:checked + .toggle-bg + .toggle-dot {
 
 /* 修复搜索按钮在移动端的图标居中问题 */
 @media (max-width: 640px) {
+
   #homeButton svg,
   button[aria-label="搜索按钮"] svg {
     margin-right: 0 !important;
   }
-  
+
   #homeButton,
   button[aria-label="搜索按钮"] {
     justify-content: center !important;
@@ -327,6 +345,12 @@ input[type="checkbox"]:checked + .toggle-bg + .toggle-dot {
   opacity: 0.9;
 }
 
+/* 加载动画增强 */
+.animate-spin {
+  border-top-color: var(--primary-color) !important;
+  filter: drop-shadow(0 0 8px var(--primary-color));
+}
+
 .filter-disabled .filter-description {
   color: #ff7b9d !important;
   font-style: italic;
@@ -457,29 +481,8 @@ body {
   width: 320px;
   box-sizing: border-box;
   scrollbar-gutter: stable;
-  scrollbar-width: thin;
-  scrollbar-color: #333 #111;
 }
 
-/* 为历史面板定制滚动条样式 */
-.history-panel::-webkit-scrollbar {
-  width: 6px;
-}
-
-.history-panel::-webkit-scrollbar-track {
-  background: #111;
-  border-radius: 4px;
-}
-
-.history-panel::-webkit-scrollbar-thumb {
-  background-color: #333;
-  border-radius: 4px;
-}
-
-.history-panel::-webkit-scrollbar-thumb:hover {
-  background-color: #444;
-  /* old4 的滑块悬停颜色 (new4 全局是 #555) */
-}
 
 .history-panel.show {
   transform: translateX(0);
@@ -529,7 +532,7 @@ body {
     border-radius: 50%;
     padding: 0.25rem;
   }
-  
+
   .history-item .delete-btn:active {
     background-color: rgba(239, 68, 68, 0.2);
     transform: scale(0.95);
@@ -870,8 +873,10 @@ body {
 
 /* -------- 模态框标题样式优化 -------- */
 #modalTitle {
-  font-size: 1.5rem !important; /* 24px，比text-3xl(30px)更内敛 */
-  font-weight: 600 !important; /* 比font-bold(700)更优雅 */
+  font-size: 1.5rem !important;
+  /* 24px，比text-3xl(30px)更内敛 */
+  font-weight: 600 !important;
+  /* 比font-bold(700)更优雅 */
   line-height: 1.4 !important;
   letter-spacing: -0.02em !important;
 }
@@ -879,7 +884,8 @@ body {
 /* 移动端进一步优化标题大小 */
 @media (max-width: 768px) {
   #modalTitle {
-    font-size: 1.25rem !important; /* 20px，移动端更小 */
+    font-size: 1.25rem !important;
+    /* 20px，移动端更小 */
     font-weight: 600 !important;
     line-height: 1.3 !important;
   }
@@ -888,7 +894,8 @@ body {
 /* 超小屏幕进一步优化 */
 @media (max-width: 480px) {
   #modalTitle {
-    font-size: 1.125rem !important; /* 18px，超小屏幕最小 */
+    font-size: 1.125rem !important;
+    /* 18px，超小屏幕最小 */
     font-weight: 600 !important;
     line-height: 1.3 !important;
   }
@@ -977,19 +984,20 @@ body {
 
 /* 移动端：始终显示删除按钮 */
 @media (max-width: 768px) {
-.history-item .history-item-delete-btn {
-  opacity: 1;
-  /* 为了在移动端有更好的点击效果，可以加一点样式 */
-  background-color: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: 50%;
-  padding: 0.2rem; /* 微调点击区域 */
-}
+  .history-item .history-item-delete-btn {
+    opacity: 1;
+    /* 为了在移动端有更好的点击效果，可以加一点样式 */
+    background-color: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 50%;
+    padding: 0.2rem;
+    /* 微调点击区域 */
+  }
 
-.history-item .history-item-delete-btn:active {
-  background-color: rgba(239, 68, 68, 0.2);
-  transform: scale(0.95);
-}
+  .history-item .history-item-delete-btn:active {
+    background-color: rgba(239, 68, 68, 0.2);
+    transform: scale(0.95);
+  }
 }
 
 /* 综艺按钮专用样式 (首页弹窗) */

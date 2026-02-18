@@ -92,74 +92,8 @@ media-player {
   padding: 1rem 0;
 }
 
-/* 自定义开关样式 */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 46px;
-  height: 24px;
-}
 
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 2px;
-  background: #fff;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-/* 未选中状态的悬停效果 */
-.slider:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* 选中状态 */
-input:checked+.slider {
-  background: #404040;
-  border-color: transparent;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-}
-
-/* 选中状态的滑块位置 */
-input:checked+.slider:before {
-  transform: translateX(22px);
-  background: #ffffff;
-}
-
-/* 选中状态的悬停效果 */
-input:checked+.slider:hover {
-  background: #505050;
-}
-
-/* 禁用状态 */
-input:disabled+.slider {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+/* 键盘快捷键提示 */
 
 /* 键盘快捷键提示 */
 .shortcut-hint {

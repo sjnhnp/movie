@@ -298,19 +298,18 @@
                     </div>
                 </div>
 
-                <!-- 播放预加载 -->
                 <div class="bg-white/5 rounded-xl p-4">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <label for="preloadingToggle" class="text-sm font-medium text-white/90">
-                                播放预加载
-                            </label>
-                            <p class="text-xs text-white/60 mt-1">
-                                自动预加载集数
-                            </p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="relative inline-block w-12 align-middle select-none">
+                    <div class="flex flex-col space-y-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <label for="preloadingToggle" class="text-sm font-medium text-white/90">
+                                    播放预加载
+                                </label>
+                                <p class="text-[10px] text-white/40 mt-0.5">
+                                    开启后自动缓存后续剧集
+                                </p>
+                            </div>
+                            <div class="relative inline-block w-12 align-middle select-none text-right">
                                 <input type="checkbox" id="preloadingToggle"
                                     class="opacity-0 absolute w-full h-full cursor-pointer z-10" aria-checked="false">
                                 <div
@@ -320,9 +319,16 @@
                                     class="toggle-dot absolute w-5 h-5 bg-white rounded-full top-0.5 left-0.5 transition-all duration-300 ease-in-out shadow-lg">
                                 </div>
                             </div>
-                            <input type="number" min="1" max="10" step="1" id="preloadCountInput"
-                                class="w-16 bg-white/10 border border-white/20 text-white px-2 py-1 rounded-lg text-sm text-center focus:outline-none focus:border-white/40 transition-all duration-300"
-                                title="预加载范围1-10" aria-label="预加载集数">
+                        </div>
+
+                        <div id="preloadingCountPanel"
+                            class="flex items-center justify-between pt-3 border-t border-white/5 transition-all duration-300">
+                            <span class="text-xs text-white/60">预加载集数 (1-10)</span>
+                            <div class="flex items-center bg-white/10 rounded-lg p-0.5">
+                                <input type="number" min="1" max="10" step="1" id="preloadCountInput"
+                                    class="w-12 bg-transparent text-white text-sm text-center focus:outline-none"
+                                    title="数量" aria-label="预加载集数">
+                            </div>
                         </div>
                     </div>
                 </div>

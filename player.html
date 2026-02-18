@@ -323,31 +323,52 @@
                         </button>
                         <div id="play-settings-dropdown"
                             class="hidden absolute right-0 bottom-full mb-2 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl shadow-xl p-4 w-56">
-                            <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center justify-between mb-4">
                                 <span class="text-white/90 text-sm font-medium">自动连播</span>
-                                <label class="switch">
-                                    <input type="checkbox" id="autoplay-next" checked aria-label="自动播放">
-                                    <span class="slider"></span>
-                                </label>
+                                <div class="relative inline-block w-12 align-middle select-none">
+                                    <input type="checkbox" id="autoplay-next" checked
+                                        class="opacity-0 absolute w-full h-full cursor-pointer z-10" aria-label="自动播放">
+                                    <div
+                                        class="toggle-bg bg-white/20 w-12 h-6 rounded-full transition-all duration-300 ease-in-out">
+                                    </div>
+                                    <div
+                                        class="toggle-dot absolute w-5 h-5 bg-white rounded-full top-0.5 left-0.5 transition-all duration-300 ease-in-out shadow-lg">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center justify-between mb-4">
                                 <span class="text-white/90 text-sm font-medium">记住进度</span>
-                                <label class="switch">
+                                <div class="relative inline-block w-12 align-middle select-none">
                                     <input type="checkbox" id="remember-episode-progress-toggle" checked
-                                        aria-label="记住进度">
-                                    <span class="slider"></span>
-                                </label>
+                                        class="opacity-0 absolute w-full h-full cursor-pointer z-10" aria-label="记住进度">
+                                    <div
+                                        class="toggle-bg bg-white/20 w-12 h-6 rounded-full transition-all duration-300 ease-in-out">
+                                    </div>
+                                    <div
+                                        class="toggle-dot absolute w-5 h-5 bg-white rounded-full top-0.5 left-0.5 transition-all duration-300 ease-in-out shadow-lg">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center justify-between mb-4">
                                 <span class="text-white/90 text-sm font-medium">广告过滤</span>
-                                <label class="switch">
-                                    <input type="checkbox" id="adFilterToggle" aria-label="分片广告过滤">
-                                    <span class="slider"></span>
-                                </label>
+                                <div class="relative inline-block w-12 align-middle select-none">
+                                    <input type="checkbox" id="adFilterToggle"
+                                        class="opacity-0 absolute w-full h-full cursor-pointer z-10"
+                                        aria-label="分片广告过滤">
+                                    <div
+                                        class="toggle-bg bg-white/20 w-12 h-6 rounded-full transition-all duration-300 ease-in-out">
+                                    </div>
+                                    <div
+                                        class="toggle-dot absolute w-5 h-5 bg-white rounded-full top-0.5 left-0.5 transition-all duration-300 ease-in-out shadow-lg">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex items-center justify-between mb-3">
-                                <span class="text-white/90 text-sm font-medium">预加载</span>
-                                <div class="flex items-center gap-3">
+                            <div class="flex flex-col space-y-3 pb-2">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <span class="text-white/90 text-sm font-medium">播放预加载</span>
+                                        <p class="text-[10px] text-white/40 mt-0.5">开启后自动缓存后续剧集</p>
+                                    </div>
                                     <div class="relative inline-block w-12 align-middle select-none">
                                         <input type="checkbox" id="preloadingToggle"
                                             class="opacity-0 absolute w-full h-full cursor-pointer z-10"
@@ -359,9 +380,14 @@
                                             class="toggle-dot absolute w-5 h-5 bg-white rounded-full top-0.5 left-0.5 transition-all duration-300 ease-in-out shadow-lg">
                                         </div>
                                     </div>
-                                    <input type="number" min="1" max="10" step="1" id="preloadCountInput"
-                                        class="w-16 bg-white/10 border border-white/20 text-white px-2 py-1 rounded-lg text-sm text-center focus:outline-none focus:border-white/40 transition-all duration-300"
-                                        title="预加载范围1-10" aria-label="预加载集数">
+                                </div>
+                                <div class="flex items-center justify-between pt-2 border-t border-white/5">
+                                    <span class="text-xs text-white/60">预加载集数 (1-10)</span>
+                                    <div class="flex items-center bg-white/10 rounded-lg p-0.5">
+                                        <input type="number" min="1" max="10" step="1" id="preloadCountInput"
+                                            class="w-10 bg-transparent text-white text-sm text-center focus:outline-none"
+                                            title="预加载范围1-10" aria-label="预加载集数">
+                                    </div>
                                 </div>
                             </div>
                             <div class="flex items-center justify-between">

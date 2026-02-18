@@ -78,13 +78,7 @@ media-player {
   margin-bottom: 10px;
 }
 
-/* 选集按钮样式 */
-.episode-active {
-  background: #3b82f6 !important;
-  border-color: #60a5fa !important;
-  color: #fff !important;
-  font-weight: bold;
-}
+
 
 .episode-grid {
   max-height: 30vh;
@@ -155,16 +149,7 @@ media-player {
   /* 最彻底的解决方案 */
 }
 
-/* 确保播放器原生控制条不会覆盖功能按钮菜单 */
-.vds-controls {
-  z-index: 50 !important;
-  /* 低于功能菜单的z-index */
-}
-
-media-player .vds-controls {
-  z-index: 50 !important;
-}
-
+media-player .vds-controls,
 media-player .vds-controls-group {
   z-index: 50 !important;
 }
@@ -474,19 +459,7 @@ media-player:focus-within #custom-right-controls {
   }
 }
 
-/* 开关文本标签样式优化 */
-.control-label {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.85);
-  margin-right: 0.5rem;
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
 
-/* 选中状态下的文本标签 */
-.switch input:checked~.control-label {
-  color: #ffffff;
-}
 
 /* 容器样式优化 */
 .player-control-bar>div {
@@ -502,50 +475,10 @@ media-player:focus-within #custom-right-controls {
 }
 
 
-/* 添加焦点状态 */
-.switch input:focus+.slider {
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
-}
 
-/* 设置动画效果 */
-@keyframes switchOn {
-  0% {
-    transform: scale(0.95);
-  }
-
-  50% {
-    transform: scale(1.05);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
-
-.switch input:checked+.slider {
-  animation: switchOn 0.2s ease-out;
-}
 
 /* 响应式调整 */
-@media (max-width: 768px) {
-  .switch {
-    width: 40px;
-    height: 22px;
-  }
 
-  .slider:before {
-    width: 16px;
-    height: 16px;
-  }
-
-  input:checked+.slider:before {
-    transform: translateX(18px);
-  }
-
-  .control-label {
-    font-size: 0.8125rem;
-  }
-}
 
 /* 隐藏 "选集" 二字 */
 #episodes-container h2 {
@@ -1860,6 +1793,7 @@ media-fullscreen-button {
 .line-clamp-1 {
   display: -webkit-box;
   -webkit-line-clamp: 1;
+  line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1868,6 +1802,7 @@ media-fullscreen-button {
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1879,6 +1814,7 @@ media-fullscreen-button {
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
+  line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;

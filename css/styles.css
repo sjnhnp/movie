@@ -33,10 +33,16 @@
   --font-main: 'Inter', 'Noto Sans SC', system-ui, -apple-system, sans-serif;
 }
 
+html,
 body {
+  background-color: var(--page-gradient-start);
   font-family: var(--font-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 /* -------- 2. 全局滚动条美化（现代简约） -------- */
@@ -80,15 +86,7 @@ body {
   min-height: 100vh;
 }
 
-/* 修复Android Chrome地址栏隐藏时底部白色背景问题 */
-html,
-body {
-  background-color: var(--page-gradient-start);
-  min-height: 100vh;
-  /* 确保页面至少占满视口高度 */
-  overflow-x: hidden;
-  /* 防止水平滚动 */
-}
+/* -------- 3. 页面背景（现代简约风格） -------- */
 
 /* -------- 4. 按钮 & 卡片过渡（优化） -------- */
 button,
@@ -105,26 +103,7 @@ button,
 }
 
 /* -------- 5. 开关样式 -------- */
-.toggle-bg {
-  background-color: rgba(255, 255, 255, 0.2);
-  transition: background-color 0.3s ease-in-out;
-}
-
-.toggle-dot {
-  transform: translateX(0);
-  transition: transform 0.3s ease-in-out;
-}
-
-/* 选中状态的样式 */
-input[type="checkbox"]:checked+.toggle-bg {
-  background-color: #6366f1 !important;
-  /* 使用主色调 */
-}
-
-input[type="checkbox"]:checked+.toggle-bg+.toggle-dot {
-  transform: translateX(1.5rem);
-  /* 24px = 1.5rem */
-}
+/* (Consolidated into Section 8) */
 
 /* -------- 6. 卡片基本样式（现代简约风格） -------- */
 .card-hover {
@@ -139,6 +118,7 @@ input[type="checkbox"]:checked+.toggle-bg+.toggle-dot {
   flex-direction: column;
   height: 100%;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, border-color, box-shadow;
 }
 
 /* 卡片内容布局优化 */
@@ -232,46 +212,36 @@ input[type="checkbox"]:checked+.toggle-bg+.toggle-dot {
 
 /* -------- 8. 开关样式（现代简约风格） -------- */
 /* 现代开关背景样式 */
-#yellowFilterToggle:checked+.toggle-bg,
-#adFilterToggle:checked+.toggle-bg,
-#doubanToggle:checked+.toggle-bg,
-#preloadingToggle:checked+.toggle-bg {
-  background-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-}
-
-/* 现代开关点样式 */
-#yellowFilterToggle:checked~.toggle-dot,
-#adFilterToggle:checked~.toggle-dot,
-#doubanToggle:checked~.toggle-dot,
-#preloadingToggle:checked~.toggle-dot {
-  transform: translateX(1.5rem);
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
-}
-
-/* 现代焦点与悬停样式 */
-#yellowFilterToggle:focus+.toggle-bg,
-#yellowFilterToggle:hover+.toggle-bg,
-#adFilterToggle:focus+.toggle-bg,
-#adFilterToggle:hover+.toggle-bg,
-#doubanToggle:focus+.toggle-bg,
-#doubanToggle:hover+.toggle-bg,
-#preloadingToggle:focus+.toggle-bg,
-#preloadingToggle:hover+.toggle-bg {
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-}
-
-/* 现代过渡效果 */
-.toggle-dot {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  background: #ffffff;
-}
-
 .toggle-bg {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background-color: var(--text-muted);
   border-radius: 12px;
+}
+
+/* 现代码点样式 */
+.toggle-dot {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  transform: translateX(0);
+}
+
+/* 选中状态 - 通用 */
+input[type="checkbox"]:checked+.toggle-bg {
+  background-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+input[type="checkbox"]:checked+.toggle-bg+.toggle-dot,
+input[type="checkbox"]:checked~.toggle-dot {
+  transform: translateX(1.5rem);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+}
+
+/* 焦点与悬停样式 */
+.toggle-bg:hover,
+input[type="checkbox"]:focus+.toggle-bg {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
 }
 
 /* -------- 9. 表单复选框（保留自定义样式） -------- */
@@ -393,11 +363,7 @@ input[type="checkbox"]:checked+.toggle-bg+.toggle-dot {
 }
 
 /* 基本布局可以用Tailwind替代 */
-body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+/* (Consolidated into Section 3) */
 
 .container {
   flex: 1;
@@ -1028,12 +994,4 @@ body {
 .variety-grid-layout .episode-btn:hover {
   background: rgba(255, 255, 255, 0.15);
   border-color: var(--primary-color);
-}
-
-/* 全局激活按钮的样式 (对所有类型节目都有效) */
-.episode-active {
-  background: #3b82f6 !important;
-  border-color: #60a5fa !important;
-  color: #fff !important;
-  font-weight: bold;
 }

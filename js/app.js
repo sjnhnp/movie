@@ -1894,14 +1894,14 @@ function reorderResultCards(sorted) {
 // 专门用于获取特殊源（内置或自定义）真实播放地址的辅助函数
 async function fetchSpecialDetail(id, sourceCode) {
     const detailUrl = `/api/detail?id=${id}&source=${sourceCode}`;
-
-    const response = await fetch(detailUrl);
-    if (!response.ok) {
-        throw new Error(`API请求失败: ${response.status}`);
+    try {
+        const response = await fetch(detailUrl);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (data.code === 200 && Array.isArray(data.episodes) && data.episodes.length > 0) return data;
+        throw new Error(data.msg || '无剧集数据');
+    } catch (e) {
+        console.error('获取特殊详情错误:', e);
+        throw e;
     }
-    const data = await response.json();
-    if (data.code !== 200 || !Array.isArray(data.episodes) || data.episodes.length === 0) {
-        throw new Error(data.msg || '未能获取到有效的剧集信息');
-    }
-    return data;
 }

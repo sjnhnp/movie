@@ -33,18 +33,37 @@ async function handleSpecialSourceDetail(id, sourceCode) {
             'text'
         );
 
-        let matches = [];
+        let matches = htmlContent.match(/\$(https?:\/\/[^"'\s]+?\.m3u8[^\s"']*)/g) || [];
         if (matches.length === 0) {
-            matches = htmlContent.match(/\$(https?:\/\/[^"'\s]+?\.m3u8)/g) || [];
+            matches = htmlContent.match(/(https?:\/\/[^"'\s]+?\.m3u8[^\s"']*)/g) || [];
         }
+
         matches = Array.from(new Set(matches)).map(link => {
-            link = link.slice(1);
+            link = link.startsWith('$') ? link.slice(1) : link;
+
+            // 补全协议或相对路径
+            if (link.startsWith('//')) {
+                link = 'https:' + link;
+            } else if (link.startsWith('/')) {
+                try {
+                    const origin = new URL(detailPageUrl).origin;
+                    link = origin + link;
+                } catch (e) {
+                    console.warn('补全绝对路径失败:', e);
+                }
+            } else if (!link.startsWith('http')) {
+                try {
+                    link = new URL(link, detailPageUrl).href;
+                } catch (e) { }
+            }
+
+            // 移除可能存在的括号备注 (针对某些特殊源)
             const idx = link.indexOf('(');
             return idx > -1 ? link.slice(0, idx) : link;
-        });
+        }).filter(link => link && link.startsWith('http') && link.includes('.m3u8'));
 
         if (matches.length === 0) {
-            throw new Error(`未能从${API_SITES[sourceCode].name}源获取到有效的播放地址`);
+            throw new Error(`未能从${API_SITES[sourceCode].name}详情页提取到有效的 m3u8 地址`);
         }
 
         const title = (htmlContent.match(/<h1[^>]*>([^<]+)<\/h1>/) || [, ''])[1].trim();
@@ -81,27 +100,40 @@ async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl) {
         );
 
         // 优化1：增加多种播放地址正则匹配（兼容不同格式）
-        let matches = [];
-        // 匹配带$前缀的地址
-        matches = htmlContent.match(/\$(https?:\/\/[^"'\s]+?\.m3u8)/g) || [];
-        // 匹配不带$前缀的地址
+        let matches = htmlContent.match(/\$(https?:\/\/[^"'\s]+?\.m3u8[^\s"']*)/g) || [];
         if (matches.length === 0) {
-            matches = htmlContent.match(/(https?:\/\/[^"'\s]+?\.m3u8)/g) || [];
-        }
-        // 匹配带参数的地址
-        if (matches.length === 0) {
-            matches = htmlContent.match(/(https?:\/\/[^"'\s]+?\.m3u8\?[^"'\s]+)/g) || [];
+            matches = htmlContent.match(/(https?:\/\/[^"'\s]+?\.m3u8[^\s"']*)/g) || [];
         }
 
-        // 优化2：清洗地址（移除多余字符）
+        // 优化2：清洗地址（移除多余字符并补全相对路径）
         matches = Array.from(new Set(matches)).map(link => {
             link = link.startsWith('$') ? link.slice(1) : link; // 移除可能的$前缀
+
+            // 补全协议或相对路径
+            if (link.startsWith('//')) {
+                link = 'https:' + link;
+            } else if (link.startsWith('/')) {
+                try {
+                    const origin = new URL(detailPageUrl).origin;
+                    link = origin + link;
+                } catch (e) {
+                    console.warn('补全绝对路径失败:', e);
+                }
+            } else if (!link.startsWith('http')) {
+                // 可能是相对路径，也可能是完全无效
+                try {
+                    link = new URL(link, detailPageUrl).href;
+                } catch (e) {
+                    // 保持原样，后续filter会过滤掉
+                }
+            }
+
             link = link.split('?')[0] + '?' + link.split('?').slice(1).join('?'); // 保留参数
             return link;
-        }).filter(link => link.startsWith('http') && link.includes('.m3u8')); // 过滤无效地址
+        }).filter(link => link && link.startsWith('http') && link.includes('.m3u8')); // 过滤无效地址
 
         if (matches.length === 0) {
-            throw new Error('未提取到真实播放地址（三次尝试后将自动修复）');
+            throw new Error('未能从详情页提取到有效的 m3u8 播放地址');
         }
 
         // 优化3：立即保存真实地址到缓存（供下次使用）
@@ -324,8 +356,14 @@ async function testSiteAvailability(apiUrl) {
             signal: AbortSignal.timeout(5000)
         });
         if (!response.ok) return false;
-        const data = await response.json();
-        return data && data.code !== 400 && Array.isArray(data.list);
+        const text = await response.text();
+        try {
+            const data = JSON.parse(text);
+            return data && data.code !== 400 && Array.isArray(data.list);
+        } catch (e) {
+            console.error('可用性测试JSON解析失败:', e, text.slice(0, 100));
+            return false;
+        }
     } catch (e) {
         console.error('站点可用性测试失败:', e);
         return false;
@@ -376,3 +414,11 @@ function resolveUrl(baseUrl, relativeUrl) {
         return base + rel;
     }
 }
+
+// 导出到全局
+window.handleSpecialSourceDetail = handleSpecialSourceDetail;
+window.handleCustomApiSpecialDetail = handleCustomApiSpecialDetail;
+window.fetchWithTimeout = fetchWithTimeout;
+window.handleApiRequest = handleApiRequest;
+window.resolveUrl = window.resolveUrl || resolveUrl;
+window.testSiteAvailability = testSiteAvailability;

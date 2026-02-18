@@ -7,6 +7,19 @@
     <meta name="description" content="看看讲究将就看看">
     <title>播放器</title>
 
+    <!-- 屏蔽 Tailwind 生产环境警告 -->
+    <script>
+        (function () {
+            const originalWarn = console.warn;
+            console.warn = function (...args) {
+                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) {
+                    return;
+                }
+                originalWarn.apply(console, args);
+            };
+        })();
+    </script>
+
     <!-- 外部样式表 -->
     <link rel="stylesheet" href="css/styles.css">
 

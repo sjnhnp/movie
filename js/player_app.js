@@ -492,9 +492,22 @@ async function processVideoUrl(url) {
     }
 
     try {
-        // 1. 拉取 m3u8 文本
-        const resp = await fetch(url, { mode: 'cors' });
-        if (!resp.ok) throw new Error(`无法获取 m3u8，状态 ${resp.status}`);
+        // 1. 协议补全
+        let targetUrl = url;
+        if (typeof targetUrl === 'string' && targetUrl.startsWith('//')) {
+            targetUrl = 'https:' + targetUrl;
+        }
+
+        // 2. 拉取 m3u8 文本
+        let resp;
+        try {
+            resp = await fetch(targetUrl, { mode: 'cors' });
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        } catch (e) {
+            console.warn(`[ProcessVideo] 直接抓取失败 (可能是 CORS)，回退到内置代理: ${targetUrl}`, e);
+            // 直接返回代理地址，代理服务器会自动处理 M3U8 重写和分片代理
+            return '/proxy/' + encodeURIComponent(targetUrl);
+        }
         const m3u8Text = await resp.text();
 
         // 2. 广告过滤 & URL 补全
@@ -567,7 +580,12 @@ async function initPlayer(videoUrl, title) {
 
     // 为播放器设置属性
     player.title = title;
-    player.src = { src: processedUrl, type: 'application/x-mpegurl' };
+    // 强制协议补全
+    let finalUrl = processedUrl;
+    if (finalUrl && typeof finalUrl === 'string' && finalUrl.startsWith('//')) {
+        finalUrl = 'https:' + finalUrl;
+    }
+    player.src = { src: finalUrl, type: 'application/x-mpegurl' };
 
     // 确保核心事件监听器只被添加一次
     if (!player.dataset.listenersAdded) {
@@ -626,8 +644,18 @@ function addPlayerEventListeners() {
     });
 
     player.addEventListener('error', (event) => {
-        console.error("Vidstack Player Error:", event.detail);
-        showError('播放器遇到错误，请检查视频源');
+        const errorDetail = event.detail;
+        console.error("Vidstack Player Error:", errorDetail);
+
+        // 尝试获取更详细的错误信息
+        let errorMessage = '播放器遇到错误，请检查视频源';
+        if (errorDetail && errorDetail.message) {
+            errorMessage += ': ' + errorDetail.message;
+        } else if (errorDetail && errorDetail.code) {
+            errorMessage += ` (错误码: ${errorDetail.code})`;
+        }
+
+        showError(errorMessage);
     });
 
     player.addEventListener('end', () => {
@@ -847,28 +875,43 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
             }
         }
 
-        // 若为自定义detail源，且初始地址无效，自动重新请求
+        // 若为特殊详情源（内置或自定义），且初始地址无效，自动重新请求真实地址
         const sourceCode = urlParams.get('source_code') || '';
-        const isCustomSpecialSource = sourceCode.startsWith('custom_') &&
-            APISourceManager.getCustomApiInfo(parseInt(sourceCode.replace('custom_', '')))?.detail;
+        const vodId = urlParams.get('id');
+        const targetIndex = parseInt(urlParams.get('index') || '0', 10);
 
-        // 若初始地址无效（无m3u8链接），二次请求真实地址
-        if (isCustomSpecialSource && (!episodeUrlForPlayer || !episodeUrlForPlayer.includes('.m3u8'))) {
+        // 检测是否为内置特殊源
+        const isBuiltinSpecialSource = !sourceCode.startsWith('custom_') &&
+            window.API_SITES && window.API_SITES[sourceCode]?.detail;
+
+        // 检测是否为自定义特殊源
+        const isCustomSpecialSource = sourceCode.startsWith('custom_') &&
+            window.APISourceManager?.getCustomApiInfo(parseInt(sourceCode.replace('custom_', '')))?.detail;
+
+        if ((isBuiltinSpecialSource || isCustomSpecialSource) && (!episodeUrlForPlayer || !episodeUrlForPlayer.includes('.m3u8'))) {
             try {
-                const vodId = urlParams.get('id');
-                const customIndex = parseInt(sourceCode.replace('custom_', ''));
-                const apiInfo = APISourceManager.getCustomApiInfo(customIndex);
-                // 重新调用地址获取接口
-                const detailResult = await handleCustomApiSpecialDetail(vodId, apiInfo.detail);
-                const detailData = JSON.parse(detailResult);
-                if (detailData.code === 200 && detailData.episodes.length > 0) {
+                console.log('检测到特殊详情源，正在重新抓取真实地址...');
+                let detailResultStr;
+
+                if (isCustomSpecialSource) {
+                    const customIndex = parseInt(sourceCode.replace('custom_', ''));
+                    const apiInfo = window.APISourceManager.getCustomApiInfo(customIndex);
+                    detailResultStr = await window.handleCustomApiSpecialDetail(vodId, apiInfo.detail);
+                } else {
+                    detailResultStr = await window.handleSpecialSourceDetail(vodId, sourceCode);
+                }
+
+                const detailData = JSON.parse(detailResultStr);
+                if (detailData.code === 200 && detailData.episodes && detailData.episodes.length > 0) {
                     // 更新播放地址为最新获取的地址
-                    episodeUrlForPlayer = detailData.episodes[urlParams.get('index') || 0];
+                    episodeUrlForPlayer = detailData.episodes[targetIndex] || detailData.episodes[0];
                     // 同步更新缓存，避免下次重复请求
                     localStorage.setItem('currentEpisodes', JSON.stringify(detailData.episodes));
+                    window.currentEpisodes = detailData.episodes;
+                    console.log('播放页二次请求特殊源地址成功:', episodeUrlForPlayer);
                 }
             } catch (e) {
-                console.log('播放页二次请求地址失败（不影响现有体验）:', e);
+                console.error('播放页二次请求特殊源地址失败:', e);
             }
         }
 

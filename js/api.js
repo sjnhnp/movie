@@ -135,7 +135,7 @@ async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl, sourceCo
                 vod_id: id,
                 vod_name: title,
                 title: title,
-                source_name: '自定义API',
+                source_name: window.APISourceManager?.getCustomApiInfo?.(parseInt(sourceCode.replace('custom_', '')))?.name || '自定义源',
                 source_code: sourceCode
             }
         });

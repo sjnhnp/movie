@@ -906,7 +906,8 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
         const isCustomSpecialSource = sourceCode.startsWith('custom_') &&
             window.APISourceManager?.getCustomApiInfo(parseInt(sourceCode.replace('custom_', '')))?.detail;
 
-        if ((isBuiltinSpecialSource || isCustomSpecialSource) && (!episodeUrlForPlayer || !episodeUrlForPlayer.includes('.m3u8'))) {
+        if (isBuiltinSpecialSource || isCustomSpecialSource) {
+            const originalEpisodeUrl = episodeUrlForPlayer;
             try {
                 Logger.debug('检测到特殊详情源，正在重新抓取真实地址...');
                 let detailResultStr;
@@ -914,7 +915,7 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
                 if (isCustomSpecialSource) {
                     const customIndex = parseInt(sourceCode.replace('custom_', ''));
                     const apiInfo = window.APISourceManager.getCustomApiInfo(customIndex);
-                    detailResultStr = await window.handleCustomApiSpecialDetail(vodId, apiInfo.detail);
+                    detailResultStr = await window.handleCustomApiSpecialDetail(vodId, apiInfo.detail, sourceCode);
                 } else {
                     detailResultStr = await window.handleSpecialSourceDetail(vodId, sourceCode);
                 }
@@ -927,9 +928,18 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
                     AppStorage.setItem('currentEpisodes', JSON.stringify(detailData.episodes));
                     window.currentEpisodes = detailData.episodes;
                     Logger.debug('播放页二次请求特殊源地址成功:', episodeUrlForPlayer);
+                } else if (originalEpisodeUrl) {
+                    // 抓取逻辑返回空，但原始 URL 存在，回退
+                    episodeUrlForPlayer = originalEpisodeUrl;
+                    Logger.warn('特殊源二次抓取返回空结果，回退到原始 URL');
                 }
             } catch (e) {
+                // 抓取过程报错，如果有原始 URL 则回退，不阻断初始化
                 Logger.error('播放页二次请求特殊源地址失败:', e);
+                if (originalEpisodeUrl) {
+                    episodeUrlForPlayer = originalEpisodeUrl;
+                    Logger.warn('特殊源抓取失败，已回退到原始 URL。');
+                }
             }
         }
 

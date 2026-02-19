@@ -575,6 +575,74 @@ async function processVideoUrl(url) {
 }
 
 // --- 播放器核心逻辑 ---
+
+/**
+ * 智能加载视频：根据 URL 类型自动选择原生播放器或 iframe 模式。
+ * 从 lookmovie 项目移植，是解决 /share/ 类 detail 特殊源无法播放的关键。
+ * - .m3u8 / .mp4 → 原生 Vidstack 播放器
+ * - /share/ 或其他网页链接 → iframe 嵌入
+ */
+async function loadVideo(url) {
+    // 协议补全
+    if (url && typeof url === 'string' && url.startsWith('//')) {
+        url = 'https:' + url;
+    }
+
+    const isGlobalPlayer = typeof player !== 'undefined' && player;
+    // 判断是否为原生可播放流：包含 .m3u8 或 .mp4 扩展名，或者是 blob URL
+    const isNative = url.includes('.m3u8') || url.includes('.mp4') || url.startsWith('blob:');
+
+    const playerRegion = document.getElementById('player-region');
+    let iframe = document.getElementById('player-iframe');
+    const playerEl = document.getElementById('player');
+
+    if (!isNative) {
+        Logger.debug('[Player] URL does not look like a stream, switching to Iframe mode:', url);
+
+        // 切换到 Iframe 模式
+        if (playerEl) playerEl.style.display = 'none';
+
+        if (!iframe) {
+            iframe = document.createElement('iframe');
+            iframe.id = 'player-iframe';
+            iframe.style.width = '100%';
+            iframe.style.height = '100%';
+            iframe.style.border = 'none';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+            iframe.allowFullscreen = true;
+            iframe.referrerPolicy = 'no-referrer';
+            iframe.style.aspectRatio = '16/9';
+            playerRegion.appendChild(iframe);
+        }
+
+        iframe.style.display = 'block';
+        iframe.src = url;
+
+        // 设置容器比例
+        if (playerRegion) playerRegion.style.aspectRatio = '16 / 9';
+
+        // 隐藏原生加载指示
+        const loading = document.getElementById('loading');
+        if (loading) loading.style.display = 'none';
+
+        return;
+    }
+
+    // 原生播放模式
+    if (iframe) iframe.style.display = 'none';
+    if (playerEl) playerEl.style.display = 'block';
+
+    if (!isGlobalPlayer) return;
+
+    // 清理旧 Blob URL
+    if (player.currentSrc && player.currentSrc.startsWith('blob:')) {
+        URL.revokeObjectURL(player.currentSrc);
+    }
+
+    const processedUrl = await processVideoUrl(url);
+    player.src = { src: processedUrl, type: 'application/x-mpegurl' };
+}
+
 async function initPlayer(videoUrl, title) {
     // 直接获取在 HTML 中声明好的播放器元素
     player = document.getElementById('player');
@@ -585,21 +653,11 @@ async function initPlayer(videoUrl, title) {
         return;
     }
 
-    // 在设置新源之前，清理可能存在的旧Blob URL
-    if (player.currentSrc && player.currentSrc.startsWith('blob:')) {
-        URL.revokeObjectURL(player.currentSrc);
-    }
-
-    const processedUrl = await processVideoUrl(videoUrl);
-
     // 为播放器设置属性
     player.title = title;
-    // 强制协议补全
-    let finalUrl = processedUrl;
-    if (finalUrl && typeof finalUrl === 'string' && finalUrl.startsWith('//')) {
-        finalUrl = 'https:' + finalUrl;
-    }
-    player.src = { src: finalUrl, type: 'application/x-mpegurl' };
+
+    // 使用 loadVideo 来智能处理视频源
+    await loadVideo(videoUrl);
 
     // 确保核心事件监听器只被添加一次
     if (!player.dataset.listenersAdded) {
@@ -769,25 +827,29 @@ async function doEpisodeSwitch(index, episodeString, originalIndex) {
     updateBrowserHistory(playUrl);
 
     if (player) {
-        const processedUrl = await processVideoUrl(playUrl);
-        player.src = { src: processedUrl, type: 'application/x-mpegurl' };
-        // 在调用预加载前添加状态检查
-        if (typeof preloadNextEpisodeParts === 'function') {
-            // 取消之前的预加载
-            if (typeof window.cancelCurrentPreload === 'function') {
-                window.cancelCurrentPreload();
-            }
-            // 延迟触发预加载，确保状态同步
-            setTimeout(() => {
-                const preloadingEnabled = AppStorage.getItem('preloadingEnabled') !== 'false';
-                if (preloadingEnabled && typeof preloadNextEpisodeParts === 'function') {
-                    preloadNextEpisodeParts(index).catch(e => {
-                        Logger.warn('预获取失败:', e);
-                    });
+        await loadVideo(playUrl);
+
+        // 只在原生播放模式下执行预加载和自动播放
+        const playerEl = document.getElementById('player');
+        if (playerEl && playerEl.style.display !== 'none') {
+            // 在调用预加载前添加状态检查
+            if (typeof preloadNextEpisodeParts === 'function') {
+                // 取消之前的预加载
+                if (typeof window.cancelCurrentPreload === 'function') {
+                    window.cancelCurrentPreload();
                 }
-            }, 500);
+                // 延迟触发预加载，确保状态同步
+                setTimeout(() => {
+                    const preloadingEnabled = AppStorage.getItem('preloadingEnabled') !== 'false';
+                    if (preloadingEnabled && typeof preloadNextEpisodeParts === 'function') {
+                        preloadNextEpisodeParts(index).catch(e => {
+                            Logger.warn('预获取失败:', e);
+                        });
+                    }
+                }, 500);
+            }
+            player.play().catch(e => Logger.warn("Autoplay after episode switch was prevented.", e));
         }
-        player.play().catch(e => Logger.warn("Autoplay after episode switch was prevented.", e));
     }
 }
 

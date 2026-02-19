@@ -22,36 +22,49 @@ async function fetchWithTimeout(targetUrl, options, timeout = 10000, responseTyp
     }
 }
 
-// 提取并清洗 M3U8 链接的通用逻辑
+// 提取并清洗 M3U8/视频 链接的通用逻辑 (移植自 lookmovie 优化版)
 function extractM3u8Links(htmlContent, baseUrl) {
-    let matches = htmlContent.match(/\$https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g) || [];
-    if (matches.length === 0) {
-        matches = htmlContent.match(/https?:\/\/[^"'\s\$]+?\.m3u8(?![a-zA-Z0-9])(?:[\?#][^"'\s\$]*)?/g) || [];
-    }
+    // 1. 处理转义斜杠 (例如 https:\/\/...m3u8)
+    const unescapedContent = htmlContent.replace(/\\\//g, '/');
 
-    return Array.from(new Set(matches)).map(link => {
-        link = link.startsWith('$') ? link.slice(1) : link;
+    // 2. 匹配 m3u8/mp4 或特定的 /share/ 地址
+    // 正则说明：匹配 http(s) 开头，到 .m3u8/.mp4 结尾，或包含 /share/id 的形式
+    const pattern = /https?:\/\/[^"'\s<>]+?(?:\.(?:m3u8|mp4)|\/share\/[^"'\s<>]+)(?:\?[^"'\s<>]*?)?/gi;
+    const rawMatches = unescapedContent.match(pattern) || [];
 
-        // 使用统一的 URL 解析函数
-        link = resolveUrl(baseUrl, link);
+    return Array.from(new Set(rawMatches))
+        .map(link => {
+            let l = link;
+            // 额外清理：末尾可能抓到的引号、括号等垃圾字符
+            const cleanEnd = l.search(/["'\s<>)]/);
+            if (cleanEnd > -1) l = l.slice(0, cleanEnd);
+            // 如果链接里还有 $，说明可能是 $http... 格式，取后半部
+            if (l.includes('$')) l = l.split('$').pop();
 
-        // 移除可能存在的括号备注 (针对某些特殊源)
-        const idx = link.indexOf('(');
-        link = idx > -1 ? link.slice(0, idx) : link;
+            // 使用统一的 URL 解析函数
+            l = resolveUrl(baseUrl, l);
 
-        // 规范化 URL
-        try {
-            return new URL(link).href;
-        } catch (e) {
-            return link;
-        }
-    }).filter(link => link && link.startsWith('http') && link.includes('.m3u8'));
+            // 规范化 URL
+            try {
+                return new URL(l).href;
+            } catch (e) {
+                return l;
+            }
+        })
+        .filter(l => l && l.startsWith('http') && (
+            l.toLowerCase().includes('.m3u8') ||
+            l.toLowerCase().includes('.mp4') ||
+            l.toLowerCase().includes('/share/')
+        ));
 }
 
 // 处理特殊片源详情 (内置源，需要HTML抓取)
 async function handleSpecialSourceDetail(id, sourceCode) {
     try {
-        const detailPageUrl = `${API_SITES[sourceCode].detail}/index.php/vod/detail/id/${id}.html`;
+        const site = API_SITES[sourceCode];
+        if (!site) throw new Error(`无效的资源代码: ${sourceCode}`);
+
+        const detailPageUrl = `${site.detail}/index.php/vod/detail/id/${id}.html`;
         const htmlContent = await fetchWithTimeout(
             PROXY_URL + encodeURIComponent(detailPageUrl),
             { headers: { 'User-Agent': API_CONFIG.headers['User-Agent'] } },
@@ -62,19 +75,25 @@ async function handleSpecialSourceDetail(id, sourceCode) {
         const matches = extractM3u8Links(htmlContent, detailPageUrl);
 
         if (matches.length === 0) {
-            throw new Error(`未能从${API_SITES[sourceCode].name}详情页提取到有效的 m3u8 地址`);
+            throw new Error(`未能从${site.name}详情页提取到有效的播放地址`);
         }
 
-        const title = (htmlContent.match(/<h1[^>]*>([^<]+)<\/h1>/) || [, ''])[1].trim();
-        const desc = (htmlContent.match(/<div[^>]*class=["']sketch["'][^>]*>([\s\S]*?)<\/div>/) || [, ''])[1]
-            .replace(/<[^>]+>/g, ' ').trim();
+        const titleMatch = htmlContent.match(/<h1[^>]*>([^<]+)<\/h1>/) || htmlContent.match(/<title>([^<]+)<\/title>/);
+        const title = (titleMatch ? titleMatch[1] : '视频播放').trim();
+
+        const descMatch = htmlContent.match(/<div[^>]*class=["']sketch["'][^>]*>([\s\S]*?)<\/div>/);
+        const desc = descMatch ? descMatch[1].replace(/<[^>]+>/g, ' ').trim() : '';
 
         return JSON.stringify({
-            code: 200, episodes: matches, detailUrl: detailPageUrl,
+            code: 200,
+            episodes: matches,
+            detailUrl: detailPageUrl,
             videoInfo: {
+                vod_id: id,
+                vod_name: title,
                 title,
                 desc,
-                source_name: API_SITES[sourceCode].name,
+                source_name: site.name,
                 source_code: sourceCode
             }
         });
@@ -85,7 +104,7 @@ async function handleSpecialSourceDetail(id, sourceCode) {
 }
 
 // 处理自定义API特殊详情 (自定义源，需要HTML抓取)
-async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl) {
+async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl, sourceCode = 'custom') {
     try {
         const detailPageUrl = `${customApiDetailBaseUrl}/index.php/vod/detail/id/${id}.html`;
         const fullUrl = PROXY_URL + encodeURIComponent(detailPageUrl);
@@ -99,19 +118,29 @@ async function handleCustomApiSpecialDetail(id, customApiDetailBaseUrl) {
         const matches = extractM3u8Links(htmlContent, detailPageUrl);
 
         if (matches.length === 0) {
-            throw new Error('未能从详情页提取到有效的 m3u8 播放地址');
+            throw new Error('未能从详情页提取到有效的播放地址');
         }
 
         AppStorage.setItem('customApiRealUrls_' + id, JSON.stringify(matches));
+
+        // 尝试从 HTML 提取标题
+        const titleMatch = htmlContent.match(/<h1[^>]*>([^<]+)<\/h1>/) || htmlContent.match(/<title>([^<]+)<\/title>/);
+        const title = (titleMatch ? titleMatch[1] : '自定义源播放').trim();
 
         return JSON.stringify({
             code: 200,
             episodes: matches,
             detailUrl: detailPageUrl,
-            videoInfo: { title: '自定义源播放', source_name: '自定义API', source_code: 'custom' }
+            videoInfo: {
+                vod_id: id,
+                vod_name: title,
+                title: title,
+                source_name: '自定义API',
+                source_code: sourceCode
+            }
         });
     } catch (e) {
-        Logger.error('自定义API detail源解析失败（本次尝试）', e);
+        Logger.error('自定义API detail源解析失败', e);
         AppStorage.setItem('customApiRealUrls_' + id, JSON.stringify([]));
         throw e;
     }
@@ -147,13 +176,13 @@ async function handleApiRequest(url) {
                 );
                 if (!result || !Array.isArray(result.list)) throw new Error('API返回的数据格式无效');
 
-                result.list.forEach(item => {
-                    item.source_name = source.startsWith('custom_') ? (window.APISourceManager?.getCustomApiInfo(parseInt(source.replace('custom_', '')))?.name || '自定义源') : API_SITES[source].name;
+                for (const item of result.list) {
+                    item.source_name = source.startsWith('custom_') ? ((await window.APISourceManager?.getCustomApiInfo?.(parseInt(source.replace('custom_', ''))))?.name || '自定义源') : API_SITES[source].name;
                     item.source_code = source;
                     if (source.startsWith('custom_')) {
                         item.api_url = customApi;
                     }
-                });
+                }
                 return JSON.stringify({ code: 200, list: result.list });
             } catch (error) {
                 const errorMsg = error.name === 'AbortError' ? '搜索请求超时'
@@ -182,10 +211,10 @@ async function handleApiRequest(url) {
                 // 处理需要HTML抓取的自定义源（有 detail 字段就走特殊抓取）
                 else if (sourceCode.startsWith('custom_')) {
                     const customIndex = parseInt(sourceCode.replace('custom_', ''), 10);
-                    const apiInfo = window.APISourceManager.getCustomApiInfo(customIndex);
+                    const apiInfo = await window.APISourceManager.getCustomApiInfo(customIndex);
                     if (apiInfo && apiInfo.detail) {
-                        // 直接用 detail 字段
-                        return await handleCustomApiSpecialDetail(id, apiInfo.detail);
+                        // 直接用 detail 字段，并传递 sourceCode
+                        return await handleCustomApiSpecialDetail(id, apiInfo.detail, sourceCode);
                     }
                 }
 
@@ -234,7 +263,7 @@ async function handleApiRequest(url) {
                             actor: videoDetail.vod_actor,
                             remarks: videoDetail.vod_remarks,
                             source_name: sourceCode.startsWith('custom_')
-                                ? (window.APISourceManager?.getCustomApiInfo(parseInt(sourceCode.replace('custom_', '')))?.name || '自定义源')
+                                ? ((await window.APISourceManager?.getCustomApiInfo?.(parseInt(sourceCode.replace('custom_', ''))))?.name || '自定义源')
                                 : (API_SITES && API_SITES[sourceCode] ? API_SITES[sourceCode].name : '未知来源'),
                             source_code: sourceCode
                         }

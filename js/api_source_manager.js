@@ -36,8 +36,8 @@ const APISourceManager = {
                 ${AppState.get('selectedAPIs').includes(apiKey) ? 'checked' : ''} data-api="${apiKey}">
                 <label for="api_${apiKey}" class="ml-1 text-xs text-gray-400 truncate">${api.name}</label>`;
             container.appendChild(box);
-            box.querySelector('input').addEventListener('change', () => {
-                this.updateSelectedAPIs();
+            box.querySelector('input').addEventListener('change', async () => {
+                await this.updateSelectedAPIs();
                 this.checkAdultAPIsSelected();
             });
         });
@@ -61,8 +61,8 @@ const APISourceManager = {
                     ${AppState.get('selectedAPIs').includes(apiKey) ? 'checked' : ''} data-api="${apiKey}">
                     <label for="api_${apiKey}" class="ml-1 text-xs text-pink-400 truncate">${api.name}</label>`;
                 container.appendChild(box);
-                box.querySelector('input').addEventListener('change', () => {
-                    this.updateSelectedAPIs();
+                box.querySelector('input').addEventListener('change', async () => {
+                    await this.updateSelectedAPIs();
                     this.checkAdultAPIsSelected();
                 });
             });
@@ -127,8 +127,8 @@ const APISourceManager = {
                     <button class="text-red-500 hover:text-red-700 text-xs px-1" onclick="APISourceManager.removeCustomApi(${idx})">✕</button>
                 </div>`;
             container.appendChild(item);
-            item.querySelector('input').addEventListener('change', () => {
-                this.updateSelectedAPIs();
+            item.querySelector('input').addEventListener('change', async () => {
+                await this.updateSelectedAPIs();
                 this.checkAdultAPIsSelected();
             });
         });
@@ -172,7 +172,7 @@ const APISourceManager = {
      * Update a custom API
      * @param {number} index - Index of the API to update
      */
-    updateCustomApi: function (index) {
+    updateCustomApi: async function (index) {
         const customAPIs = AppState.get('customAPIs');
         if (index < 0 || index >= customAPIs.length) return;
 
@@ -209,8 +209,7 @@ const APISourceManager = {
 
         // 更新API信息
         const updatedCustomAPIs = [...customAPIs];
-        const apiData = { name, url, isAdult };
-        if (detail) apiData.detail = detail;
+        const apiData = { name, url, isAdult, detail: detail || '' };
 
         updatedCustomAPIs[index] = apiData;
         AppState.set('customAPIs', updatedCustomAPIs);
@@ -240,20 +239,20 @@ const APISourceManager = {
     /**
      * Select all APIs
      */
-    selectAllAPIs: function (selectAll = true) {
+    selectAllAPIs: async function (selectAll = true) {
         // 获取所有内置和自定义API的复选框
         const checkboxes = document.querySelectorAll('#apiCheckboxes input[type="checkbox"], #customApisList input[type="checkbox"]');
         checkboxes.forEach(box => {
             box.checked = selectAll;
         });
-        this.updateSelectedAPIs();
+        await this.updateSelectedAPIs();
         this.checkAdultAPIsSelected();
     },
 
     /**
      * Update selected APIs
      */
-    updateSelectedAPIs: function () {
+    updateSelectedAPIs: async function () {
         const builtIn = Array.from(document.querySelectorAll('#apiCheckboxes input:checked')).map(input => input.dataset.api);
         const custom = Array.from(document.querySelectorAll('#customApisList input:checked')).map(input => 'custom_' + input.dataset.customIndex);
         const selectedAPIs = [...builtIn, ...custom];
@@ -276,7 +275,7 @@ const APISourceManager = {
     /**
      * Add a custom API
      */
-    addCustomApi: function () {
+    addCustomApi: async function () {
         const nameInput = DOMCache.get('customApiName') || document.getElementById('customApiName');
         const urlInput = DOMCache.get('customApiUrl') || document.getElementById('customApiUrl');
         const isAdultInput = DOMCache.get('customApiIsAdult') || document.getElementById('customApiIsAdult');
@@ -347,7 +346,7 @@ const APISourceManager = {
      * Remove a custom API
      * @param {number} index - Index of the API to remove
      */
-    removeCustomApi: function (index) {
+    removeCustomApi: async function (index) {
         const customAPIs = AppState.get('customAPIs');
         if (index < 0 || index >= customAPIs.length) return;
 
@@ -446,7 +445,7 @@ const APISourceManager = {
      * @param {number} index - 自定义API索引
      * @returns {object|null} - 自定义API信息对象或null
      */
-    getCustomApiInfo: function (index) {
+    getCustomApiInfo: async function (index) {
         // 【修改】让函数在没有 AppState 的环境中也能工作
         let customAPIs = [];
         if (typeof AppState !== 'undefined' && AppState.get('customAPIs')) {
@@ -462,9 +461,10 @@ const APISourceManager = {
             }
         }
 
-        if (customAPIs && typeof index === 'number' && index >= 0 && index < customAPIs.length) {
+        if (customAPIs && typeof index === 'number' && !isNaN(index) && index >= 0 && index < customAPIs.length) {
             return customAPIs[index];
         }
+        if (isNaN(index)) return null;
         Logger.warn(`getCustomApiInfo: Invalid index ${index} or customAPIs not found.`);
         return null;
     },
@@ -474,14 +474,14 @@ const APISourceManager = {
      * @param {string} sourceCode - 来源代码 (例如 'heimuer', 'custom_0')
      * @returns {object|null} - 包含API信息的对象 (例如 { name: 'API名称', url: 'API地址', isCustom: boolean }) 或 null
      */
-    getSelectedApi: function (sourceCode) {
+    getSelectedApi: async function (sourceCode) {
         if (!sourceCode) {
             return null;
         }
 
         if (sourceCode.startsWith('custom_')) {
             const customIndex = parseInt(sourceCode.replace('custom_', ''), 10);
-            const apiInfo = this.getCustomApiInfo(customIndex); // 使用 this 调用对象内部方法
+            const apiInfo = await this.getCustomApiInfo(customIndex); // 使用 this 调用对象内部方法
             return apiInfo ? { name: apiInfo.name, url: apiInfo.url, isCustom: true } : null;
         } else {
             // 确保 API_SITES 是可访问的 (通常在 config.js 中定义并全局可用)

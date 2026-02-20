@@ -345,7 +345,7 @@ function backgroundSpeedUpdate(results) {
         if (!speedDetectionEnabled) {
             return resolve();
         }
-        
+
         const concurrency = 2;
         let cursor = 0;
         const isPending = v => !v || v === '检测中...' || v === 'pending';
@@ -1424,7 +1424,7 @@ function createResultItemUsingTemplate(item) {
     if (sourceNameElement) {
         if (item.source_name) {
             sourceNameElement.textContent = item.source_name;
-            sourceNameElement.className = 'result-source-name text-xs text-gray-400';
+            sourceNameElement.className = 'result-source-name text-xs text-gray-300 font-medium';
         } else {
             sourceNameElement.className = 'result-source-name hidden';
         }

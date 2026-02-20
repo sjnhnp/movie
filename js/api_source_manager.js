@@ -445,7 +445,7 @@ const APISourceManager = {
      * @param {number} index - 自定义API索引
      * @returns {object|null} - 自定义API信息对象或null
      */
-    getCustomApiInfo: async function (index) {
+    getCustomApiInfo: function (index) {
         // 【修改】让函数在没有 AppState 的环境中也能工作
         let customAPIs = [];
         if (typeof AppState !== 'undefined' && AppState.get('customAPIs')) {
@@ -474,14 +474,14 @@ const APISourceManager = {
      * @param {string} sourceCode - 来源代码 (例如 'heimuer', 'custom_0')
      * @returns {object|null} - 包含API信息的对象 (例如 { name: 'API名称', url: 'API地址', isCustom: boolean }) 或 null
      */
-    getSelectedApi: async function (sourceCode) {
+    getSelectedApi: function (sourceCode) {
         if (!sourceCode) {
             return null;
         }
 
         if (sourceCode.startsWith('custom_')) {
             const customIndex = parseInt(sourceCode.replace('custom_', ''), 10);
-            const apiInfo = await this.getCustomApiInfo(customIndex); // 使用 this 调用对象内部方法
+            const apiInfo = this.getCustomApiInfo(customIndex); // 使用 this 调用对象内部方法
             return apiInfo ? { name: apiInfo.name, url: apiInfo.url, isCustom: true } : null;
         } else {
             // 确保 API_SITES 是可访问的 (通常在 config.js 中定义并全局可用)

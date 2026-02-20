@@ -110,67 +110,38 @@
                     <div class="w-full max-w-3xl">
                         <form id="searchForm" class="relative group z-10 w-full">
                             <!-- 1. 动态对流流光晕背景 (Glow Effect) -->
-                            <div
-                                class="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-2xl blur-xl opacity-20 group-hover:opacity-40 group-focus-within:opacity-60 transition-all duration-700 animate-pulse-slow"
-                                aria-hidden="true"
-                            >
+                            <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 rounded-2xl blur-xl opacity-20 group-hover:opacity-40 group-focus-within:opacity-60 transition-all duration-700 animate-pulse-slow"
+                                aria-hidden="true">
                             </div>
 
                             <!-- 2. 主容器 (Glass Container) -->
                             <div
-                                class="relative flex items-stretch h-16 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 group-hover:bg-white/10 group-focus-within:border-indigo-500/50 group-focus-within:bg-black/40 group-focus-within:ring-1 group-focus-within:ring-indigo-500/50"
-                            >
+                                class="relative flex items-stretch h-16 bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl transition-all duration-300 group-hover:bg-white/10 group-focus-within:border-indigo-500/50 group-focus-within:bg-black/40 group-focus-within:ring-1 group-focus-within:ring-indigo-500/50">
                                 <!-- 关闭按钮 -->
-                                <button
-                                    id="closeSearchPanelButton"
-                                    type="button"
+                                <button id="closeSearchPanelButton" type="button"
                                     class="px-5 md:px-6 flex items-center justify-center text-white/70 hover:text-white hover:bg-white/5 border-r border-white/5 transition-all duration-300 group-focus-within:text-indigo-400 cursor-pointer"
-                                    aria-label="关闭搜索"
-                                    title="关闭搜索"
-                                >
-                                    <svg
-                                        class="w-5 h-5 mr-0 md:mr-2 transition-transform group-hover:scale-110"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M6 18L18 6M6 6l12 12"
-                                        >
+                                    aria-label="关闭搜索" title="关闭搜索">
+                                    <svg class="w-5 h-5 mr-0 md:mr-2 transition-transform group-hover:scale-110"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M6 18L18 6M6 6l12 12">
                                         </path>
                                     </svg>
                                     <span class="hidden md:inline font-bold">关闭</span>
                                 </button>
 
                                 <!-- 输入框 -->
-                                <input
-                                    type="text"
-                                    id="searchInput"
+                                <input type="text" id="searchInput"
                                     class="flex-1 bg-transparent text-white px-4 md:px-6 py-0 focus:outline-none placeholder-white/20 text-lg font-bold transition-all"
-                                    placeholder="搜索你想看的影视内容..."
-                                    autocomplete="off"
-                                    aria-label="视频搜索框"
-                                />
+                                    placeholder="搜索你想看的影视内容..." autocomplete="off" aria-label="视频搜索框" />
 
                                 <!-- 搜索按钮 -->
-                                <button
-                                    type="submit"
+                                <button type="submit"
                                     class="px-6 md:px-8 flex items-center justify-center bg-white/5 hover:bg-white/10 text-white font-medium transition-all duration-300 hover:text-indigo-400 active:scale-95 cursor-pointer"
-                                    aria-label="搜索按钮"
-                                >
-                                    <svg
-                                        class="w-6 h-6 mr-0 md:mr-2 transform transition-transform group-hover:rotate-12"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
+                                    aria-label="搜索按钮">
+                                    <svg class="w-6 h-6 mr-0 md:mr-2 transform transition-transform group-hover:rotate-12"
+                                        fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                     </svg>
                                     <span class="hidden md:inline text-lg">搜索</span>
@@ -181,12 +152,8 @@
                         <!-- 搜索历史区域 -->
                         <div class="flex-none mb-4">
                             <!-- 搜索历史标签 -->
-                            <div
-                                id="recentSearches"
-                                class="mt-6 flex flex-wrap gap-3 justify-center"
-                                aria-label="最近搜索记录"
-                                aria-live="polite"
-                            >
+                            <div id="recentSearches" class="mt-6 flex flex-wrap gap-3 justify-center"
+                                aria-label="最近搜索记录" aria-live="polite">
                             </div>
                         </div>
                     </div>
@@ -649,7 +616,8 @@
                             更新状态</p>
                     </div>
                     <div class="result-source flex justify-between items-center mt-auto pt-1 border-t border-gray-800">
-                        <span class="result-source-name text-xs text-gray-500" data-field="source">数据源</span>
+                        <span class="result-source-name text-xs text-gray-300 font-medium"
+                            data-field="source">数据源</span>
                         <span
                             class="quality-tag text-xs font-medium py-0.5 px-1.5 rounded bg-gray-500 text-white cursor-pointer transition-colors hover:opacity-80"
                             data-field="quality-tag" data-action="retest-quality" title="点击重新检测画质">

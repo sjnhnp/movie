@@ -177,7 +177,7 @@ async function handleApiRequest(url) {
                 if (!result || !Array.isArray(result.list)) throw new Error('API返回的数据格式无效');
 
                 for (const item of result.list) {
-                    item.source_name = source.startsWith('custom_') ? ((await window.APISourceManager?.getCustomApiInfo?.(parseInt(source.replace('custom_', ''))))?.name || '自定义源') : API_SITES[source].name;
+                    item.source_name = source.startsWith('custom_') ? ((window.APISourceManager?.getCustomApiInfo?.(parseInt(source.replace('custom_', ''))))?.name || '自定义源') : API_SITES[source].name;
                     item.source_code = source;
                     if (source.startsWith('custom_')) {
                         item.api_url = customApi;
@@ -211,7 +211,7 @@ async function handleApiRequest(url) {
                 // 处理需要HTML抓取的自定义源（有 detail 字段就走特殊抓取）
                 else if (sourceCode.startsWith('custom_')) {
                     const customIndex = parseInt(sourceCode.replace('custom_', ''), 10);
-                    const apiInfo = await window.APISourceManager.getCustomApiInfo(customIndex);
+                    const apiInfo = window.APISourceManager.getCustomApiInfo(customIndex);
                     if (apiInfo && apiInfo.detail) {
                         // 直接用 detail 字段，并传递 sourceCode
                         return await handleCustomApiSpecialDetail(id, apiInfo.detail, sourceCode);
@@ -263,7 +263,7 @@ async function handleApiRequest(url) {
                             actor: videoDetail.vod_actor,
                             remarks: videoDetail.vod_remarks,
                             source_name: sourceCode.startsWith('custom_')
-                                ? ((await window.APISourceManager?.getCustomApiInfo?.(parseInt(sourceCode.replace('custom_', ''))))?.name || '自定义源')
+                                ? ((window.APISourceManager?.getCustomApiInfo?.(parseInt(sourceCode.replace('custom_', ''))))?.name || '自定义源')
                                 : (API_SITES && API_SITES[sourceCode] ? API_SITES[sourceCode].name : '未知来源'),
                             source_code: sourceCode
                         }

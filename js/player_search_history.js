@@ -596,11 +596,11 @@ function createResultItemUsingTemplate(item) {
     if (qualityElement) {
         // 检查是否启用了画质速度检测
         const speedDetectionEnabled = getBoolConfig(PLAYER_CONFIG.speedDetectionStorage, PLAYER_CONFIG.speedDetectionEnabled);
-        
+
         if (speedDetectionEnabled) {
             // 只有启用画质检测时才初始化画质标签
             initializeQualityTag(qualityElement, item);
-            
+
             // 添加画质标签点击事件
             qualityElement.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -1060,7 +1060,7 @@ async function detectVideoQuality(item, forceRetest = false) {
         if (!speedDetectionEnabled) {
             return '未知';
         }
-        
+
         // 如果没有播放链接，返回未知
         if (!item.vod_play_url) {
             return '未知';
@@ -1144,7 +1144,7 @@ function refreshPlayerSpeedBadges(results) {
     if (!speedDetectionEnabled) {
         return;
     }
-    
+
     results.forEach(item => {
         const badge = document.querySelector(
             `.card-hover[data-id="${item.vod_id}"][data-source-code="${item.source_code}"] [data-field="speed-tag"]`
@@ -1215,6 +1215,28 @@ function renderPlayerSearchHistory() {
     }
 
     const frag = document.createDocumentFragment();
+
+    // 添加动态 header（与首页一致）
+    const hasExternalHeader = document.getElementById('clearSearchHistory');
+    if (!hasExternalHeader) {
+        const header = document.createElement('div');
+        header.className = 'flex justify-between items-center w-full mb-2 px-1';
+
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'text-white/30 text-xs uppercase tracking-widest font-bold';
+        titleDiv.textContent = '最近搜索:';
+
+        const clearBtn = document.createElement('button');
+        clearBtn.id = 'clearHistoryBtn';
+        clearBtn.className = 'text-white/30 hover:text-white transition-colors text-xs uppercase tracking-widest font-bold cursor-pointer';
+        clearBtn.setAttribute('aria-label', '清除搜索历史');
+        clearBtn.textContent = '清除搜索历史';
+        clearBtn.onclick = handleClearSearchHistory;
+
+        header.appendChild(titleDiv);
+        header.appendChild(clearBtn);
+        frag.appendChild(header);
+    }
 
     // 仅生成搜索标签
     history.forEach(item => {

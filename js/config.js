@@ -33,19 +33,19 @@ if (typeof window !== 'undefined') window.SITE_CONFIG = SITE_CONFIG;
 
 // API站点配置
 const API_SITES = {
+    zuid: { api: 'https://api.zuidapi.com/api.php/provide/vod', name: '最大资源' },
+    yzzy: { api: 'https://api.yzzy-api.com/inc/apijson.php', name: '优质资源' },
     bfzy: { api: 'https://bfzyapi.com/api.php/provide/vod', name: '暴风资源' },
     mdzy: { api: 'https://www.mdzyapi.com/api.php/provide/vod', name: '魔都资源' },
-    dbzy: { api: 'https://caiji.dbzy5.com/api.php/provide/vod', name: '豆瓣资源' },
     maotai: { api: 'https://caiji.maotaizy.cc/api.php/provide/vod', name: '茅台资源' },
-    dyttzy: { api: 'https://caiji.dyttzyapi.com/api.php/provide/vod', name: '电影天堂', detail: 'https://caiji.dyttzyapi.com' },
-    yzzy: { api: 'https://api.yzzy-api.com/inc/apijson.php', name: '优质资源' },
-    ruyi: { api: 'https://cj.rycjapi.com/api.php/provide/vod', name: '如意资源' },
     wolong: { api: 'https://wolongzyw.com/api.php/provide/vod', name: '卧龙资源' },
+    dyttzy: { api: 'https://caiji.dyttzyapi.com/api.php/provide/vod', name: '电影天堂', detail: 'https://caiji.dyttzyapi.com' },
+    ruyi: { api: 'https://cj.rycjapi.com/api.php/provide/vod', name: '如意资源' },
+    dbzy: { api: 'https://caiji.dbzy5.com/api.php/provide/vod', name: '豆瓣资源' },
     wwzy: { api: 'https://wwzy.tv/api.php/provide/vod', name: '旺旺短剧' },
     hwba: { api: 'https://cjhwba.com/api.php/provide/vod', name: '华为吧资源' },
     jmzy: { api: 'https://api.jmzy.com/api.php/provide/vod', name: '金马资源' },
     zy360: { api: 'https://360zy.com/api.php/provide/vod', name: '360资源' },
-    zuid: { api: 'https://api.zuidapi.com/api.php/provide/vod', name: '最大资源' },
     baidu: { api: 'https://api.apibdzy.com/api.php/provide/vod', name: '百度云资源' },
     wujin: { api: 'https://api.wujinapi.me/api.php/provide/vod', name: '无尽资源' },
     ikun: { api: 'https://ikunzyapi.com/api.php/provide/vod', name: 'iKun资源' },
@@ -53,7 +53,7 @@ const API_SITES = {
 };
 
 if (typeof window !== 'undefined') window.API_SITES = API_SITES;
-const DEFAULT_SELECTED_APIS = ["mdzy", "bfzy", "maotai", "wolong"];
+const DEFAULT_SELECTED_APIS = ["zuid", "yzzy", "mdzy", "bfzy", "maotai", "wolong"];
 if (typeof window !== 'undefined') window.DEFAULT_SELECTED_APIS = DEFAULT_SELECTED_APIS;
 
 // 聚合搜索配置

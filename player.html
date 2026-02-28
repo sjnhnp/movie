@@ -8,24 +8,12 @@
     <title>播放器</title>
 
     <!-- 屏蔽 Tailwind 生产环境警告 -->
-    <script>
-        (function () {
-            const originalWarn = console.warn;
-            console.warn = function (...args) {
-                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) {
-                    return;
-                }
-                originalWarn.apply(console, args);
-            };
-        })();
-    </script>
+    <script src="js/tailwind-warn-suppress.js"></script>
 
     <!-- 外部样式表 -->
     <link rel="stylesheet" href="css/styles.css">
 
-    <!-- Vidstack Player plyr官方样式 -->
-    <!--<link rel="stylesheet" href="https://cdn.vidstack.io/player.css" />
-    <link rel="stylesheet" href="https://cdn.vidstack.io/plyr.css" /> -->
+
 
     <!-- Vidstack Player default官方样式 -->
     <link rel="stylesheet" href="https://cdn.vidstack.io/player/theme.css" />
@@ -557,20 +545,7 @@
             </div>
         </div>
 
-        <!-- 加载提示 -->
-        <div id="loading"
-            class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center z-[10003]">
-            <div class="bg-black/20 backdrop-blur-xl border border-white/10 p-8 rounded-2xl text-center">
-                <div class="loading-spinner mb-4"></div>
-                <p class="text-white text-lg">加载中...</p>
-            </div>
-        </div>
 
-        <!-- Toast 消息 -->
-        <div id="toast"
-            class="fixed top-4 left-1/2 -translate-x-1/2 opacity-0 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 text-white z-[10004] pointer-events-none">
-            <span id="toastMessage"></span>
-        </div>
 
         <!-- 记住进度弹窗 -->
         <div id="progress-restore-modal" tabindex="-1" aria-modal="true" role="dialog" style="display: none;">

@@ -7,17 +7,7 @@
     <title>X</title>
 
     <!-- 屏蔽 Tailwind 生产环境警告 -->
-    <script>
-        (function () {
-            const originalWarn = console.warn;
-            console.warn = function (...args) {
-                if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) {
-                    return;
-                }
-                originalWarn.apply(console, args);
-            };
-        })();
-    </script>
+    <script src="js/tailwind-warn-suppress.js"></script>
 
     <!-- 比如Facebook抓取的预览 -->
     <meta property="og:title" content="X" />

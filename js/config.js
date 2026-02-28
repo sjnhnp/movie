@@ -43,8 +43,6 @@ const API_SITES = {
     ruyi: { api: 'https://cj.rycjapi.com/api.php/provide/vod', name: '如意资源' },
     dbzy: { api: 'https://caiji.dbzy5.com/api.php/provide/vod', name: '豆瓣资源' },
     wwzy: { api: 'https://wwzy.tv/api.php/provide/vod', name: '旺旺短剧' },
-    hwba: { api: 'https://cjhwba.com/api.php/provide/vod', name: '华为吧资源' },
-    jmzy: { api: 'https://api.jmzy.com/api.php/provide/vod', name: '金马资源' },
     zy360: { api: 'https://360zy.com/api.php/provide/vod', name: '360资源' },
     baidu: { api: 'https://api.apibdzy.com/api.php/provide/vod', name: '百度云资源' },
     wujin: { api: 'https://api.wujinapi.me/api.php/provide/vod', name: '无尽资源' },
@@ -53,7 +51,7 @@ const API_SITES = {
 };
 
 if (typeof window !== 'undefined') window.API_SITES = API_SITES;
-const DEFAULT_SELECTED_APIS = ["zuid", "yzzy", "mdzy", "bfzy", "maotai", "wolong"];
+const DEFAULT_SELECTED_APIS = ["zuid", "mdzy", "maotai", "wolong"];
 if (typeof window !== 'undefined') window.DEFAULT_SELECTED_APIS = DEFAULT_SELECTED_APIS;
 
 // 聚合搜索配置
